@@ -123,34 +123,36 @@ Throughout these years, I've always stood out for creativity, responsibility, wh
   <footer>
     <nav>
       <ul>
-        <li><a rel="external noreferrer" target="_blank" href="https://www.linkedin.com/in/rafael-alfa/">Linkedin</a></li>
-        <li><a rel="external noreferrer" target="_blank" href="https://github.com/alfa-dev">Github</a></li>
-        <li><a rel="external noreferrer" target="_blank" href="https://stackoverflow.com/users/8392712/rafael-lopes">stackoverflow</a></li>
+        <li><a rel="external noreferrer" target="_blank" title="My Linkedin profile" aria-label="My Linkedin profile" href="https://www.linkedin.com/in/rafael-alfa/">Linkedin</a></li>
+        <li><a rel="external noreferrer" target="_blank" title="My Github profile" aria-label="My Github profile" href="https://github.com/alfa-dev">Github</a></li>
+        <li><a rel="external noreferrer" target="_blank" title="My Stackoverflow profile" aria-label="My Stackoverflow profile" href="https://stackoverflow.com/users/8392712/rafael-lopes">stackoverflow</a></li>
       </ul>
     </nav>
   </footer>
 
   <script>
     //Yes, this is the script that makes the text looks like typen in real time
+    (function(terminal) {
+      var text = terminal.innerText.split('');
 
-    var text = terminal.innerText.split('');
-    var textIndex = 0;
+      terminal.innerText = '';
 
-    terminal.innerText = '';
+      function type(i) {
+        terminal.innerText += text[i];
 
-    function type() {
-      terminal.innerText += text[textIndex];
-      textIndex++;
+        if(text[i + 1])
+          setTimeout(
+            type.bind(this, i + 1),
+            Math.floor((Math.random() * 50) + 1)
+          );
+      };
 
-      if(text[textIndex + 1])
-        setTimeout(type, Math.floor((Math.random() * 50) + 1));
-    };
-
-    type();
+      type(0);
+    })(terminal);
   </script>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-175544729-1"></script>
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-175544729-1"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
