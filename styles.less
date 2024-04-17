@@ -1,0 +1,135 @@
+:root {
+  --pico-h1-color: white;
+  --pico-font-size: 16px;
+  --pico-font-family: Inter, sans-serif;
+  --pico-border-radius: 1rem;
+
+  @supports (font-variation-settings: normal) {
+    --pico-font-family: InterVariable, sans-serif;
+  }
+}
+
+body {
+  font-family: Inter, sans-serif;
+
+  @supports (font-variation-settings: normal) {
+    font-family: InterVariable, sans-serif;
+  }
+
+  text-rendering: optimizeLegibility;
+  color: #4c4c4c;
+  margin: 0;
+  padding: 0;
+}
+
+main {
+  max-width: 500px;
+  min-width: min-content;
+  margin: 0 auto!important;
+  padding: 0px !important;
+
+  border-left: 1px solid red;
+  border-right: 1px solid red;
+}
+
+header {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: #128aed;
+  color: white;
+  z-index: 10;
+
+
+  h1 {
+    margin: 0;
+    font-size: 1.8em;
+    padding-block: .3em;
+    padding-inline: 1em;
+  }
+
+  nav {
+    width: 4.2em;
+    // height: 100%;
+  }
+  
+  ul {
+    display: flex;
+    justify-items: center;
+    align-items: center;
+    list-style: none;
+    padding: 0px;
+    margin: 0px;
+    margin-right: 15px;
+    height: 100%;
+    gap: .5em;
+
+    li {
+      display: block;
+      background: white;
+      text-decoration: none;
+      margin: 0 0.5em;
+      padding: 0em;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      font-size: 0;
+      overflow: hidden;
+    }
+  }
+}
+
+footer {
+  position: sticky;
+  bottom: 0;
+  margin: 0px;
+  padding: 0px;
+  background: #128aed;
+  border-bottom: 1px solid red;
+}
+
+#intervals {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  padding: 1em;
+  margin: 1em;
+  justify-content: center;
+
+  label {
+    position: relative;
+    z-index: 0;
+    border: 1px solid #128aed;
+    color: #128aed;
+    padding: 10px;
+    margin-right: -1px;
+    cursor: pointer;
+  }
+
+  input {
+    display: none;
+  }
+}
+
+#amounts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1em;
+  padding: 1em;
+  margin: 1em;
+
+  input {
+    display: none;
+  }
+}
+
+label:has(input[role="switch"]) ~ * {
+  display: none;
+}
+
+label:has(input[role="switch"]:checked) ~ * {
+  display: block;
+}
