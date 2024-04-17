@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WIX PROTOTYPE</title>
+
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+  />
+  
+  <link rel="stylesheet/less" type="text/css" href="styles.less" />
+  <script src="https://cdn.jsdelivr.net/npm/less" ></script>
+
+  <script>
+    (function loadFonts() {
+      const linkPreconnect = document.createElement('link');
+      const linkStylesheet = document.createElement('link');
+
+      linkPreconnect.rel = 'preconnect';
+      linkStylesheet.rel = 'stylesheet';
+
+      linkPreconnect.href = 'https://rsms.me/';
+      linkStylesheet.href = 'https://rsms.me/inter/inter.css';
+
+      document.head.appendChild(linkPreconnect);
+      document.head.appendChild(linkStylesheet);
+    })();
+  </script>
+</head>
+
+<body>
+  <main>
+    <header>
+      <h1>
+        <strong>Choose Amount</strong>
+      </h1>
+      <nav>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Services</a></li>
+          <li><a href="#">Products</a></li>
+        </ul>
+      </nav>
+    </header>
+    
+    <section id="choose_amount">
+      <form action="" id="intervals">
+        <label for="one_time">
+          <input type="radio" name="donation_type" id="one_time" value="one_time">
+          One time
+        </label>
+        <label for="monthly">
+          <input type="radio" name="donation_type" id="monthly" value="monthly">
+          Monthly
+        </label>
+      </form>
+
+      <form action="" id="amounts">
+        <label for="amount_1" role="button" >
+          <input type="radio" name="amount" id="amount_1" value="10">
+          $10
+        </label>
+        <label for="amount_2" role="button" >
+          <input type="radio" name="amount" id="amount_2" value="20">
+          $20
+        </label>
+        <label for="amount_3" role="button" >
+          <input type="radio" name="amount" id="amount_3" value="50">
+          $50
+        </label>
+        <label for="amount_4" role="button" >
+          <input type="radio" name="amount" id="amount_4" value="100">
+          $100
+        </label>
+        <label for="amount_5" role="button" >
+          <input type="radio" name="amount" id="amount_5" value="200">
+          $200
+        </label>
+        <label for="amount_6" role="button" >
+          <input type="radio" name="amount" id="amount_6" value="500">
+          $500
+        </label>
+        <label for="amount_7" role="button" >
+          <input type="radio" name="amount" id="amount_7" value="1000">
+          $1000
+        </label>
+      </form>
+
+      <form action="">
+        <label for="write_us_a_comment">
+          <input type="checkbox" role="switch"  name="donation_type" id="write_us_a_comment" value="write_us_a_comment">
+          Write us a comment
+        </label>
+
+        <textarea name="" id="" cols="30" rows="10"></textarea>
+      </form>
+    </section>
+
+    <footer>
+      <button>Next -></button>
+    </footer>
+  </main>
+</body>
+</html>
