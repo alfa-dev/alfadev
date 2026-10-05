@@ -1,151 +1,170 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rafael Lopes (Alfa) — frontend developer</title>
+  <meta name="description" content="I'm Rafael, also known as Alfa. I'm a frontend developer from Brazil, building for the web for over 13 years, and I look after the design system at Donorbox.">
+  <meta name="theme-color" content="#060606">
 
-  <meta name="title" content="Alfa Dev — Senior Frontend Developer">
-  <meta name="description" content="I will help you build awesome experiences for your users.">
-
+  <meta property="og:title" content="Rafael Lopes (Alfa) — frontend developer">
+  <meta property="og:description" content="I'm a frontend developer from Brazil. I've been building for the web for over 13 years, and I look after the design system at Donorbox.">
+  <meta property="og:url" content="https://alfadev.com.br/">
+  <meta property="og:image" content="https://alfadev.com.br/assets/og-image.png">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://alfadev.tech/">
-  <meta property="og:title" content="Alfa Dev — Senior Frontend Developer">
-  <meta property="og:description" content="I will help you build awesome experiences for your users.">
-  <meta property="og:image" content="https://alfadev.tech/alfadev.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://alfadev.com.br/">
+  <meta name="twitter:title" content="Rafael Lopes (Alfa) — frontend developer">
+  <meta name="twitter:description" content="I'm a frontend developer from Brazil. I've been building for the web for over 13 years, and I look after the design system at Donorbox.">
+  <meta name="twitter:image" content="https://alfadev.com.br/assets/og-image.png">
 
-  <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://alfadev.tech/">
-  <meta property="twitter:title" content="Alfa Dev — Senior Frontend Developer">
-  <meta property="twitter:description" content="I will help you build awesome experiences for your users.">
-  <meta property="twitter:image" content="https://alfadev.tech/alfadev.png">
+  <!-- Single-URL bilingual site: the language is switched client-side, so every
+       hreflang points at the same document. -->
+  <link rel="canonical" href="https://alfadev.com.br/">
+  <link rel="alternate" hreflang="en" href="https://alfadev.com.br/">
+  <link rel="alternate" hreflang="pt-BR" href="https://alfadev.com.br/">
+  <link rel="alternate" hreflang="x-default" href="https://alfadev.com.br/">
 
-  <title>Alfa Dev - Technology</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/effects.css">
 </head>
-
-<style>
-  html { font-size: 16px; }
-  main, footer {
-    padding: 2em;
-    box-sizing: border-box;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
-  body {
-    background-color: black;
-    color: white;
-    font-family: monospace;
-  }
-
-  h1 {
-    font-size: 4em;
-    margin: 0px;
-    text-shadow: black 4px 4px 4px, white -4px 0px 64px;
-    pointer-events: none;
-  }
-
-  header { display: flex; }
-
-  header h1, header p { display: inline-block; }
-  header h1 {
-    margin-block-start: 0;
-    margin-inline-start: 0;
-    margin-block-end: 0;
-  }
-
-  ul {
-    display: flex;
-    padding: 0px;
-    margin: 0px;
-    list-style-type: none;
-    justify-content: space-around;
-  }
-
-  p, li {
-    background-color: #00000099;
-    padding: 8px;
-    box-sizing: border-box;
-  }
-
-  pre {
-    width: 100%;
-    white-space: break-spaces;
-  }
-
-  li a {
-    display: block;
-    font-size: 0px;
-    width: 2rem;
-    height: 2rem;
-    background: center center no-repeat;
-  }
-
-  li:nth-child(1) a { background-image: url(https://image.flaticon.com/icons/svg/174/174857.svg); }
-  li:nth-child(2) a { background-image: url(https://image.flaticon.com/icons/svg/733/733553.svg); }
-  li:nth-child(3) a { background-image: url(https://cdn.sstatic.net/Sites/stackoverflow/company/Img/logos/so/so-icon.svg); }
-
-  footer {
-    position: fixed;
-    bottom: 0px;
-    width: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  script {
-    display: block;
-    position: fixed;
-    bottom: 0px;
-    font-size: 80%;
-    max-width: 500px;
-    opacity: .2;
-    pointer-events: none;
-  }
-</style>
 <body>
-  <main>
-    <header>
-      <h1>α</h1>
-      <p>
-        Hi! I'm Rafael Lopes, aka Alfa.<br /> <br />
-        I will help you build awesome experiences for your users.
-      </p>
-    </header>
+  <a class="skip-link" href="#main" data-i18n="nav.skip">Skip to content</a>
 
-    <pre id="terminal">Currently I am Senior Front-End Developer and have been working as a Web Developer for over 12 years, 5 of them in home-office.
+  <canvas id="glyph-field" class="glyph-field" aria-hidden="true"></canvas>
 
-Throughout these years, I've always stood out for creativity, responsibility, whim and passion.
-    </pre>
+  <div id="scroll-progress" class="scroll-progress" aria-hidden="true"></div>
+  <nav id="progress-rail" class="progress-rail" aria-hidden="true">
+    <span class="progress-rail__current">00</span>
+    <span class="progress-rail__sep">/</span>
+    <span class="progress-rail__total">04</span>
+  </nav>
+
+  <header class="site-header">
+    <div class="brand-block">
+      <a class="brand" href="#hero" data-i18n-attr="aria-label:nav.brandLabel" aria-label="Back to top">α</a>
+      <span class="version-tag">v1.1.0</span>
+    </div>
+    <nav class="site-nav" aria-label="Main">
+      <div class="site-nav__links">
+        <a class="nav-link" href="#experience" data-i18n="nav.experience">Experience</a>
+        <a class="nav-link" href="#projects" data-i18n="nav.projects">Projects</a>
+        <a class="nav-link" href="#contact" data-i18n="nav.contact">Contact</a>
+      </div>
+      <button id="lang-toggle" class="lang-toggle" type="button" aria-pressed="false">PT / EN</button>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="hero" aria-labelledby="hero-heading">
+      <p class="hero__glyph" aria-hidden="true">α</p>
+      <h1 id="hero-heading" class="hero__name">Rafael Lopes</h1>
+      <p class="hero__role" data-i18n="hero.role">UI Platform Owner @ Donorbox</p>
+      <p class="hero__tagline" data-i18n="hero.tagline">I'm a frontend developer. I've been building things for the web for over 13 years, most of it in plain JavaScript.</p>
+      <p class="hero__impact" data-i18n="hero.impact">These days I look after donorbox-components, the design system the Donorbox product is built with.</p>
+      <div class="hero__ctas">
+        <a class="btn btn--primary" href="#experience" data-i18n="hero.ctaExperience">My experience</a>
+        <a class="btn btn--ghost" href="#contact" data-i18n="hero.ctaContact">Get in touch</a>
+      </div>
+    </section>
+
+    <section id="about" aria-labelledby="about-heading" data-reveal data-chapter="01">
+      <p class="section-label" aria-hidden="true">01 — About</p>
+      <h2 id="about-heading" class="section-heading" data-i18n="about.heading">About</h2>
+      <div class="about-layout">
+        <p class="section-intro about-text" data-i18n="about.body">I'm Rafael, a frontend developer from Brazil. I've been working on the web for over a decade, most of it close to the browser. I care about how a product looks as much as how it works. At Donorbox I'm a platform owner rather than a manager in the usual sense: I set standards, build tooling, and still write the code myself.</p>
+        <figure class="about-photo">
+          <img src="assets/rafael-coding.jpg" alt="Rafael Lopes working on a laptop, reading code in a terminal." data-i18n-attr="alt:about.photoAlt" loading="lazy" width="1400" height="1400">
+        </figure>
+      </div>
+    </section>
+
+    <section id="experience" aria-labelledby="experience-heading" data-reveal data-chapter="02">
+      <p class="section-label" aria-hidden="true">02 — Experience</p>
+      <h2 id="experience-heading" class="section-heading" data-i18n="experience.heading">Experience</h2>
+      <p class="section-intro" data-i18n="experience.intro">More than a decade in frontend, on quite different products. The constant is that I enjoy the details.</p>
+      <ol class="experience-list">
+        <li class="experience-item">
+          <span class="experience-item__years" data-i18n="experience.donorbox.years">2020—Present</span>
+          <article>
+            <h3 class="experience-item__org">Donorbox</h3>
+            <p class="experience-item__role" data-i18n="experience.donorbox.role">Senior Frontend Manager / UI Platform Owner</p>
+            <p class="experience-item__body" data-i18n="experience.donorbox.body">I look after donorbox-components end to end — architecture, component API, releases and the checks around them. I lead mostly by writing the reference implementation the product's frontend uses.</p>
+          </article>
+        </li>
+        <li class="experience-item">
+          <span class="experience-item__years" data-i18n="experience.contabilizei.years">2019—2020</span>
+          <article>
+            <h3 class="experience-item__org">Contabilizei</h3>
+            <p class="experience-item__role" data-i18n="experience.contabilizei.role">Frontend Developer</p>
+            <p class="experience-item__body" data-i18n="experience.contabilizei.body">Frontend work on an accounting product, inside an established codebase and delivery process.</p>
+          </article>
+        </li>
+        <li class="experience-item">
+          <span class="experience-item__years" data-i18n="experience.heaven.years">2013—2019</span>
+          <article>
+            <h3 class="experience-item__org">Nutrebem</h3>
+            <p class="experience-item__role" data-i18n="experience.heaven.role">Frontend Developer</p>
+            <p class="experience-item__body" data-i18n="experience.heaven.body">The longest stretch of my early career. I built web projects end to end and learned most of what I still use today.</p>
+          </article>
+        </li>
+      </ol>
+    </section>
+
+    <section id="projects" aria-labelledby="projects-heading" data-reveal data-chapter="03">
+      <p class="section-label" aria-hidden="true">03 — Projects</p>
+      <h2 id="projects-heading" class="section-heading" data-i18n="projects.heading">Projects</h2>
+      <p class="section-intro" data-i18n="projects.intro">A few things I've built outside of work, alongside donorbox-components.</p>
+      <div class="projects-grid">
+        <!-- placeholder: replace with real project -->
+        <article class="project-card">
+          <h3 class="project-card__name" data-i18n="projects.item1.name">Project name</h3>
+          <p class="project-card__description" data-i18n="projects.item1.description">One-line description of what it does and your role.</p>
+          <a class="project-card__link" href="#" data-i18n="projects.item1.linkLabel">View project</a>
+        </article>
+        <!-- placeholder: replace with real project -->
+        <article class="project-card">
+          <h3 class="project-card__name" data-i18n="projects.item2.name">Project name</h3>
+          <p class="project-card__description" data-i18n="projects.item2.description">One-line description of what it does and your role.</p>
+          <a class="project-card__link" href="#" data-i18n="projects.item2.linkLabel">View project</a>
+        </article>
+        <!-- placeholder: replace with real project -->
+        <article class="project-card">
+          <h3 class="project-card__name" data-i18n="projects.item3.name">Project name</h3>
+          <p class="project-card__description" data-i18n="projects.item3.description">One-line description of what it does and your role.</p>
+          <a class="project-card__link" href="#" data-i18n="projects.item3.linkLabel">View project</a>
+        </article>
+      </div>
+    </section>
+
+    <section id="contact" aria-labelledby="contact-heading" data-reveal data-chapter="04">
+      <p class="section-label" aria-hidden="true">04 — Contact</p>
+      <h2 id="contact-heading" class="section-heading" data-i18n="contact.heading">Get in touch</h2>
+      <p class="section-intro" data-i18n="contact.body">I'm always up for a conversation about frontend, design systems, or interfaces that have to last. Happy to trade notes on JavaScript, design, or anything creative too.</p>
+      <div class="contact__links">
+        <a class="contact__link" href="https://www.linkedin.com/in/rafael-alfa/" target="_blank" rel="noopener" data-i18n-attr="aria-label:contact.linkedinLabel">LinkedIn</a>
+        <a class="contact__link" href="https://github.com/alfa-dev" target="_blank" rel="noopener" data-i18n-attr="aria-label:contact.githubLabel">GitHub</a>
+      </div>
+      <p class="contact__note" data-i18n="contact.note">LinkedIn is the quickest way to reach me. My code is on GitHub.</p>
+    </section>
   </main>
 
-  <footer>
-    <nav>
-      <ul>
-        <li><a rel="external noreferrer" target="_blank" href="https://www.linkedin.com/in/rafael-alfa/">Linkedin</a></li>
-        <li><a rel="external noreferrer" target="_blank" href="https://github.com/alfa-dev">Github</a></li>
-        <li><a rel="external noreferrer" target="_blank" href="https://stackoverflow.com/users/8392712/rafael-lopes">stackoverflow</a></li>
-      </ul>
-    </nav>
+  <footer class="site-footer">
+    <p>&copy; 2026 Rafael Lopes.</p>
   </footer>
 
-  <script>
-    //Yes, this is the script that makes the text looks like typen in real time
-
-    var text = terminal.innerText.split('');
-    var textIndex = 0;
-
-    terminal.innerText = '';
-
-    function type() {
-      terminal.innerText += text[textIndex];
-      textIndex++;
-
-      if(text[textIndex + 1])
-        setTimeout(type, Math.floor((Math.random() * 50) + 1));
-    };
-
-    type();
-  </script>
+  <script defer src="js/i18n.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/split-type@0.3.4/index.min.js" crossorigin="anonymous"></script>
+  <script defer src="js/hero-reveal.js"></script>
+  <script defer src="js/light-source.js"></script>
+  <script defer src="js/glyph-field.js"></script>
+  <script defer src="js/reveal.js"></script>
+  <script defer src="js/scroll-progress.js"></script>
+  <script defer src="js/main.js"></script>
 </body>
 </html>

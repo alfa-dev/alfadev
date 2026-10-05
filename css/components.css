@@ -1,0 +1,262 @@
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.brand-block {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.brand {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: var(--fs-500);
+  display: inline-flex;
+}
+
+.version-tag {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  opacity: 0.65;
+  letter-spacing: 0.02em;
+}
+
+/* Component identifiers in the margin — editorial, never announced. */
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  opacity: 0.5;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-1);
+}
+
+.nav-link {
+  position: relative;
+  text-decoration: none;
+  color: var(--text-muted);
+  font-size: var(--fs-200);
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.3rem;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+.nav-link:hover {
+  color: var(--text);
+}
+
+.nav-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.lang-toggle {
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: var(--fs-200);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.75rem;
+  color: var(--text);
+  transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+
+.lang-toggle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-fast) var(--ease);
+  z-index: -1;
+}
+
+.lang-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.lang-toggle:hover::before {
+  transform: scaleX(1);
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-size: var(--fs-300);
+  border: 1px solid var(--border);
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.btn--primary:hover {
+  background: color-mix(in srgb, var(--accent) 85%, white);
+}
+
+.btn--ghost {
+  color: var(--text);
+}
+
+.btn--ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.project-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  transition: border-color var(--dur-fast) var(--ease);
+}
+
+.project-card:hover {
+  border-color: var(--accent);
+}
+
+.project-card__name {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: var(--fs-500);
+}
+
+.project-card__description {
+  color: var(--text-muted);
+  font-size: var(--fs-300);
+}
+
+.project-card__link {
+  margin-top: auto;
+  padding-top: var(--space-2);
+  color: var(--text);
+  font-size: var(--fs-200);
+  text-decoration: none;
+}
+
+.project-card__link:hover {
+  color: var(--accent);
+}
+
+.experience-item__years {
+  font-family: var(--font-mono);
+  font-size: var(--fs-200);
+  color: var(--text-muted);
+  padding-top: 0.3rem;
+}
+
+.experience-item__org {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: var(--fs-500);
+}
+
+.experience-item__role {
+  color: var(--accent);
+  font-size: var(--fs-200);
+  margin-top: 0.2rem;
+}
+
+.experience-item__body {
+  color: var(--text-muted);
+  margin-top: var(--space-1);
+}
+
+.contact__note {
+  font-size: var(--fs-200);
+  color: var(--text-muted);
+  margin-top: var(--space-3);
+}
+
+.contact__link {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-size: var(--fs-300);
+  transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+
+.contact__link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-fast) var(--ease);
+  z-index: -1;
+}
+
+.contact__link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.contact__link:hover::before {
+  transform: scaleX(1);
+}
+
+/* Fixed chapter indicator, echoing the "you are N of M" device from the KAGE
+   reference without copying its dot-rail visual — plain numerals only. */
+.progress-rail {
+  position: fixed;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  z-index: 30;
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+.progress-rail__current {
+  color: var(--accent);
+}
+
+.progress-rail__sep {
+  opacity: 0.5;
+}
+
+@media (max-width: 640px) {
+  .progress-rail {
+    display: none;
+  }
+}

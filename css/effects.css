@@ -1,0 +1,182 @@
+/* The site's one signature background motif: a sparse field of small α
+   glyphs (js/glyph-field.js) lit by the same scroll-driven --light-x/
+   --light-y that js/light-source.js sets on :root. Canvas paints itself;
+   this just fixes it in place, behind everything, out of the way of
+   pointer/scroll. */
+.glyph-field {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+html.no-motion .glyph-field,
+html.no-motion .scroll-progress {
+  display: none;
+}
+
+/* Forced reduced motion, toggled from the token panel: the same contract as
+   the OS-level preference, applied at runtime. Everything freezes into the
+   state it is already in — nothing disappears. */
+html.force-reduced-motion *,
+html.force-reduced-motion *::before,
+html.force-reduced-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  animation-timeline: auto !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+html.force-reduced-motion .scroll-progress {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: var(--dur-med);
+    animation-timing-function: var(--ease);
+  }
+
+  ::view-transition-old(root) {
+    animation-name: view-fade-out;
+  }
+
+  ::view-transition-new(root) {
+    animation-name: view-fade-in;
+  }
+}
+
+@keyframes view-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes view-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+html.no-motion body {
+  background: radial-gradient(
+    ellipse at top,
+    color-mix(in srgb, var(--accent) 10%, var(--bg)) 0%,
+    var(--bg) 60%
+  );
+}
+
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: var(--accent);
+  z-index: 50;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll(root)) {
+    .scroll-progress {
+      animation: scroll-progress-fill linear;
+      animation-timeline: scroll(root);
+    }
+  }
+}
+
+@keyframes scroll-progress-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .split-char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(0.6em);
+    transition: opacity var(--dur-med) var(--ease), transform var(--dur-med) var(--ease);
+  }
+
+  .split-char.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(1.25rem);
+    transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .experience-list > .experience-item {
+    opacity: 0;
+    transform: translateY(1rem);
+    transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease);
+  }
+
+  [data-reveal].is-visible .experience-list > .experience-item {
+    opacity: 1;
+    transform: none;
+  }
+
+  .experience-list > .experience-item:nth-child(1) { transition-delay: 0ms; }
+  .experience-list > .experience-item:nth-child(2) { transition-delay: 80ms; }
+  .experience-list > .experience-item:nth-child(3) { transition-delay: 160ms; }
+}
+
+/* "Deriva": sections enter tipped back in perspective and straighten as they
+   cross the viewport centre, instead of the plain fade+translateY every other
+   site ships. animation-timeline: view() drives it natively and, being last
+   in the cascade, overrides the fallback above wherever it's supported.
+   Browsers without support silently keep the [data-reveal]/.is-visible
+   fallback from reveal.js. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    main {
+      perspective: 1400px;
+    }
+
+    [data-reveal] {
+      opacity: 1;
+      transform: none;
+      transition: none;
+      animation: deriva-straighten linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 40%;
+      transform-style: preserve-3d;
+    }
+
+    [data-reveal].is-visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    .experience-list > .experience-item {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+}
+
+@keyframes deriva-straighten {
+  from {
+    opacity: 0;
+    transform: rotateX(9deg) translateY(2rem) scale(0.98);
+    filter: brightness(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: rotateX(0deg) translateY(0) scale(1);
+    filter: brightness(1);
+  }
+}

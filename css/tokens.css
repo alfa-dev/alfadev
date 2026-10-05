@@ -1,0 +1,61 @@
+:root {
+  /* Color — dark-first, contrast pre-checked against --bg (#060606) */
+  --bg: #060606;
+  --bg-raised: #131315;
+  --text: #f2f2f0;           /* ~18:1 on --bg */
+  --text-muted: #b7b7b3;     /* ~9.5:1 on --bg, stays above 4.5:1 */
+  --accent: #7ef9c4;         /* mint — ~13:1 on --bg, used for links/focus/canvas */
+  --accent-dim: #3f8a6c;     /* ~4:1, decorative only, never text on its own */
+  --border: #29292b;
+
+  /* Type scale */
+  --font-mono: "JetBrains Mono", "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-weight-body: 400;
+  --font-weight-heading: 400;
+
+  /* Every step of the type scale is multiplied by --type-scale, so the token
+     panel can retune the whole page's typography from one control. Hierarchy
+     here leans on scale, not color or weight — a wide, dramatic clamp() range
+     between the smallest meta text and the hero headline. */
+  --type-scale: 1;
+  --fs-900: calc(clamp(3.25rem, 4vw + 3rem, 7.75rem) * var(--type-scale));
+  --fs-700: calc(clamp(2rem, 2.2vw + 1.4rem, 3.375rem) * var(--type-scale));
+  --fs-500: calc(clamp(1.125rem, 0.6vw + 1rem, 1.5rem) * var(--type-scale));
+  --fs-300: calc(1rem * var(--type-scale));
+  --fs-200: calc(0.8125rem * var(--type-scale));
+
+  /* Spacing scale — every step is driven by --density-scale so a single
+     slider in the token panel can retune the whole page's rhythm. */
+  --density-scale: 1;
+  --space-1: calc(0.5rem * var(--density-scale));
+  --space-2: calc(1rem * var(--density-scale));
+  --space-3: calc(1.5rem * var(--density-scale));
+  --space-4: calc(2.5rem * var(--density-scale));
+  --space-5: calc(4rem * var(--density-scale));
+  --space-6: calc(7rem * var(--density-scale));
+
+  /* Layout */
+  --measure: 42rem;
+  --page-max: 72rem;
+  --radius: 0.5rem;
+
+  /* Light source — a single global light whose position is driven by scroll
+     (js/light-source.js). Everything that "catches light" reads these two. */
+  --light-x: 50%;
+  --light-y: 20%;
+
+  /* Motion */
+  --dur-fast: 150ms;
+  --dur-med: 400ms;
+  --dur-slow: 700ms;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    /* Light parks at a fixed, coherent position; no rAF ever runs. */
+    --light-x: 50%;
+    --light-y: 20%;
+  }
+}
