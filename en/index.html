@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Alfa Dev · Custom software development: web, mobile, embedded and automation</title>
-<meta name="description" content="Custom software: web systems, mobile apps, embedded solutions, automations and payment integrations (Pix, cards, bank slips) for small businesses and complex operations. Working remotely with clients in Brazil and worldwide.">
+<title>Alfa Dev · Custom software, mobile apps and AI applied to your business</title>
+<meta name="description" content="Custom software: web systems, mobile apps, embedded solutions, automations, applied artificial intelligence (AI), brand activation games for trade shows and events, and payment integrations (Pix, cards, bank slips) for small businesses and complex operations. Working remotely with clients in Brazil and worldwide.">
 <link rel="canonical" href="https://alfadev.com.br/en/">
 <link rel="alternate" hreflang="pt-BR" href="https://alfadev.com.br/">
 <link rel="alternate" hreflang="en" href="https://alfadev.com.br/en/">
@@ -17,11 +17,11 @@
 <meta property="og:site_name" content="Alfa Dev">
 <meta property="og:url" content="https://alfadev.com.br/en/">
 <meta property="og:title" content="Alfa Dev · Custom software, built to last">
-<meta property="og:description" content="From small businesses to complex operations: custom web systems, mobile apps, embedded solutions, automations and payment integrations.">
+<meta property="og:description" content="From small businesses to complex operations: custom web systems, mobile apps, embedded solutions, automations, applied AI, event games and payment integrations.">
 <meta property="og:image" content="https://alfadev.com.br/assets/hero-2.webp">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Alfa Dev · Custom software, built to last">
-<meta name="twitter:description" content="From small businesses to complex operations: custom web systems, mobile apps, embedded solutions, automations and payment integrations.">
+<meta name="twitter:description" content="From small businesses to complex operations: custom web systems, mobile apps, embedded solutions, automations, applied AI, event games and payment integrations.">
 <meta name="twitter:image" content="https://alfadev.com.br/assets/hero-2.webp">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0812'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Georgia,serif' font-style='italic' font-size='44' fill='%239B6BFF'%3E%CE%B1%3C/text%3E%3C/svg%3E">
 <script>document.documentElement.classList.add('js')</script>
@@ -66,7 +66,16 @@
     "Data storage",
     "APIs and integrations",
     "Authentication",
-    "Applied artificial intelligence"
+    "Applied artificial intelligence",
+    "AI agents",
+    "Large language models (LLM)",
+    "A/B testing",
+    "Technical SEO",
+    "Business intelligence",
+    "Brand activation games",
+    "Advergames",
+    "Interactive event kiosks",
+    "Trade show lead capture"
   ],
   "sameAs": [
     "https://github.com/alfa-dev",
@@ -88,6 +97,34 @@
         "itemOffered": {
           "@type": "Service",
           "name": "Artificial intelligence integration"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "AI chatbots and agents for customer service"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "AI document reading and data extraction"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "A/B testing, landing pages and technical SEO"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Interactive brand activation games for trade shows, exhibitions and events"
         }
       },
       {
@@ -744,19 +781,51 @@ button { font: inherit; color: inherit; }
 }
 .hero-chip--gain svg { color: var(--violet-2); flex-shrink: 0; }
 
-/* problem -> light -> solution flow (drawn by JS from the chip positions) */
+/* problem -> light -> solution: same language as the services flowchart (wires + light pulses) */
+.hero-float { --hcycle: 4.4s; }
 .hero-flow { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
-.hf-in { fill: none; stroke: rgba(163, 156, 184, .2); stroke-width: 1; stroke-dasharray: 2 6; }
-.hf-out { fill: none; stroke: rgba(196, 168, 255, .3); stroke-width: 1.2; }
-.hf-raw { fill: rgba(18, 14, 30, .95); stroke: rgba(196, 188, 214, .85); stroke-width: 1.2; stroke-dasharray: 2.5 2; }
-.hf-flash { fill: url(#hf-glow); }
-.hf-dot { fill: #fff; filter: drop-shadow(0 0 4px rgba(180, 140, 255, .95)) drop-shadow(0 0 10px rgba(155, 107, 255, .7)); }
-.hf-tail { fill: #C4A8FF; }
-.hero-chip { transition: border-color .4s, box-shadow .4s, color .4s, background-color .4s; }
-.hero-chip--pain.is-send { border-color: rgba(196, 188, 214, .75); color: rgba(243, 240, 250, .9); }
-.hero-chip--gain.is-hit {
-  border-color: #E6D9FF; background: rgba(76, 48, 150, .78);
-  box-shadow: 0 0 0 4px rgba(155, 107, 255, .18), 0 0 30px rgba(155, 107, 255, .65), inset 0 0 14px rgba(196, 168, 255, .25);
+.hf-wire-in { fill: none; stroke: rgba(163, 156, 184, .3); stroke-width: 1.2; stroke-dasharray: 3 5; }
+.hf-wire-out { fill: none; stroke: rgba(196, 168, 255, .38); stroke-width: 1.3; }
+.hf-pulse {
+  fill: none; stroke-linecap: round; stroke-dasharray: 12 200; stroke-dashoffset: 12;
+  animation: hf-pulse var(--hcycle) var(--d, 0s) cubic-bezier(.5, 0, .5, 1) infinite;
+}
+.hf-pulse--in { stroke: rgba(236, 232, 246, .9); stroke-width: 2.2; }
+.hf-pulse--out { stroke: #E2D4FF; stroke-width: 3; }
+@keyframes hf-pulse { 0% { stroke-dashoffset: 12; } 28%, 100% { stroke-dashoffset: -100; } }
+
+/* the core sits in the light: dark node with a rotating light border, like the build node */
+.hero-core {
+  position: absolute; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 18px;
+  display: grid; place-items: center; z-index: 1;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(160deg, #1a1430, #0d0a18) padding-box,
+    conic-gradient(from var(--flow-ang), rgba(155,107,255,.2) 0 60%, #E6D9FF 78%, rgba(155,107,255,.2) 92%) border-box;
+  box-shadow: 0 0 0 6px rgba(155, 107, 255, .1), 0 0 40px rgba(180, 140, 255, .55);
+  animation: flow-spin 4s linear infinite;
+}
+.hero-core::before {
+  content: ""; position: absolute; inset: -10px; border-radius: 24px; border: 1px solid rgba(196, 168, 255, .5);
+  animation: hf-core var(--hcycle) 1.35s ease-out infinite; opacity: 0;
+}
+@keyframes hf-core { 0% { transform: scale(.85); opacity: .9; } 30%, 100% { transform: scale(1.5); opacity: 0; } }
+.hero-core svg { width: 26px; height: 26px; overflow: visible; }
+.hero-core path { fill: none; stroke: url(#brand-grad); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.hero-core[hidden] { display: none; }
+
+/* chips light up when a pulse leaves (problems) or lands (solutions) */
+.hero-chip { position: relative; }
+.hero-chip::after {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; opacity: 0;
+  animation: hf-ping var(--hcycle) var(--pd, 0s) ease-out infinite;
+}
+.hero-chip--pain::after { border: 1px solid rgba(226, 220, 240, .8); box-shadow: 0 0 0 3px rgba(226, 220, 240, .1); }
+.hero-chip--gain::after { border: 1px solid #E6D9FF; box-shadow: 0 0 0 4px rgba(155, 107, 255, .2), 0 0 28px rgba(155, 107, 255, .7); }
+@keyframes hf-ping { 0% { opacity: 0; } 4% { opacity: 1; } 22%, 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .hf-pulse, .hero-core::before { display: none; }
+  .hero-core, .hero-chip::after { animation: none; }
 }
 
 /* positions, tracking the beam at ~68% x */
@@ -984,7 +1053,12 @@ button { font: inherit; color: inherit; }
 .flow-agent p{margin:5px 0 0;font-size:.8rem;line-height:1.45;color:var(--mut-l)}
 @media (min-width:1100px){.flow{padding-bottom:150px}}
 
-.flow-foot{margin-top:clamp(28px,3.4vw,44px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 24px}
+.svc-extra{margin-top:clamp(36px,4vw,56px);display:flex;align-items:center;gap:14px 24px;flex-wrap:wrap;
+  padding:18px 22px;border-radius:var(--r-card);background:rgba(255,255,255,.6);border:1px solid var(--line-l)}
+.svc-extra__h{flex:none;font-family:var(--f-mono);font-size:.66rem;letter-spacing:.16em;color:var(--violet)}
+.svc-extra ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.svc-extra li{padding:6px 12px;border-radius:var(--r-pill);background:#fff;border:1px solid var(--line-l);font-size:.84rem;color:var(--fg-l);white-space:nowrap}
+.flow-foot{margin-top:clamp(24px,3vw,36px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 24px}
 .flow-cap{font-size:.95rem;color:var(--mut-l);max-width:40em}
 .flow{margin-top:28px}
 
@@ -1008,6 +1082,9 @@ button { font: inherit; color: inherit; }
   .flow-outputs{display:grid;grid-template-rows:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .flow-outputs li{align-self:stretch;flex-direction:column;align-items:flex-start;gap:10px;padding:14px}
   .flow-foot{flex-direction:column;align-items:stretch;text-align:center}
+  .svc-extra{padding:16px;gap:12px}
+  .svc-extra ul{gap:6px}
+  .svc-extra li{padding:5px 10px;font-size:.76rem}
   .flow-foot .btn{width:100%}
 }
 
@@ -1238,6 +1315,23 @@ button { font: inherit; color: inherit; }
   .cases-vis *{animation:none!important}
   .cases-sig i{opacity:0}.cases-spark{stroke-dashoffset:0}
 }
+
+/* 7 · activation game totem */
+.cases-totem{position:absolute;left:50%;top:6%;width:40%;height:82%;transform:translateX(-50%) rotateY(-18deg) rotateX(6deg);transform-style:preserve-3d}
+.cases-totem__screen{position:absolute;inset:0 0 12% 0;border-radius:14px;overflow:hidden;
+  background:linear-gradient(180deg,#3a1f12,#1b0f0a 70%),#1b0f0a;border:3px solid #2b2440;
+  box-shadow:0 0 0 1px rgba(196,168,255,.3),0 30px 40px -12px rgba(0,0,0,.8),0 0 30px rgba(242,181,68,.25)}
+.cases-totem__brand{position:absolute;left:50%;top:9%;width:46%;height:7%;transform:translateX(-50%);border-radius:99px;background:linear-gradient(90deg,#F2B544,#FFD98A)}
+.cases-totem__score{position:absolute;right:8%;top:19%;font:600 .62rem/1 var(--f-mono);color:#FFE7B3}
+.cases-drop{position:absolute;left:var(--x);top:-8%;width:9%;aspect-ratio:1/1.25;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#C98B5A,#7A4524);box-shadow:inset -2px 0 0 rgba(0,0,0,.25);
+  animation:cases-fall 3.1s var(--d) linear infinite}
+.cases-drop--bad{background:radial-gradient(circle at 35% 30%,#9aa3b2,#4b5262)}
+@keyframes cases-fall{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(1150%) rotate(220deg)}}
+.cases-cup{position:absolute;bottom:6%;left:40%;width:26%;height:12%;border-radius:4px 4px 12px 12px;
+  background:linear-gradient(180deg,#F2B544,#C98A1E);box-shadow:0 0 14px rgba(242,181,68,.6);animation:cases-cup 2.6s ease-in-out infinite alternate}
+@keyframes cases-cup{0%{left:12%}100%{left:62%}}
+.cases-totem__base{position:absolute;left:30%;right:30%;bottom:0;height:12%;border-radius:0 0 8px 8px;background:linear-gradient(180deg,#2b2440,#151027)}
 
 /* stats */
 .cases-stats{position:relative;display:flex;flex-direction:column;justify-content:space-evenly;padding:clamp(20px,2.4vw,32px) clamp(20px,2.2vw,30px);
@@ -1794,14 +1888,11 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
     <div class="hero-dust" data-particles="70"></div>
   </div>
 
-  <div class="hero-float" aria-hidden="true">
-    <svg class="hero-flow" focusable="false">
-      <defs>
-        <radialGradient id="hf-glow"><stop offset="0" stop-color="#fff"/><stop offset=".3" stop-color="#efe4ff" stop-opacity=".9"/><stop offset=".7" stop-color="#b48cff" stop-opacity=".3"/><stop offset="1" stop-color="#9b6bff" stop-opacity="0"/></radialGradient>
-      </defs>
-      <g class="hf-lines"></g>
-      <g class="hf-pkts"></g>
-    </svg>
+  <div class="hero-float" aria-hidden="true" data-live>
+    <svg class="hero-flow" focusable="false"><g class="hf-lines"></g></svg>
+    <div class="hero-core">
+      <svg viewBox="0 0 24 24" focusable="false"><path d="M18.5 5.5c-1.6 6.2-4.6 13-9.4 13-3.1 0-5.1-2.6-5.1-6 0-3.8 2.5-7 5.6-7 4.2 0 5.6 5.4 7.4 10.2.8 2 1.9 2.8 3 2.8"/></svg>
+    </div>
     <div class="hero-chip-pos hero-pain hero-p1"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain1">Manual processes</span></div>
     <div class="hero-chip-pos hero-pain hero-p2"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain2">Scattered data</span></div>
     <div class="hero-chip-pos hero-pain hero-p3"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain3">No time to spare</span></div>
@@ -1998,6 +2089,21 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
         </ul>
       </div>
     </div>
+    <div class="svc-extra">
+      <p class="svc-extra__h" data-i18n="svc.xLabel">WE ALSO DO</p>
+      <ul>
+        <li data-i18n="svc.x0">Brand activation games</li>
+        <li data-i18n="svc.x1">A/B testing</li>
+        <li data-i18n="svc.x2">Landing pages</li>
+        <li data-i18n="svc.x3">Technical SEO</li>
+        <li data-i18n="svc.x4">Dashboards &amp; BI</li>
+        <li data-i18n="svc.x5">ERP &amp; CRM integrations</li>
+        <li data-i18n="svc.x6">Legacy system migration</li>
+        <li data-i18n="svc.x7">AI chatbots &amp; agents</li>
+        <li data-i18n="svc.x8">AI document reading</li>
+        <li data-i18n="svc.x9">Admin panels</li>
+      </ul>
+    </div>
     <div class="flow-foot">
       <p class="flow-cap" data-i18n="svc.cap">From rough sketch to live solution, with you following every step.</p>
       <a class="btn btn--primary" href="#contato"><span data-i18n="svc.go">Start my project</span> <span class="btn__arr" aria-hidden="true">→</span></a>
@@ -2089,6 +2195,30 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
 
     <div class="cases-body">
       <div class="cases-track" data-cases-track data-live tabindex="0" role="region" aria-label="Solution examples" data-i18n-aria="cases.track">
+
+        <article class="cases-card">
+          <div class="cases-card__in">
+          <div class="cases-vis cases-vis--game" aria-hidden="true">
+            <div class="cases-glow"></div>
+            <div class="cases-totem">
+              <div class="cases-totem__screen">
+                <span class="cases-totem__brand"></span>
+                <span class="cases-totem__score">1.250</span>
+                <i class="cases-drop" style="--x:18%;--d:0s"></i><i class="cases-drop" style="--x:46%;--d:.7s"></i><i class="cases-drop cases-drop--bad" style="--x:70%;--d:1.3s"></i><i class="cases-drop" style="--x:32%;--d:1.9s"></i><i class="cases-drop" style="--x:82%;--d:2.5s"></i>
+                <span class="cases-cup"></span>
+              </div>
+              <span class="cases-totem__base"></span>
+            </div>
+            <div class="cases-chip cases-chip--ok"><i></i><span data-i18n="cases.chip7">Live leaderboard</span></div>
+          </div>
+          <div class="cases-card__txt">
+            <p class="cases-cat" data-i18n="cases.c7cat">BRAND ACTIVATION GAMES</p>
+            <h3 class="cases-card__title" data-i18n="cases.c7title">Branded game for trade shows</h3>
+            <p class="cases-card__desc" data-i18n="cases.c7desc">Interactive games in the brand's identity for booths, trade shows and events: lines at the booth, captured leads and a live leaderboard.</p>
+            <a class="cases-demo" href="../demos/jogo.html"><span data-i18n="cases.demo">Try the demo</span> <span class="btn__arr" aria-hidden="true">→</span></a>
+          </div>
+          </div>
+        </article>
 
         <article class="cases-card">
           <div class="cases-card__in">
@@ -2358,6 +2488,14 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
         <p data-i18n="faq.a5">Every solution is designed following Brazil's LGPD data-protection law, with access control and human review at the critical points where AI acts.</p>
       </details>
       <details class="faq-item">
+        <summary><span data-i18n="faq.q8">Do you work with artificial intelligence?</span><span class="faq-ic" aria-hidden="true"></span></summary>
+        <p data-i18n="faq.a8">Yes. We apply AI where it pays off: customer service agents and chatbots, automatic document reading, data classification and decision support. It comes in as part of the solution, integrated with your systems and with human review at the critical points.</p>
+      </details>
+      <details class="faq-item">
+        <summary><span data-i18n="faq.q9">Do you build games for trade shows and events?</span><span class="faq-ic" aria-hidden="true"></span></summary>
+        <p data-i18n="faq.a9">Yes. We build interactive branded games for booths, trade shows and exhibitions: touch kiosks, quick sign-up for players, a live leaderboard and lead export. It's one of the most effective ways to draw a crowd, engagement and leads at an event.</p>
+      </details>
+      <details class="faq-item">
         <summary><span data-i18n="faq.q7">Do you integrate payment methods?</span><span class="faq-ic" aria-hidden="true"></span></summary>
         <p data-i18n="faq.a7">Yes. We integrate Pix, cards, bank slips and recurring subscriptions into your systems, websites and apps, with automatic confirmation and reconciliation.</p>
       </details>
@@ -2409,6 +2547,22 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Every solution is designed following Brazil's LGPD data-protection law, with access control and human review at the critical points where AI acts."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you work with artificial intelligence?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. We apply AI where it pays off: customer service agents and chatbots, automatic document reading, data classification and decision support. It comes in as part of the solution, integrated with your systems and with human review at the critical points."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you build games for trade shows and events?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. We build interactive branded games for booths, trade shows and exhibitions: touch kiosks, quick sign-up for players, a live leaderboard and lead export. It's one of the most effective ways to draw a crowd, engagement and leads at an event."
       }
     },
     {
@@ -2648,132 +2802,46 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
     cards.forEach(function (c) { io.observe(c); });
   })();
 
-  /* ================= hero: problems enter the light and leave as solutions ================= */
+  /* ================= hero: problems -> core in the light -> solutions ================= */
   (function () {
     var host = doc.querySelector('.hero-float'), svg = host && host.querySelector('.hero-flow');
     if (!svg) return;
-    var NS = 'http://www.w3.org/2000/svg';
+    var NS = 'http://www.w3.org/2000/svg', lines = svg.querySelector('.hf-lines'), core = host.querySelector('.hero-core');
     var pains = $$('.hero-pain .hero-chip', host), gains = $$('.hero-gain .hero-chip', host);
-    var lines = svg.querySelector('.hf-lines'), layer = svg.querySelector('.hf-pkts');
-    var pairs = [], trips = [], raf = 0, last = 0, spawnAt = 0, next = 0, visible = false;
-    var T_IN = 2200, T_FLASH = 480, T_OUT = 1250, GAP = 1150;
-
-    function el(tag, attrs, parent) {
-      var n = doc.createElementNS(NS, tag);
-      for (var k in attrs) n.setAttribute(k, attrs[k]);
-      (parent || layer).appendChild(n);
-      return n;
+    var IN = [0, .35, .7, 1.05], OUT = 1.6, TRAVEL = 4.4 * .28;   // seconds; must match --hcycle and the 28% keyframe
+    function path(d, cls, delay) {
+      var n = doc.createElementNS(NS, 'path');
+      n.setAttribute('d', d); n.setAttribute('class', cls);
+      if (delay != null) { n.setAttribute('pathLength', '100'); n.style.setProperty('--d', delay + 's'); }
+      lines.appendChild(n);
     }
     function layout() {
-      lines.textContent = ''; pairs = [];
-      if (getComputedStyle(host).display === 'none') return false;
-      var hb = host.getBoundingClientRect();
-      if (!hb.width) return false;
+      lines.textContent = '';
+      if (getComputedStyle(host).display === 'none') return;
+      var hb = host.getBoundingClientRect(); if (!hb.width) return;
       var pr = pains.map(function (c) { return c.getBoundingClientRect(); });
       var gr = gains.map(function (c) { return c.getBoundingClientRect(); });
       var right = Math.max.apply(null, pr.map(function (r) { return r.right; })) - hb.left;
       var left = Math.min.apply(null, gr.map(function (r) { return r.left; })) - hb.left;
-      var beam = right + (left - right) * 0.6;   // the light sits a bit right of centre
-      pains.forEach(function (c, i) {
-        var a = pr[i], b = gr[i]; if (!b) return;
-        var x0 = a.right - hb.left + 4, y0 = a.top + a.height / 2 - hb.top;
-        var x1 = b.left - hb.left - 4, y1 = b.top + b.height / 2 - hb.top;
-        var my = y0 + (y1 - y0) * 0.5;
-        var a0 = { x: x0, y: y0 }, m = { x: beam, y: my };
-        el('path', { class: 'hf-in', d: wander(a0, m, 1) }, lines);           // faint guide, itself a bit lost
-        var pout = el('path', { class: 'hf-out', d: 'M' + beam + ' ' + my + ' L' + x1 + ' ' + y1 }, lines);
-        pairs.push({ a0: a0, m: m, pout: pout, lout: pout.getTotalLength(), pain: c, gain: gains[i] });
+      var cx = right + (left - right) * .58;
+      var cy = (pr[0].top + pr[pr.length - 1].bottom + gr[0].top + gr[gr.length - 1].bottom) / 4 - hb.top;
+      core.style.left = cx + 'px'; core.style.top = cy + 'px';
+      var ex = cx - 32, sx = cx + 32;          // wires meet the core's edges
+      pr.forEach(function (r, i) {
+        var x0 = r.right - hb.left + 2, y0 = r.top + r.height / 2 - hb.top;
+        var d = 'M' + x0 + ' ' + y0 + ' C' + (x0 + (ex - x0) * .55) + ' ' + y0 + ' ' + (ex - (ex - x0) * .45) + ' ' + cy + ' ' + ex + ' ' + cy;
+        path(d, 'hf-wire-in'); path(d, 'hf-pulse hf-pulse--in', IN[i % 4]);
+        pains[i].style.setProperty('--pd', IN[i % 4] + 's');
       });
-      return pairs.length > 0;
+      gr.forEach(function (r, i) {
+        var x1 = r.left - hb.left - 2, y1 = r.top + r.height / 2 - hb.top, dl = +(OUT + i * .15).toFixed(2);
+        var d = 'M' + sx + ' ' + cy + ' C' + (sx + (x1 - sx) * .45) + ' ' + cy + ' ' + (x1 - (x1 - sx) * .55) + ' ' + y1 + ' ' + x1 + ' ' + y1;
+        path(d, 'hf-wire-out'); path(d, 'hf-pulse hf-pulse--out', dl);
+        gains[i].style.setProperty('--pd', (dl + TRAVEL * .9).toFixed(2) + 's');
+      });
     }
-    // a messy route: random detours, a little backtracking, one loop; calmer as it nears the light
-    function wander(a, b, seed) {
-      var rnd = seed ? (function (n) { return function () { n = (n * 9301 + 49297) % 233280; return n / 233280; }; })(seed * 7919 + Math.round(a.y)) : Math.random;
-      var pts = [a], K = 7, dx = b.x - a.x;
-      for (var k = 1; k < K; k++) {
-        var t = k / K, calm = 1 - t * 0.75;
-        var x = a.x + dx * t + (rnd() - .5) * dx * .22 * calm;
-        if (k === 3) x -= dx * .12 * calm;                                // backtrack
-        var y = a.y + (b.y - a.y) * t + (rnd() - .5) * 70 * calm;
-        pts.push({ x: x, y: y });
-        if (k === 2) {                                                     // a small loop: going in circles
-          var r = 9 + rnd() * 7;
-          pts.push({ x: x + r, y: y - r }, { x: x + 2 * r * .2, y: y - 2 * r }, { x: x - r, y: y - r }, { x: x + r * .4, y: y + 2 });
-        }
-      }
-      pts.push(b);
-      var d = 'M' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
-      for (var i = 0; i < pts.length - 1; i++) {                          // Catmull-Rom -> cubic
-        var p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
-        d += ' C' + (p1.x + (p2.x - p0.x) / 6).toFixed(1) + ' ' + (p1.y + (p2.y - p0.y) / 6).toFixed(1) + ' ' +
-             (p2.x - (p3.x - p1.x) / 6).toFixed(1) + ' ' + (p2.y - (p3.y - p1.y) / 6).toFixed(1) + ' ' + p2.x.toFixed(1) + ' ' + p2.y.toFixed(1);
-      }
-      return d;
-    }
-    function ease(t) { return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
-    function spawn(now) {
-      var p = pairs[next % pairs.length]; next++;
-      p.pain.classList.add('is-send'); setTimeout(function () { p.pain.classList.remove('is-send'); }, 700);
-      var g = doc.createElementNS(NS, 'g'); layer.appendChild(g);
-      var route = el('path', { d: wander(p.a0, p.m, 0), fill: 'none', stroke: 'none' }, g);   // fresh mess every trip
-      trips.push({ p: p, t0: now, g: g, route: route, lroute: route.getTotalLength(), spin: (Math.random() - .5) * 900,
-        raw: el('rect', { class: 'hf-raw', width: 10, height: 10, rx: 2.5, x: -5, y: -5 }, g),
-        flash: el('circle', { class: 'hf-flash', r: 0 }, g),
-        tails: [0, 1, 2].map(function (k) { return el('circle', { class: 'hf-tail', r: 2.6 - k * .6, opacity: 0 }, g); }),
-        dot: el('circle', { class: 'hf-dot', r: 3.6, opacity: 0 }, g) });
-    }
-    function put(n, pt) { n.setAttribute('transform', 'translate(' + pt.x.toFixed(1) + ' ' + pt.y.toFixed(1) + ')'); }
-    function step(tr, now) {
-      var dt = now - tr.t0, p = tr.p;
-      if (dt < T_IN) {                                   // raw problem stumbles toward the light
-        var u = dt / T_IN, a = Math.min(1, Math.max(0, u + Math.sin(u * 19) * .025 * (1 - u))), pt = tr.route.getPointAtLength(a * tr.lroute);
-        var jit = 1.6 * (1 - u);
-        tr.raw.setAttribute('transform', 'translate(' + (pt.x + (Math.random() - .5) * jit).toFixed(1) + ' ' + (pt.y + (Math.random() - .5) * jit).toFixed(1) +
-          ') rotate(' + (tr.spin * u + Math.sin(u * 23) * 25 * (1 - u)).toFixed(1) + ')');
-        tr.raw.setAttribute('opacity', Math.min(1, dt / 200));
-        return true;
-      }
-      if (dt < T_IN + T_FLASH) {                         // processed by the light
-        var f = (dt - T_IN) / T_FLASH, c = p.m;
-        tr.raw.setAttribute('opacity', Math.max(0, 1 - f * 3));
-        put(tr.flash, c); tr.flash.setAttribute('r', (6 + 30 * Math.sin(f * Math.PI)).toFixed(1));
-        tr.flash.setAttribute('opacity', Math.sin(f * Math.PI).toFixed(2));
-        put(tr.dot, c); tr.dot.setAttribute('opacity', f > .5 ? 1 : 0);
-        return true;
-      }
-      var o = (dt - T_IN - T_FLASH) / T_OUT;
-      tr.flash.setAttribute('opacity', 0); tr.raw.setAttribute('opacity', 0);
-      if (o < 1) {                                       // solution travels to its chip
-        var e = 1 - Math.pow(1 - o, 3);                  // straight and calm: ease-out
-        put(tr.dot, p.pout.getPointAtLength(e * p.lout));
-        tr.tails.forEach(function (t, k) {
-          var lag = Math.max(0, e - (k + 1) * .035);
-          put(t, p.pout.getPointAtLength(lag * p.lout)); t.setAttribute('opacity', (.55 - k * .15).toFixed(2));
-        });
-        if (!tr.hit && o > .96) { tr.hit = true; p.gain.classList.add('is-hit'); setTimeout(function () { p.gain.classList.remove('is-hit'); }, 900); }
-        return true;
-      }
-      return false;
-    }
-    function frame(now) {
-      raf = 0;
-      if (!visible || doc.hidden) { last = 0; return; }
-      if (last && now - last > 200) { trips.forEach(function (t) { t.t0 += now - last; }); spawnAt += now - last; }  // resume where it paused
-      last = now;
-      if (now >= spawnAt) { spawn(now); spawnAt = now + GAP; }
-      trips = trips.filter(function (t) { var alive = step(t, now); if (!alive) t.g.remove(); return alive; });
-      raf = requestAnimationFrame(frame);
-    }
-    function start() { if (!raf && visible && !doc.hidden && !reduced && pairs.length) raf = requestAnimationFrame(frame); }
-    function relayout() { trips.forEach(function (t) { t.g.remove(); }); trips = []; layout(); start(); }
-
-    var ready = function () { layout(); start(); };
-    if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(ready); else ready();
-    win.addEventListener('resize', function () { clearTimeout(relayout.t); relayout.t = setTimeout(relayout, 150); }, { passive: true });
-    doc.addEventListener('visibilitychange', start);
-    if ('IntersectionObserver' in win) {
-      new IntersectionObserver(function (es) { visible = es[es.length - 1].isIntersecting; start(); }).observe(host);
-    } else { visible = true; start(); }
+    if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(layout); else layout();
+    win.addEventListener('resize', function () { clearTimeout(layout.t); layout.t = setTimeout(layout, 150); }, { passive: true });
   })();
 
   /* ================= particles ================= */

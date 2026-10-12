@@ -24,10 +24,10 @@ EN = json.loads((ROOT / "i18n" / "en.json").read_text(encoding="utf-8"))
 SITE = "https://alfadev.com.br/"
 
 HEAD = {
-    "title": "Alfa Dev · Custom software development: web, mobile, embedded and automation",
-    "description": "Custom software: web systems, mobile apps, embedded solutions, automations and payment integrations (Pix, cards, bank slips) for small businesses and complex operations. Working remotely with clients in Brazil and worldwide.",
+    "title": "Alfa Dev · Custom software, mobile apps and AI applied to your business",
+    "description": "Custom software: web systems, mobile apps, embedded solutions, automations, applied artificial intelligence (AI), brand activation games for trade shows and events, and payment integrations (Pix, cards, bank slips) for small businesses and complex operations. Working remotely with clients in Brazil and worldwide.",
     "og_title": "Alfa Dev · Custom software, built to last",
-    "og_description": "From small businesses to complex operations: custom web systems, mobile apps, embedded solutions, automations and payment integrations.",
+    "og_description": "From small businesses to complex operations: custom web systems, mobile apps, embedded solutions, automations, applied AI, event games and payment integrations.",
 }
 
 # Portuguese strings inside the JSON-LD blocks -> English
@@ -36,6 +36,17 @@ LD = {
         "Software agency specialized in web systems, mobile apps, embedded systems, process automation and payment integrations, with cloud infrastructure and AI applied where it makes sense. Working remotely with small businesses and complex operations in Brazil and worldwide.",
     "Brasil": "Brazil",
     "Mundo": "Worldwide",
+    "Chatbots e agentes de IA para atendimento": "AI chatbots and agents for customer service",
+    "Leitura e extração de dados de documentos com IA": "AI document reading and data extraction",
+    "Testes A/B, landing pages e SEO técnico": "A/B testing, landing pages and technical SEO",
+    "Agentes de IA": "AI agents",
+    "Modelos de linguagem (LLM)": "Large language models (LLM)",
+    "Testes A/B": "A/B testing",
+    "Jogos interativos para ativação de marca em feiras, exposições e eventos": "Interactive brand activation games for trade shows, exhibitions and events",
+    "Jogos para ativação de marca": "Brand activation games",
+    "Totens interativos para eventos": "Interactive event kiosks",
+    "Captação de leads em feiras": "Trade show lead capture",
+    "SEO técnico": "Technical SEO",
     "Serviços": "Services",
     "Desenvolvimento de sistemas web sob medida": "Custom web system development",
     "Integração de inteligência artificial": "Artificial intelligence integration",
