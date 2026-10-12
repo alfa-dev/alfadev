@@ -1,0 +1,1125 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Documentos lidos em segundos · Demonstração · Alfa Dev</title>
+<meta name="description" content="Demonstração de leitura automática de documentos: notas fiscais, boletos, contratos e recibos com CNPJ, valores, datas e vencimentos extraídos, validados e prontos para o seu sistema.">
+<meta name="robots" content="noindex,follow">
+<meta name="theme-color" content="#0A0812">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0812'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Georgia,serif' font-style='italic' font-size='44' fill='%239B6BFF'%3E%CE%B1%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="demo.css">
+<style>
+/* ---------- layout ---------- */
+[hidden] { display: none !important; }
+:root { --stage-h: clamp(460px, calc(100vh - 300px), 860px); }
+.app { max-width: 1380px; margin: 0 auto; padding: 20px clamp(12px, 3vw, 28px) 56px; display: grid; gap: 16px; }
+
+/* document selector */
+.thumbs { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 6px; scroll-snap-type: x proximity; scrollbar-width: thin; }
+.thumb {
+  flex: 1 0 168px; scroll-snap-align: start; display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px 10px 10px; border-radius: 14px; border: 1px solid var(--line-d); background: var(--ink-2);
+  color: var(--fg-d); text-align: left; transition: border-color .2s, background-color .2s;
+}
+.thumb:hover { border-color: rgba(155,107,255,.55); }
+.thumb[aria-pressed="true"] { border-color: var(--violet); background: linear-gradient(160deg, rgba(155,107,255,.16), rgba(155,107,255,.04)); box-shadow: 0 10px 30px -18px rgba(139,92,246,.9); }
+.thumb:disabled { opacity: .5; cursor: default; }
+.thumb b { display: block; font-weight: 500; font-size: .9rem; line-height: 1.25; }
+.thumb small { display: block; font-family: var(--f-mono); font-size: .64rem; color: var(--mut-d); letter-spacing: .02em; margin-top: 2px; }
+.thumb .done-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); margin-left: auto; flex: none; opacity: 0; }
+.thumb.has-result .done-dot { opacity: 1; }
+.mini { flex: none; width: 34px; height: 44px; border-radius: 3px; background: #F7F3EA; position: relative; overflow: hidden; box-shadow: 0 4px 10px -4px rgba(0,0,0,.6); }
+.mini::before { content: ""; position: absolute; left: 6px; right: 6px; top: 8px; bottom: 9px; background: repeating-linear-gradient(#CFC6B4 0 2px, transparent 2px 6px); }
+.mini--nota::after { content: ""; position: absolute; left: 4px; right: 4px; top: 4px; height: 9px; border: 1px solid #8E8574; background: #F7F3EA; }
+.mini--boleto::after { content: ""; position: absolute; left: 4px; right: 4px; bottom: 4px; height: 8px; background: repeating-linear-gradient(90deg, #2A2620 0 1px, transparent 1px 2px, #2A2620 2px 4px, transparent 4px 5px); }
+.mini--contrato::after { content: ""; position: absolute; right: 5px; bottom: 4px; width: 14px; height: 5px; border-bottom: 1.5px solid #3446A8; border-radius: 0 0 50% 50%; }
+.mini--recibo { height: 34px; margin: 5px 0; }
+.mini--recibo::after { content: ""; position: absolute; right: 3px; top: 9px; width: 14px; height: 14px; border: 2px solid rgba(179,38,30,.75); border-radius: 50%; transform: rotate(-12deg); }
+.mini--texto { background: var(--ink-3); border: 1px dashed rgba(196,168,255,.55); box-shadow: none; }
+.mini--texto::before { background: repeating-linear-gradient(rgba(196,168,255,.5) 0 2px, transparent 2px 6px); right: 10px; }
+
+.work { display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, 410px); gap: 16px; align-items: start; }
+
+/* viewer */
+.viewer { overflow: hidden; min-width: 0; }
+.vbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line-d); flex-wrap: wrap; }
+.vbar h2 { font-size: 1.02rem; }
+.vbar p { font-family: var(--f-mono); font-size: .7rem; color: var(--mut-d); margin-top: 2px; }
+.vbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-read svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.stage {
+  position: relative; height: var(--stage-h); overflow: auto; overscroll-behavior: contain;
+  padding: 28px clamp(12px, 3vw, 32px) 40px; container-type: inline-size;
+  background: radial-gradient(120% 70% at 50% 0%, rgba(155,107,255,.10), transparent 60%), #0D0A17;
+}
+.sheet { position: relative; max-width: 720px; margin: 0 auto; }
+.scan {
+  position: absolute; left: -14px; right: -14px; top: 0; height: 90px; pointer-events: none; z-index: 3;
+  background: linear-gradient(180deg, rgba(155,107,255,0), rgba(155,107,255,.14) 70%, rgba(196,168,255,.55) 97%, rgba(255,255,255,.95) 100%);
+  border-bottom: 2px solid #E6DAFF; box-shadow: 0 10px 28px rgba(155,107,255,.55); border-radius: 0 0 4px 4px;
+  will-change: transform;
+}
+.sheet.is-reading .paper { filter: saturate(.9); }
+.progress { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: transparent; z-index: 4; }
+.progress i { display: block; height: 100%; width: 0; background: var(--grad); }
+
+/* ---------- paper documents (light) ---------- */
+.paper {
+  position: relative; background: #FFFDF8; color: #1F1C17; border-radius: 3px; padding: 34px 38px 38px;
+  font-size: 12px; line-height: 1.45; overflow-wrap: anywhere;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.25), 0 2px 0 rgba(255,255,255,.05), 0 36px 70px -34px rgba(0,0,0,.95), 0 12px 24px -16px rgba(0,0,0,.7);
+  background-image: linear-gradient(180deg, rgba(255,255,255,.6), rgba(244,238,226,.35));
+}
+.paper .mono { font-family: var(--f-mono); }
+@container (max-width: 560px) { .paper { padding: 18px 14px 22px; font-size: 10.5px; } }
+
+/* highlights */
+mark.hl { color: inherit; background: var(--mk); box-shadow: inset 0 -2px 0 var(--mk-b); border-radius: 2px; padding: 0 1px; cursor: pointer; transition: background-color .2s, box-shadow .2s; }
+mark.hl.is-on { background: var(--mk-on); box-shadow: 0 0 0 2px var(--mk-b); }
+.k-party { --mk: rgba(124,77,255,.15); --mk-on: rgba(124,77,255,.32); --mk-b: #8B5CF6; }
+.k-money { --mk: rgba(31,157,97,.15); --mk-on: rgba(31,157,97,.32); --mk-b: #22A06B; }
+.k-date  { --mk: rgba(230,160,20,.2); --mk-on: rgba(230,160,20,.42); --mk-b: #E0A01C; }
+.k-code  { --mk: rgba(47,116,208,.14); --mk-on: rgba(47,116,208,.3); --mk-b: #3B82F6; }
+.k-term  { --mk: rgba(220,60,98,.13); --mk-on: rgba(220,60,98,.3); --mk-b: #E5487A; }
+
+/* NF / DANFE */
+.nf { font-family: Arial, "Helvetica Neue", Helvetica, sans-serif; font-size: 10.5px; }
+.nf .lbl { display: block; font-size: 7.5px; letter-spacing: .03em; color: #5E584E; line-height: 1.2; margin-bottom: 2px; }
+.nf-head { display: grid; grid-template-columns: 1.25fr .8fr 1.35fr; border: 1px solid #2A2620; }
+.nf-head > div { padding: 7px 8px; border-right: 1px solid #2A2620; min-width: 0; }
+.nf-head > div:last-child { border-right: 0; }
+.nf-emit strong { display: block; font-size: 13px; margin: 2px 0 3px; }
+.nf-danfe { text-align: center; }
+.nf-danfe b { display: block; font-size: 17px; letter-spacing: .06em; }
+.nf-danfe small { display: block; font-size: 7.5px; line-height: 1.25; }
+.nf-io { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 5px 0; font-size: 8px; text-align: left; }
+.nf-io span:last-child { border: 1px solid #2A2620; padding: 1px 6px; font-weight: 700; font-size: 11px; }
+.nf-num { font-weight: 700; font-size: 10.5px; line-height: 1.35; }
+.barcode { height: 34px; background: repeating-linear-gradient(90deg, #111 0 2px, transparent 2px 3px, #111 3px 4px, transparent 4px 7px, #111 7px 10px, transparent 10px 11px, #111 11px 12px, transparent 12px 14px, #111 14px 15px, transparent 15px 18px); margin-bottom: 6px; }
+.nf-key .mono { display: block; font-size: 10px; font-weight: 500; letter-spacing: .02em; margin: 2px 0 4px; }
+.nf-key small { display: block; font-size: 7.5px; color: #5E584E; }
+.nf-sec { font-size: 8.5px; font-weight: 700; letter-spacing: .04em; margin: 10px 0 2px; }
+.grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border-left: 1px solid #2A2620; border-top: 1px solid #2A2620; }
+.grid > div { border-right: 1px solid #2A2620; border-bottom: 1px solid #2A2620; padding: 3px 6px 4px; min-width: 0; min-height: 30px; }
+.grid .s2 { grid-column: span 2; } .grid .s3 { grid-column: span 3; } .grid .s4 { grid-column: span 4; } .grid .s5 { grid-column: span 5; } .grid .s6 { grid-column: span 6; }
+.grid .r { text-align: right; } .grid .bold { font-weight: 700; }
+.nf-items { width: 100%; border-collapse: collapse; font-size: 9.5px; }
+.nf-items th { font-size: 7.5px; font-weight: 400; color: #5E584E; text-align: left; border: 1px solid #2A2620; padding: 3px 5px; }
+.nf-items td { border-left: 1px solid #2A2620; border-right: 1px solid #2A2620; padding: 3px 5px; vertical-align: top; }
+.nf-items tbody tr:last-child td { border-bottom: 1px solid #2A2620; padding-bottom: 14px; }
+.nf-items .n { text-align: right; font-family: var(--f-mono); font-size: 9px; white-space: nowrap; }
+.nf-add { border: 1px solid #2A2620; padding: 4px 6px 10px; }
+@container (max-width: 560px) {
+  .nf-head { grid-template-columns: 1fr 1fr; }
+  .nf-head > div:nth-child(2) { border-right: 0; }
+  .nf-key { grid-column: span 2; border-top: 1px solid #2A2620; }
+  .nf .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nf .grid > div { grid-column: span 1; }
+  .nf .grid .s3, .nf .grid .s4, .nf .grid .s5, .nf .grid .s6 { grid-column: span 2; }
+  .nf-items .hide-sm { display: none; }
+}
+
+/* Boleto */
+.bl { font-family: Arial, "Helvetica Neue", Helvetica, sans-serif; font-size: 10.5px; }
+.bl .lbl { display: block; font-size: 7.5px; color: #5E584E; line-height: 1.2; margin-bottom: 2px; }
+.bl-cut { border-top: 1px dashed #8E8574; margin: 0 0 14px; position: relative; text-align: right; font-size: 7.5px; color: #8E8574; padding-top: 2px; }
+.bl-head { display: flex; align-items: flex-end; border-bottom: 2px solid #1F1C17; flex-wrap: wrap; }
+.bl-bank { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 14px; padding: 0 10px 5px 0; border-right: 2px solid #1F1C17; }
+.bl-bank i { width: 16px; height: 16px; border-radius: 4px; background: linear-gradient(135deg, #1D4E89, #3D7CC9); display: inline-block; }
+.bl-code { font-weight: 700; font-size: 16px; padding: 0 10px 5px; border-right: 2px solid #1F1C17; }
+.bl-linha { flex: 1; text-align: right; font-family: var(--f-mono); font-size: 12px; font-weight: 500; padding: 0 0 5px 10px; letter-spacing: .01em; }
+.bl .grid > div { min-height: 32px; }
+.bl .venc { font-weight: 700; font-size: 12px; text-align: right; background: #F3EEDF; }
+.bl .instr { grid-row: span 3; }
+.bl .barcode { height: 52px; max-width: 440px; margin: 10px 0 4px; }
+.bl-foot { display: flex; justify-content: space-between; gap: 10px; font-size: 7.5px; color: #5E584E; flex-wrap: wrap; }
+@container (max-width: 560px) {
+  .bl-linha { flex-basis: 100%; text-align: left; padding: 6px 0 5px; font-size: 10.5px; }
+  .bl .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bl .grid > div { grid-column: span 1; }
+  .bl .grid .s5, .bl .grid .s6, .bl .instr { grid-column: span 2; grid-row: auto; }
+}
+
+/* Contrato */
+.ct { font-family: Georgia, "Times New Roman", serif; font-size: 12.5px; line-height: 1.6; padding-top: 44px; }
+.ct h3 { font-family: Georgia, serif; font-size: 13.5px; letter-spacing: .08em; text-align: center; font-weight: 700; }
+.ct-num { text-align: center; font-size: 11px; color: #5E584E; margin: 2px 0 18px; }
+.ct p { text-align: justify; hyphens: auto; margin-bottom: 9px; }
+.ct h4 { font-size: 11px; letter-spacing: .06em; font-weight: 700; margin: 14px 0 3px; font-variant: small-caps; }
+.ct-local { text-align: right !important; margin-top: 18px; }
+.ct-sign { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 30px; text-align: center; }
+.sig { display: block; font-family: var(--f-serif); font-style: italic; font-size: 25px; line-height: 1; color: #2B3A8F; transform: rotate(-4deg); height: 26px; }
+.ct-sign hr { border: 0; border-top: 1px solid #2A2620; margin: 4px 0 4px; }
+.ct-sign b { display: block; font-size: 11px; }
+.ct-sign small { font-size: 9.5px; letter-spacing: .08em; color: #5E584E; }
+.ct-page { position: absolute; right: 38px; bottom: 14px; font-size: 9px; color: #8E8574; }
+.ct-band { position: absolute; left: 0; right: 0; top: 0; height: 5px; background: linear-gradient(90deg, #3B3A6E, #7C6BC4); border-radius: 3px 3px 0 0; }
+@container (max-width: 560px) { .ct { font-size: 11px; padding-top: 28px; } .ct-sign { gap: 14px; } .sig { font-size: 19px; } .ct-page { right: 14px; bottom: 8px; } }
+
+/* Recibo */
+.rc { font-family: Georgia, "Times New Roman", serif; font-size: 13.5px; line-height: 1.75; border-left: 10px solid transparent; background-image: radial-gradient(circle at 5px 50%, #0D0A17 3px, transparent 3.5px), linear-gradient(180deg, rgba(255,255,255,.6), rgba(244,238,226,.35)); background-size: 10px 16px, auto; background-repeat: repeat-y, no-repeat; background-position: -10px 0, 0 0; }
+.rc-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; border-bottom: 2px solid #1F1C17; padding-bottom: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.rc-top h3 { font-size: 24px; letter-spacing: .22em; font-weight: 700; font-family: Georgia, serif; }
+.rc-top .rc-n { font-family: var(--f-mono); font-size: 12px; color: #5E584E; }
+.rc-val { border: 2px solid #1F1C17; padding: 6px 14px; font-family: var(--f-mono); font-size: 16px; font-weight: 500; background: #F3EEDF; }
+.rc p { margin-bottom: 10px; text-align: justify; }
+.rc-local { text-align: right !important; margin-top: 16px; }
+.rc-sign { margin: 26px 0 0 auto; width: min(300px, 100%); text-align: center; }
+.rc-sign hr { border: 0; border-top: 1px solid #2A2620; margin: 2px 0 6px; }
+.rc-sign p { font-size: 11.5px; line-height: 1.5; text-align: center !important; margin: 0; }
+.stamp { position: absolute; left: 46%; top: 52%; transform: rotate(-14deg); border: 3px double rgba(179,38,30,.72); color: rgba(179,38,30,.72); padding: 4px 16px 3px; font: 700 22px/1.1 Arial, sans-serif; letter-spacing: .28em; border-radius: 8px; pointer-events: none; mix-blend-mode: multiply; text-align: center; }
+.stamp small { display: block; font-size: 7.5px; letter-spacing: .12em; }
+@container (max-width: 560px) { .rc { font-size: 12px; } .rc-top h3 { font-size: 18px; } .stamp { left: 52%; top: 46%; font-size: 16px; } }
+
+/* pasted text */
+.txt pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: var(--f-mono); font-size: 12px; line-height: 1.65; }
+.paste { display: grid; gap: 10px; max-width: 720px; margin: 0 auto; }
+.paste label { font-weight: 500; }
+.paste p { font-size: .84rem; }
+.paste textarea { min-height: 300px; resize: vertical; font-family: var(--f-mono); font-size: .86rem; line-height: 1.55; }
+.paste-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+/* ---------- panel ---------- */
+.panel { display: flex; flex-direction: column; height: calc(var(--stage-h) + 72px); }
+.panel-head, .panel-status, .panel-foot { flex: none; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px 6px; }
+.panel-head h2 { font-size: 1.02rem; }
+.panel-status { padding: 0 16px 12px; font-size: .82rem; color: var(--mut-d); border-bottom: 1px solid var(--line-d); min-height: 32px; }
+.fields { flex: 1; overflow-y: auto; padding: 6px 16px 16px; overscroll-behavior: contain; }
+.grp { font-family: var(--f-mono); font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: var(--mut-d); margin: 14px 0 6px; }
+.field { position: relative; padding: 9px 10px 10px 14px; margin: 0 -4px 6px; border-radius: 12px; border: 1px solid transparent; transition: background-color .2s, border-color .2s; }
+.field::before { content: ""; position: absolute; left: 3px; top: 12px; bottom: 12px; width: 3px; border-radius: 3px; background: var(--mk-b); opacity: .85; }
+.field.is-on { background: rgba(255,255,255,.035); border-color: var(--line-d); }
+.field-top { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+.field-top label { font-size: .8rem; color: var(--mut-d); margin-right: auto; }
+.field textarea.d-input { resize: vertical; line-height: 1.4; min-height: 58px; }
+.field .d-input { min-height: 38px; padding: 7px 10px; font-size: .9rem; font-family: var(--f-mono); }
+.field .d-pill { font-size: .6rem; padding: 2px 7px; }
+.conf { display: inline-flex; align-items: center; gap: 5px; }
+.conf i { display: inline-flex; gap: 2px; }
+.conf i b { width: 3px; height: 9px; border-radius: 1px; background: currentColor; opacity: .25; }
+.conf--alta i b { opacity: 1; }
+.conf--media i b:nth-child(-n+2) { opacity: 1; }
+.conf--baixa i b:first-child { opacity: 1; }
+.field.f-in { animation: fin .45s var(--ease) both; animation-delay: calc(var(--i) * 85ms); }
+@keyframes fin { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.empty { text-align: center; padding: 36px 10px; color: var(--mut-d); font-size: .88rem; }
+.empty svg { width: 46px; height: 46px; margin: 0 auto 12px; stroke: var(--violet-2); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: .8; }
+.empty h3 { color: var(--fg-d); font-size: 1rem; margin-bottom: 6px; }
+.empty ul { list-style: none; padding: 0; margin: 16px 0 0; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.skel { height: 54px; border-radius: 12px; margin: 10px 0; background: linear-gradient(90deg, rgba(255,255,255,.03), rgba(255,255,255,.07), rgba(255,255,255,.03)); background-size: 200% 100%; animation: sk 1.2s linear infinite; }
+@keyframes sk { to { background-position: -200% 0; } }
+
+.panel-foot { border-top: 1px solid var(--line-d); padding: 12px 16px 14px; display: grid; gap: 10px; }
+.review { display: flex; align-items: center; gap: 10px; font-size: .88rem; cursor: pointer; }
+.review input { width: 18px; height: 18px; accent-color: var(--violet); margin: 0; }
+.exports { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.exports .d-btn--primary { grid-column: 1 / -1; }
+
+/* ---------- processed table ---------- */
+.done { padding: 0; overflow: hidden; }
+.done-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; flex-wrap: wrap; border-bottom: 1px solid var(--line-d); }
+.done-head h2 { font-size: 1.02rem; }
+.done-head p { font-size: .8rem; color: var(--mut-d); margin-top: 2px; }
+.tbl { width: 100%; border-collapse: collapse; font-size: .86rem; }
+.tbl th { text-align: left; font-family: var(--f-mono); font-size: .64rem; letter-spacing: .08em; text-transform: uppercase; color: var(--mut-d); font-weight: 400; padding: 10px 16px; border-bottom: 1px solid var(--line-d); }
+.tbl td { padding: 11px 16px; border-bottom: 1px solid var(--line-d); vertical-align: middle; }
+.tbl tr:last-child td { border-bottom: 0; }
+.tbl .num { font-family: var(--f-mono); font-size: .82rem; white-space: nowrap; }
+.tbl tr.is-new td { animation: rowin 1.6s var(--ease); }
+@keyframes rowin { from { background: rgba(155,107,255,.18); } to { background: transparent; } }
+@media (max-width: 700px) {
+  .tbl thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .tbl, .tbl tbody, .tbl tr, .tbl td { display: block; }
+  .tbl tr { padding: 12px 16px; border-bottom: 1px solid var(--line-d); display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+  .tbl tr:last-child { border-bottom: 0; }
+  .tbl td { padding: 0; border: 0; }
+  .tbl td:first-child { grid-column: 1 / -1; font-weight: 500; }
+  .tbl td[data-label]::before { content: attr(data-label); display: block; font-family: var(--f-mono); font-size: .6rem; letter-spacing: .08em; text-transform: uppercase; color: var(--mut-d); }
+  .tbl td:first-child::before { display: none; }
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 1020px) {
+  .work { grid-template-columns: minmax(0, 1fr); }
+  .panel { height: auto; }
+  .fields { overflow: visible; }
+  .stage { height: min(68vh, 640px); min-height: 420px; }
+}
+@media (max-width: 520px) {
+  .thumb { flex-basis: 150px; }
+  .vbar { padding: 12px; }
+  .vbar-actions, .vbar-actions .d-btn { flex: 1 1 auto; }
+  .stage { padding: 14px 10px 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skel { animation: none; }
+}
+</style>
+</head>
+<body>
+<header class="demo-bar">
+  <a class="demo-brand" href="../index.html" aria-label="Alfa Dev, voltar ao site">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.5 5.5c-1.6 6.2-4.6 13-9.4 13-3.1 0-5.1-2.6-5.1-6 0-3.8 2.5-7 5.6-7 4.2 0 5.6 5.4 7.4 10.2.8 2 1.9 2.8 3 2.8"/></svg>
+    <b>Alfa <span>Dev</span></b>
+  </a>
+  <div class="demo-title"><strong>Documentos lidos em segundos</strong><span class="demo-badge">Demonstração</span></div>
+  <div class="demo-bar__end">
+    <a class="demo-back" href="../index.html#cases">← <span>Voltar ao site</span></a>
+    <a class="demo-cta" href="../index.html#contato">Quero algo assim <span aria-hidden="true">→</span></a>
+  </div>
+</header>
+<div class="demo-intro">
+  <p>Notas, contratos e boletos lidos automaticamente, com os dados já organizados no seu sistema.</p>
+  <p class="demo-intro__note">Dados fictícios · roda no seu navegador</p>
+</div>
+
+<main id="app" class="app">
+  <h1 class="sr-only">Leitura automática de documentos</h1>
+
+  <div class="thumbs" role="group" aria-label="Documentos de exemplo">
+    <button type="button" class="thumb" data-doc="nota" aria-pressed="true"><span class="mini mini--nota" aria-hidden="true"></span><span><b>Nota fiscal</b><small>DANFE · NF-e</small></span><span class="done-dot" aria-hidden="true"></span></button>
+    <button type="button" class="thumb" data-doc="boleto" aria-pressed="false"><span class="mini mini--boleto" aria-hidden="true"></span><span><b>Boleto bancário</b><small>Ficha de compensação</small></span><span class="done-dot" aria-hidden="true"></span></button>
+    <button type="button" class="thumb" data-doc="contrato" aria-pressed="false"><span class="mini mini--contrato" aria-hidden="true"></span><span><b>Contrato</b><small>Prestação de serviços</small></span><span class="done-dot" aria-hidden="true"></span></button>
+    <button type="button" class="thumb" data-doc="recibo" aria-pressed="false"><span class="mini mini--recibo" aria-hidden="true"></span><span><b>Recibo</b><small>Pagamento avulso</small></span><span class="done-dot" aria-hidden="true"></span></button>
+    <button type="button" class="thumb" data-doc="texto" aria-pressed="false"><span class="mini mini--texto" aria-hidden="true"></span><span><b>Cole seu texto</b><small>E-mail, PDF, mensagem</small></span><span class="done-dot" aria-hidden="true"></span></button>
+  </div>
+
+  <div class="work">
+    <section class="viewer d-card" aria-labelledby="doc-name">
+      <div class="vbar">
+        <div>
+          <h2 id="doc-name">Nota fiscal</h2>
+          <p id="doc-meta">DANFE · 1 página</p>
+        </div>
+        <div class="vbar-actions">
+          <button type="button" class="d-btn" id="btn-edit" hidden>Editar texto</button>
+          <button type="button" class="d-btn d-btn--primary btn-read" id="btn-read">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M4 12h16"/></svg>
+            <span>Ler documento</span>
+          </button>
+        </div>
+      </div>
+      <div class="stage" id="stage"></div>
+    </section>
+
+    <aside class="panel d-card" aria-labelledby="panel-title">
+      <div class="panel-head">
+        <h2 id="panel-title">Dados extraídos</h2>
+        <span class="d-pill" id="doc-type">Aguardando</span>
+      </div>
+      <p class="panel-status" id="status" role="status" aria-live="polite">Escolha um documento e clique em “Ler documento”.</p>
+      <div class="fields" id="fields"></div>
+      <div class="panel-foot">
+        <label class="review"><input type="checkbox" id="reviewed" disabled> <span>Revisado por uma pessoa</span></label>
+        <div class="exports">
+          <button type="button" class="d-btn" id="btn-json" disabled>Baixar JSON</button>
+          <button type="button" class="d-btn" id="btn-csv" disabled>Baixar CSV</button>
+          <button type="button" class="d-btn d-btn--primary" id="btn-send" disabled>Enviar para o sistema</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <section class="done d-card" aria-labelledby="done-title">
+    <div class="done-head">
+      <div>
+        <h2 id="done-title">Documentos processados</h2>
+        <p>O que já foi enviado para o sistema (salvo neste navegador).</p>
+      </div>
+      <button type="button" class="d-btn" id="btn-restore">Restaurar demonstração</button>
+    </div>
+    <table class="tbl">
+      <thead><tr><th scope="col">Documento</th><th scope="col">Tipo</th><th scope="col">Campos</th><th scope="col">Valor</th><th scope="col">Revisão</th><th scope="col">Enviado em</th></tr></thead>
+      <tbody id="done-body"></tbody>
+    </table>
+  </section>
+</main>
+
+<div class="d-toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ============ sample documents (fictitious data) ============ -->
+<template id="tpl-nota">
+<article class="paper nf" aria-label="Nota fiscal de exemplo">
+  <div class="nf-head">
+    <div class="nf-emit">
+      <span class="lbl">IDENTIFICAÇÃO DO EMITENTE</span>
+      <strong>Moinho Têxtil Ateliê Ltda</strong>
+      <div>Rua das Fiandeiras, 210 · Vila Madalena</div>
+      <div>São Paulo/SP · CEP 05435-010</div>
+      <div>CNPJ <span class="mono">34.718.552/0001-51</span></div>
+      <div>IE 147.268.390.115</div>
+    </div>
+    <div class="nf-danfe">
+      <b>DANFE</b>
+      <small>Documento Auxiliar da Nota Fiscal Eletrônica</small>
+      <div class="nf-io"><span>0 · ENTRADA<br>1 · SAÍDA</span><span>1</span></div>
+      <div class="nf-num">NF-e<br>Nº 000.012.487<br>SÉRIE 001 · FOLHA 1/1</div>
+    </div>
+    <div class="nf-key">
+      <div class="barcode" aria-hidden="true"></div>
+      <span class="lbl">CHAVE DE ACESSO</span>
+      <span class="mono">3526 1034 7185 5200 0151 5500 1000 0124 8714 8302 9158</span>
+      <small>Consulta de autenticidade no portal nacional da NF-e ou no site da Sefaz autorizadora</small>
+    </div>
+  </div>
+  <div class="grid" style="margin-top:6px">
+    <div class="s3"><span class="lbl">NATUREZA DA OPERAÇÃO</span>Venda de mercadoria adquirida de terceiros</div>
+    <div class="s3"><span class="lbl">PROTOCOLO DE AUTORIZAÇÃO DE USO</span><span class="mono">135260004812733</span></div>
+  </div>
+
+  <div class="nf-sec">DESTINATÁRIO</div>
+  <div class="grid">
+    <div class="s3"><span class="lbl">NOME / RAZÃO SOCIAL</span>Café Serra Azul Comércio de Alimentos Ltda</div>
+    <div class="s2"><span class="lbl">CNPJ / CPF</span><span class="mono">07.926.413/0001-40</span></div>
+    <div><span class="lbl">DATA DA EMISSÃO</span><span class="mono">03/10/2026</span></div>
+    <div class="s3"><span class="lbl">ENDEREÇO</span>Av. Brigadeiro Faria Lima, 1800 · Pinheiros</div>
+    <div class="s2"><span class="lbl">MUNICÍPIO / UF</span>São Paulo · SP</div>
+    <div><span class="lbl">DATA DA SAÍDA/ENTRADA</span><span class="mono">04/10/2026</span></div>
+  </div>
+
+  <div class="nf-sec">FATURA / DUPLICATA</div>
+  <div class="grid">
+    <div class="s6"><span class="mono">Dup. 001 · Venc. 02/11/2026 · R$ 4.982,00</span></div>
+  </div>
+
+  <div class="nf-sec">CÁLCULO DO IMPOSTO</div>
+  <div class="grid">
+    <div class="s2"><span class="lbl">BASE DE CÁLCULO DO ICMS</span><span class="mono">R$ 4.982,00</span></div>
+    <div><span class="lbl">VALOR DO ICMS</span><span class="mono">R$ 896,76</span></div>
+    <div><span class="lbl">VALOR DO FRETE</span><span class="mono">R$ 120,00</span></div>
+    <div class="s2"><span class="lbl">VALOR TOTAL DOS PRODUTOS</span><span class="mono">R$ 4.862,00</span></div>
+    <div class="s4"><span class="lbl">INFORMAÇÕES COMPLEMENTARES DO CÁLCULO</span>ICMS próprio · alíquota 18%</div>
+    <div class="s2 bold"><span class="lbl">VALOR TOTAL DA NOTA</span><span class="mono">R$ 4.982,00</span></div>
+  </div>
+
+  <div class="nf-sec">DADOS DOS PRODUTOS / SERVIÇOS</div>
+  <table class="nf-items">
+    <thead><tr><th class="hide-sm">CÓD.</th><th>DESCRIÇÃO</th><th>QTD.</th><th class="hide-sm">UN.</th><th>V. UNIT.</th><th>V. TOTAL</th></tr></thead>
+    <tbody>
+      <tr><td class="hide-sm mono">1042</td><td>Avental de lona crua bordado</td><td class="n">40</td><td class="hide-sm">UN</td><td class="n">58,90</td><td class="n">2.356,00</td></tr>
+      <tr><td class="hide-sm mono">2210</td><td>Pano de prato em linho (kit c/ 3)</td><td class="n">60</td><td class="hide-sm">KIT</td><td class="n">32,50</td><td class="n">1.950,00</td></tr>
+      <tr><td class="hide-sm mono">3315</td><td>Toalha de mesa 1,4 × 2,2 m</td><td class="n">8</td><td class="hide-sm">UN</td><td class="n">69,50</td><td class="n">556,00</td></tr>
+    </tbody>
+  </table>
+
+  <div class="nf-sec">DADOS ADICIONAIS</div>
+  <div class="nf-add">Pedido de compra 4471. Entrega agendada com o setor de recebimento. Documento fictício para demonstração.</div>
+</article>
+</template>
+
+<template id="tpl-boleto">
+<article class="paper bl" aria-label="Boleto bancário de exemplo">
+  <div class="bl-cut">corte na linha pontilhada</div>
+  <div class="bl-head">
+    <span class="bl-bank"><i aria-hidden="true"></i>Banco Exemplo</span>
+    <span class="bl-code">999-1</span>
+    <span class="bl-linha">99991.09003 00248.716037 00512.345604 7 16100000129000</span>
+  </div>
+  <div class="grid" style="border-top:0">
+    <div class="s5"><span class="lbl">LOCAL DE PAGAMENTO</span>Pagável em qualquer banco até a data limite</div>
+    <div class="venc"><span class="lbl">VENCIMENTO</span>25/10/2026</div>
+    <div class="s5"><span class="lbl">BENEFICIÁRIO</span>Clínica Vale Verde Fisioterapia Ltda · CNPJ 41.260.387/0001-00</div>
+    <div class="r"><span class="lbl">AGÊNCIA / CÓDIGO</span><span class="mono">1090/0024871-6</span></div>
+    <div><span class="lbl">DATA DO DOCUMENTO</span>12/10/2026</div>
+    <div><span class="lbl">Nº DO DOCUMENTO</span>2026-1018</div>
+    <div><span class="lbl">ESPÉCIE DOC.</span>DS</div>
+    <div><span class="lbl">ACEITE</span>N</div>
+    <div><span class="lbl">DATA PROCESSAMENTO</span>12/10/2026</div>
+    <div class="r"><span class="lbl">NOSSO NÚMERO</span><span class="mono">109/00248716-0</span></div>
+    <div><span class="lbl">USO DO BANCO</span>&nbsp;</div>
+    <div><span class="lbl">CARTEIRA</span>109</div>
+    <div><span class="lbl">ESPÉCIE</span>R$</div>
+    <div><span class="lbl">QUANTIDADE</span>&nbsp;</div>
+    <div><span class="lbl">VALOR</span>&nbsp;</div>
+    <div class="r bold"><span class="lbl">(=) VALOR DO DOCUMENTO</span>R$ 1.290,00</div>
+    <div class="s5 instr"><span class="lbl">INSTRUÇÕES (TEXTO DE RESPONSABILIDADE DO BENEFICIÁRIO)</span>Após o vencimento, cobrar multa de 2% e juros de 1% ao mês.<br>Referente a 10 sessões de fisioterapia, outubro/2026.<br>Não receber após 30 dias do vencimento.</div>
+    <div><span class="lbl">(−) DESCONTO / ABATIMENTO</span>&nbsp;</div>
+    <div><span class="lbl">(+) MORA / MULTA</span>&nbsp;</div>
+    <div><span class="lbl">(=) VALOR COBRADO</span>&nbsp;</div>
+    <div class="s6"><span class="lbl">PAGADOR</span>Mariana Albuquerque Souza · CPF 318.452.960-60<br>Rua Coronel Oscar Porto, 455, ap. 72 · Paraíso · São Paulo/SP · CEP 04003-003</div>
+  </div>
+  <div class="barcode" aria-hidden="true"></div>
+  <div class="bl-foot"><span>Autenticação mecânica · Ficha de compensação</span><span>Documento fictício para demonstração</span></div>
+</article>
+</template>
+
+<template id="tpl-contrato">
+<article class="paper ct" aria-label="Contrato de prestação de serviços de exemplo">
+  <div class="ct-band" aria-hidden="true"></div>
+  <h3>CONTRATO DE PRESTAÇÃO DE SERVIÇOS CONTÁBEIS</h3>
+  <p class="ct-num">Contrato nº 2026/118</p>
+  <p>Pelo presente instrumento particular, as partes abaixo qualificadas têm entre si justo e contratado o seguinte:</p>
+  <p><b>CONTRATANTE:</b> Construtora Pedra Alta Ltda, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº 19.583.640/0001-08, com sede na Rua Joaquim Floriano, 466, São Paulo/SP.</p>
+  <p><b>CONTRATADA:</b> Núcleo Contábil Assessoria Ltda, inscrita no CNPJ sob o nº 58.204.731/0001-39, com sede na Av. Paulista, 1009, conj. 1204, São Paulo/SP.</p>
+  <h4>Cláusula 1ª · Do objeto</h4>
+  <p>A CONTRATADA prestará à CONTRATANTE serviços de escrituração contábil, fiscal e de departamento pessoal, conforme Anexo I.</p>
+  <h4>Cláusula 2ª · Do preço</h4>
+  <p>Pelos serviços, a CONTRATANTE pagará à CONTRATADA o valor global de R$ 78.000,00 (setenta e oito mil reais), em 12 (doze) parcelas mensais de R$ 6.500,00, com vencimento todo dia 10, mediante emissão de nota fiscal.</p>
+  <h4>Cláusula 3ª · Da vigência</h4>
+  <p>O presente contrato terá vigência de 12 (doze) meses, de 01/11/2026 a 31/10/2027, podendo ser renovado por igual período mediante termo aditivo. Os valores serão reajustados anualmente pelo IPCA acumulado no período.</p>
+  <h4>Cláusula 4ª · Da rescisão</h4>
+  <p>A rescisão imotivada por qualquer das partes sujeitará quem lhe der causa à multa de 10% (dez por cento) sobre o saldo remanescente, mediante aviso prévio de 30 (trinta) dias.</p>
+  <h4>Cláusula 5ª · Do foro</h4>
+  <p>Fica eleito o foro da Comarca de São Paulo/SP para dirimir quaisquer dúvidas oriundas deste contrato.</p>
+  <p class="ct-local">São Paulo, 12 de outubro de 2026.</p>
+  <div class="ct-sign">
+    <div><span class="sig" aria-hidden="true">R. Bastos</span><hr><b>Construtora Pedra Alta Ltda</b><small>CONTRATANTE</small></div>
+    <div><span class="sig" aria-hidden="true">L. Okumura</span><hr><b>Núcleo Contábil Assessoria Ltda</b><small>CONTRATADA</small></div>
+  </div>
+  <span class="ct-page">Página 1 de 1</span>
+</article>
+</template>
+
+<template id="tpl-recibo">
+<article class="paper rc" aria-label="Recibo de exemplo">
+  <div class="rc-top">
+    <div><h3>RECIBO</h3><span class="rc-n">Nº 0347</span></div>
+    <div class="rc-val">R$ 850,00</div>
+  </div>
+  <p>Recebi de Lucas Ferreira Damasceno, CPF 205.774.138-99, a importância de R$ 850,00 (oitocentos e cinquenta reais), referente ao conserto e afinação de piano vertical, com troca de 4 cordas e regulagem dos martelos.</p>
+  <p>Para maior clareza, firmo o presente recibo, dando plena e geral quitação do valor acima.</p>
+  <p class="rc-local">São Paulo, 8 de outubro de 2026.</p>
+  <div class="rc-sign">
+    <span class="sig" aria-hidden="true">Helena P. Ribeiro</span>
+    <hr>
+    <p>Emitente: Helena Prado Ribeiro · CPF 471.093.826-13</p>
+    <p>Afinação e restauro de pianos</p>
+  </div>
+  <div class="stamp" aria-hidden="true">PAGO<small>QUITADO</small></div>
+</article>
+</template>
+
+<script>
+(() => {
+'use strict';
+
+/* ================= helpers ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const digits = s => String(s).replace(/\D/g, '');
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const pad = n => String(n).padStart(2, '0');
+const brl = n => 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const parseBRL = s => { const d = String(s).replace(/[^\d,]/g, '').replace(',', '.'); return d ? Number(d) : NaN; };
+const fmtDate = dt => `${pad(dt.getUTCDate())}/${pad(dt.getUTCMonth() + 1)}/${dt.getUTCFullYear()}`;
+
+/* ================= validators ================= */
+function validCNPJ(v) {
+  const d = digits(v);
+  if (d.length !== 14 || /^(\d)\1+$/.test(d)) return false;
+  const calc = n => { let s = 0, w = n - 7; for (let i = 0; i < n; i++) { s += +d[i] * w--; if (w < 2) w = 9; } const r = s % 11; return r < 2 ? 0 : 11 - r; };
+  return calc(12) === +d[12] && calc(13) === +d[13];
+}
+function validCPF(v) {
+  const d = digits(v);
+  if (d.length !== 11 || /^(\d)\1+$/.test(d)) return false;
+  for (let k = 9; k < 11; k++) {
+    let s = 0; for (let i = 0; i < k; i++) s += +d[i] * (k + 1 - i);
+    const r = (s * 10) % 11;
+    if ((r === 10 ? 0 : r) !== +d[k]) return false;
+  }
+  return true;
+}
+function mod10(s) { let sum = 0, w = 2; for (let i = s.length - 1; i >= 0; i--) { const p = +s[i] * w; sum += p > 9 ? p - 9 : p; w = w === 2 ? 1 : 2; } return (10 - sum % 10) % 10; }
+function mod11Boleto(s) { let sum = 0, w = 2; for (let i = s.length - 1; i >= 0; i--) { sum += +s[i] * w; w = w === 9 ? 2 : w + 1; } const d = 11 - sum % 11; return (d === 0 || d > 9) ? 1 : d; }
+function checkLinha(v) {
+  const d = digits(v);
+  if (d.length !== 47) return { ok: false };
+  const f1 = d.slice(0, 9), f2 = d.slice(10, 20), f3 = d.slice(21, 31);
+  const fieldsOk = mod10(f1) === +d[9] && mod10(f2) === +d[20] && mod10(f3) === +d[31];
+  const dv = +d[32], fator = +d.slice(33, 37), valor = +d.slice(37, 47) / 100;
+  const bar = d.slice(0, 4) + d.slice(33, 47) + f1.slice(4) + f2 + f3; // 43 digits, without general DV
+  const ok = fieldsOk && mod11Boleto(bar) === dv;
+  // vencimento factor (FEBRABAN, cycle restarted at 1000 on 22/02/2025)
+  const venc = fator >= 1000 ? new Date(Date.UTC(2025, 1, 22) + (fator - 1000) * 864e5) : null;
+  return { ok, valor, venc };
+}
+function validChave(v) {
+  const d = digits(v);
+  if (d.length !== 44) return false;
+  let s = 0, w = 2; for (let i = 42; i >= 0; i--) { s += +d[i] * w; w = w === 9 ? 2 : w + 1; }
+  const r = s % 11; return (r < 2 ? 0 : 11 - r) === +d[43];
+}
+function toDate(d, m, y) {
+  const dt = new Date(Date.UTC(+y, +m - 1, +d));
+  return (dt.getUTCFullYear() === +y && dt.getUTCMonth() === +m - 1 && dt.getUTCDate() === +d) ? dt : null;
+}
+
+/* ================= extraction engine (runs on the document text) ================= */
+const MESES = { janeiro: 1, fevereiro: 2, 'março': 3, marco: 3, abril: 4, maio: 5, junho: 6, julho: 7, agosto: 8, setembro: 9, outubro: 10, novembro: 11, dezembro: 12 };
+const ROLE_LABEL = { emitente: 'Emitente', destinatario: 'Destinatário', beneficiario: 'Beneficiário', pagador: 'Pagador', contratante: 'Contratante', contratada: 'Contratada', fornecedor: 'Fornecedor', cliente: 'Cliente' };
+const ROLE_TABLE = [
+  [/emitente|prestador/, 'emitente'], [/destinat[áa]rio|tomador/, 'destinatario'], [/benefici[áa]rio|cedente/, 'beneficiario'],
+  [/pagador|sacado|recebi(?:emos)?\s+d[eoa]/, 'pagador'], [/contratante/, 'contratante'], [/contratad[ao]/, 'contratada'],
+  [/fornecedor/, 'fornecedor'], [/cliente/, 'cliente']
+];
+const MONEY_TABLE = [
+  [/total da nota|total a pagar|valor do documento|valor cobrado|import[âa]ncia|valor global|valor total/, 'total3'],
+  [/total/, 'total2'], [/mensa(?:l|is)|por m[êe]s|mensalidade|parcelas?/, 'mensal'], [/frete/, 'frete'], [/desconto/, 'desconto']
+];
+const DATE_TABLE = [
+  [/emiss[ãa]o|emitid[ao]|data do documento/, 'emissao'], [/vencimento|venc\.|vence|pag[áa]vel at[ée]/, 'vencimento'],
+  [/sa[íi]da|entrada/, 'saida'], [/processamento/, 'processamento'], [/assinatura|assinad[ao]/, 'assinatura']
+];
+const TYPE_LABEL = { nota: 'Nota fiscal', boleto: 'Boleto', contrato: 'Contrato', recibo: 'Recibo', livre: 'Texto livre' };
+
+// closest label (by position) found in the window before idx
+function nearest(text, idx, table, win) {
+  const seg = text.slice(Math.max(0, idx - win), idx);
+  let best = null;
+  for (const [rx, tag] of table) {
+    const g = new RegExp(rx.source, 'gi'); let m;
+    while ((m = g.exec(seg))) { if (!best || m.index > best.pos) best = { tag, pos: m.index }; }
+  }
+  return best ? best.tag : null;
+}
+const countRx = (text, rx) => (text.match(new RegExp(rx.source, 'gi')) || []).length;
+function occBefore(text, raw, at) { let n = 0, i = text.indexOf(raw); while (i !== -1 && i < at) { n++; i = text.indexOf(raw, i + 1); } return n; }
+
+function detectType(text, hasLinha) {
+  const sc = {
+    nota: countRx(text, /danfe/) * 3 + countRx(text, /chave de acesso/) * 2 + Math.min(countRx(text, /nota fiscal|nf-e/), 2),
+    boleto: (hasLinha ? 3 : 0) + countRx(text, /benefici[áa]rio/) * 2 + countRx(text, /nosso n[úu]mero/) * 2 + Math.min(countRx(text, /boleto/), 1),
+    contrato: Math.min(countRx(text, /contratante|contratad[ao]/), 6) + countRx(text, /cl[áa]usula/) + Math.min(countRx(text, /contrato/), 2),
+    recibo: countRx(text, /\brecibo\b/) * 2 + countRx(text, /recebi(?:emos)?\s+d[eoa]/) * 3 + countRx(text, /quita[çc][ãa]o/)
+  };
+  let best = 'livre', max = 2;
+  for (const k in sc) if (sc[k] > max) { max = sc[k]; best = k; }
+  return best;
+}
+
+function extract(text) {
+  const out = [];
+  const add = f => { if (out.some(o => o.id === f.id)) return; f.occ = occBefore(text, f.raw, f.at); f.original = f.value; out.push(f); };
+
+  /* --- codes: linha digitável, chave de acesso --- */
+  let linha = null;
+  const linhaRx = /(?<!\d)\d{5}\.?\d{5}\s*\d{5}\.?\d{6}\s*\d{5}\.?\d{6}\s*\d\s*\d{14}(?!\d)/g;
+  let m = linhaRx.exec(text);
+  if (m) {
+    linha = checkLinha(m[0]);
+    linha.raw = m[0];
+    add({ id: 'linha', key: 'linha_digitavel', label: 'Linha digitável', kind: 'code', raw: m[0], at: m.index, value: m[0].replace(/\s+/g, ' '),
+      conf: linha.ok ? 'alta' : 'baixa', check: { ok: linha.ok, label: linha.ok ? 'DV válido' : 'DV inválido' }, validator: 'linha' });
+  }
+  const type = detectType(text, !!linha);
+
+  const numRx = [/n[º°o]\.?\s*do\s*documento\s*:?\s*(\d[\w.\/-]*\w)/dgi, /(?:nf-?e|nota fiscal|recibo|fatura|contrato|documento|pedido)[^\d]{0,48}?(?:n[º°]|n\.º|no\.|n[úu]mero)\s*:?\s*(\d[\d.\/-]{0,16}\d|\d)/dgi];
+  for (const rx of numRx) {
+    m = rx.exec(text);
+    if (m) {
+      const lbl = { nota: 'Número da nota', contrato: 'Número do contrato', recibo: 'Número do recibo' }[type] || 'Número do documento';
+      add({ id: 'numero', key: 'numero', label: lbl, kind: 'code', raw: m[1], at: m.indices[1][0], value: m[1], conf: 'alta' });
+      break;
+    }
+  }
+  m = /s[ée]rie\s*:?\s*(\d{1,3})(?!\d)/dgi.exec(text);
+  if (m) add({ id: 'serie', key: 'serie', label: 'Série', kind: 'code', raw: m[1], at: m.indices[1][0], value: m[1], conf: 'media' });
+
+  const chaveRx = /(?<!\d)(?:\d{4}\s?){10}\d{4}(?!\d)/g;
+  m = chaveRx.exec(text);
+  if (m) {
+    const ok = validChave(m[0]);
+    add({ id: 'chave', key: 'chave_acesso', label: 'Chave de acesso', kind: 'code', raw: m[0], at: m.index, value: digits(m[0]).replace(/(\d{4})(?=\d)/g, '$1 '),
+      conf: ok ? 'alta' : 'baixa', check: { ok, label: ok ? 'DV válido' : 'DV inválido' } });
+  }
+  m = /nosso\s+n[úu]mero\s*:?\s*(\d[\d\/.\-]*\d)/dgi.exec(text);
+  if (m) add({ id: 'nosso', key: 'nosso_numero', label: 'Nosso número', kind: 'code', raw: m[1], at: m.indices[1][0], value: m[1], conf: 'alta' });
+
+  /* --- parties: names, CNPJ, CPF --- */
+  const parties = [];
+  const nameRx = /(emitente|destinat[áa]rio|benefici[áa]rio|pagador|contratante|contratad[ao]|fornecedor|cliente)\s*(?:[:\-–—]\s*|\n\s*)(?:(?:nome|raz[ãa]o)[^\n]*\n\s*)?([^\n,;·—–(]{3,80})/dgi;
+  const recebiRx = /recebi(?:emos)?\s+d[eoa]\s+([^\n,;·—–(]{3,80})/dgi;
+  const roleOf = w => { const t = ROLE_TABLE.find(([rx]) => new RegExp('^(?:' + rx.source + ')$', 'i').test(w)); return t ? t[1] : null; };
+  const pushName = (role, rawName, at) => {
+    const name = rawName.replace(/\s+(?:CNPJ|CPF|inscrit[ao]|IE)\b.*$/i, '').trim();
+    if (!/^[A-ZÀ-Ý]/.test(name) || !/\s/.test(name) || /^(CNPJ|CPF|NOME|RAZ|ENDERE|DATA|AG[ÊE]NCIA)/i.test(name) || /\d{3}/.test(name)) return;
+    if (parties.some(p => p.role === role && p.name)) return;
+    parties.push({ role, name, at: at });
+  };
+  while ((m = nameRx.exec(text))) pushName(roleOf(m[1]), m[2], m.indices[2][0]);
+  while ((m = recebiRx.exec(text))) pushName('pagador', m[1], m.indices[1][0]);
+
+  const codeSpans = out.filter(f => f.id === 'linha' || f.id === 'chave').map(f => [f.at, f.at + f.raw.length]);
+  const ids = [];
+  const idRx = /(?<![\d.\/-])(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}|\d{3}\.\d{3}\.\d{3}-\d{2})(?![\d])|(?<![\d.\/-])(\d{14})(?![\d])/g;
+  while ((m = idRx.exec(text))) {
+    const raw = m[1] || m[2]; const d = digits(raw);
+    if (codeSpans.some(([a, b]) => m.index >= a && m.index < b)) continue;
+    if (ids.some(x => digits(x.raw) === d)) continue;
+    const isCnpj = d.length === 14;
+    ids.push({ raw, at: m.index, isCnpj, role: nearest(text, m.index, ROLE_TABLE, 160) });
+  }
+  const usedRoles = new Set();
+  const roleOrder = [];
+  parties.forEach(p => { if (!roleOrder.includes(p.role)) roleOrder.push(p.role); });
+  ids.forEach(i => { if (i.role && !roleOrder.includes(i.role)) roleOrder.push(i.role); });
+  roleOrder.forEach(role => {
+    const p = parties.find(x => x.role === role);
+    const doc = ids.find(x => x.role === role && !x.taken);
+    if (p) add({ id: 'nome-' + role, key: role, label: ROLE_LABEL[role], kind: 'party', raw: p.name, at: p.at, value: p.name, conf: doc ? 'alta' : 'media' });
+    if (doc) { doc.taken = true; pushId(doc, role); }
+    usedRoles.add(role);
+  });
+  ids.filter(x => !x.taken).forEach((doc, i) => pushId(doc, null, i));
+  function pushId(doc, role, i) {
+    const t = doc.isCnpj ? 'CNPJ' : 'CPF';
+    const ok = doc.isCnpj ? validCNPJ(doc.raw) : validCPF(doc.raw);
+    const d = digits(doc.raw);
+    const value = doc.isCnpj ? d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5') : d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    add({ id: (t.toLowerCase()) + '-' + (role || 'x' + i), key: t.toLowerCase() + (role ? '_' + role : '_' + (i + 1)), label: role ? `${t} · ${ROLE_LABEL[role].toLowerCase()}` : t,
+      kind: 'party', raw: doc.raw, at: doc.at, value, conf: ok ? 'alta' : 'baixa', check: { ok, label: ok ? 'válido' : 'inválido' }, validator: t.toLowerCase() });
+  }
+
+  /* --- money --- */
+  const money = [];
+  const moneyRx = /R\$\s?\d{1,3}(?:\.\d{3})+,\d{2}(?!\d)|R\$\s?\d+,\d{2}(?!\d)/g;
+  while ((m = moneyRx.exec(text))) money.push({ raw: m[0], at: m.index, num: parseBRL(m[0]), tag: nearest(text, m.index, MONEY_TABLE, 60) });
+  if (money.length) {
+    const score = t => t === 'total3' ? 3 : t === 'total2' ? 2 : 0;
+    const cands = money.filter(x => score(x.tag) > 0);
+    let total, conf = 'alta';
+    if (cands.length) total = cands.sort((a, b) => score(b.tag) - score(a.tag) || b.num - a.num)[0];
+    else { total = money.filter(x => !['mensal', 'frete', 'desconto'].includes(x.tag)).sort((a, b) => b.num - a.num)[0]; conf = 'media'; }
+    let check = null;
+    if (total && linha && linha.ok) {
+      const same = Math.abs(linha.valor - total.num) < .005;
+      check = { ok: same, label: same ? 'confere c/ linha' : 'difere da linha' };
+      conf = same ? 'alta' : 'baixa';
+    }
+    if (total) add({ id: 'total', key: 'valor_total', label: 'Valor total', kind: 'money', raw: total.raw, at: total.at, value: brl(total.num), conf, check });
+    [['mensal', 'Valor mensal', 'valor_mensal'], ['frete', 'Frete', 'frete'], ['desconto', 'Desconto', 'desconto']].forEach(([tag, label, key]) => {
+      const x = money.find(v => v.tag === tag && v !== total && v.num > 0);
+      if (x) add({ id: tag, key, label, kind: 'money', raw: x.raw, at: x.at, value: brl(x.num), conf: 'alta' });
+    });
+  }
+
+  /* --- dates --- */
+  const dates = [];
+  const dRx = /(?<![\d\/])(\d{1,2})\/(\d{1,2})\/(\d{4})(?![\d\/])/g;
+  while ((m = dRx.exec(text))) { const dt = toDate(m[1], m[2], m[3]); if (dt) dates.push({ raw: m[0], at: m.index, dt, tag: nearest(text, m.index, DATE_TABLE, 50) }); }
+  const lRx = /(?<!\d)(\d{1,2})º?\s+de\s+(janeiro|fevereiro|março|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\s+de\s+(\d{4})/gi;
+  while ((m = lRx.exec(text))) {
+    const dt = toDate(m[1], MESES[m[2].toLowerCase()], m[3]);
+    if (!dt) continue;
+    const before = text.slice(Math.max(0, m.index - 40), m.index);
+    const local = /[A-ZÀ-Ý][A-Za-zÀ-ÿ]+(?:\s+[A-Za-zÀ-ÿ]+){0,3}(?:\/[A-Z]{2})?,\s*$/.test(before);
+    dates.push({ raw: m[0], at: m.index, dt, tag: nearest(text, m.index, DATE_TABLE, 50) || (local ? 'local' : null) });
+  }
+  dates.sort((a, b) => a.at - b.at);
+  const vr = /vig[êe]ncia[\s\S]{0,200}?(?:de|entre)\s+(\d{2}\/\d{2}\/\d{4})\s+(?:a|até|e)\s+(\d{2}\/\d{2}\/\d{4})/dgi.exec(text);
+  if (vr) {
+    const a = dates.find(x => x.at === vr.indices[1][0]), b = dates.find(x => x.at === vr.indices[2][0]);
+    if (a) a.tag = 'inicio'; if (b) b.tag = 'fim';
+  }
+  const DATE_OUT = [
+    ['emissao', 'Data de emissão', 'data_emissao'], ['saida', 'Data de saída', 'data_saida'], ['vencimento', 'Vencimento', 'vencimento'],
+    ['inicio', 'Início da vigência', 'inicio_vigencia'], ['fim', 'Fim da vigência', 'fim_vigencia'],
+    ['assinatura', 'Data de assinatura', 'data_assinatura'], ['local', type === 'contrato' ? 'Data de assinatura' : 'Data do documento', 'data_documento']
+  ];
+  let anyDate = false;
+  DATE_OUT.forEach(([tag, label, key]) => {
+    const x = dates.find(d => d.tag === tag);
+    if (!x) return;
+    anyDate = true;
+    let conf = tag === 'local' ? 'media' : 'alta', check = null;
+    if (tag === 'local' && type !== 'livre') conf = 'alta';
+    if (tag === 'vencimento' && linha && linha.ok && linha.venc) {
+      const same = fmtDate(linha.venc) === fmtDate(x.dt);
+      check = { ok: same, label: same ? 'confere c/ linha' : 'difere da linha' };
+      if (!same) conf = 'media';
+    }
+    add({ id: 'd-' + tag, key, label, kind: 'date', raw: x.raw, at: x.at, value: fmtDate(x.dt), conf, check, validator: 'date' });
+  });
+  if (!anyDate && dates.length) {
+    const x = dates[0];
+    add({ id: 'd-data', key: 'data', label: 'Data', kind: 'date', raw: x.raw, at: x.at, value: fmtDate(x.dt), conf: 'media', validator: 'date' });
+  }
+
+  /* --- terms & conditions --- */
+  m = /vig[êe]ncia[\s\S]{0,120}?(\d{1,3}(?:\s*\([a-zà-ú\s]+\))?\s*(?:meses|m[êe]s|anos?))/dgi.exec(text);
+  if (m) {
+    const n = m[1].match(/^\d+/)[0], unit = /ano/i.test(m[1]) ? (n === '1' ? 'ano' : 'anos') : (n === '1' ? 'mês' : 'meses');
+    add({ id: 'vigencia', key: 'vigencia', label: 'Vigência', kind: 'term', raw: m[1], at: m.indices[1][0], value: `${n} ${unit}`, conf: vr ? 'alta' : 'media' });
+  }
+  m = /objeto[\s\S]{0,80}?(servi[çc]os\s+de\s+[^.;\n]{5,140}?)(?=,\s*conforme|[.;\n])/dgi.exec(text);
+  if (m) add({ id: 'objeto', key: 'objeto', label: 'Objeto', kind: 'term', raw: m[1], at: m.indices[1][0], value: m[1], conf: 'media' });
+  m = /multa[^%\n]{0,100}?(\d{1,2}(?:,\d{1,2})?\s?%)/dgi.exec(text);
+  if (m) add({ id: 'multa', key: 'multa', label: 'Multa', kind: 'term', raw: m[1], at: m.indices[1][0], value: m[1].replace(/\s/g, ''), conf: 'alta' });
+  m = /juros[^%\n]{0,60}?(\d{1,2}(?:,\d{1,2})?\s?%(?:\s*(?:ao|a\.)\s*m[êe]s|\s*a\.m\.)?)/dgi.exec(text);
+  if (m) add({ id: 'juros', key: 'juros', label: 'Juros', kind: 'term', raw: m[1], at: m.indices[1][0], value: m[1], conf: 'alta' });
+  m = /reajust\w*[^.\n]{0,80}?\b(IPCA|IGP-?M|INPC)\b/dgi.exec(text);
+  if (m) add({ id: 'reajuste', key: 'indice_reajuste', label: 'Índice de reajuste', kind: 'term', raw: m[1], at: m.indices[1][0], value: m[1].toUpperCase(), conf: 'alta' });
+  m = /foro\s+da\s+comarca\s+de\s+([A-ZÀ-Ý][^\n,.;]{2,40}?)(?=\s+para|[,.;\n])/dgi.exec(text);
+  if (m) add({ id: 'foro', key: 'foro', label: 'Foro', kind: 'term', raw: m[1], at: m.indices[1][0], value: m[1], conf: 'alta' });
+  m = /referente\s+(?:a|ao|à|aos|às)\s+([^.\n]{5,140})/dgi.exec(text);
+  if (m) add({ id: 'ref', key: 'descricao', label: 'Descrição', kind: 'term', raw: m[1].trim(), at: m.indices[1][0], value: m[1].trim(), conf: 'media' });
+
+  /* --- contact --- */
+  m = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g.exec(text);
+  if (m) add({ id: 'email', key: 'email', label: 'E-mail', kind: 'code', raw: m[0], at: m.index, value: m[0], conf: 'alta' });
+  m = /\(\d{2}\)\s?9?\d{4}-\d{4}/g.exec(text);
+  if (m) add({ id: 'tel', key: 'telefone', label: 'Telefone', kind: 'code', raw: m[0], at: m.index, value: m[0], conf: 'alta' });
+
+  // display order by group
+  const GROUP = { code: 0, party: 1, money: 2, date: 3, term: 4 };
+  const GNAME = ['Identificação', 'Partes', 'Valores', 'Datas', 'Condições', 'Contato'];
+  out.forEach((f, i) => { const g = (f.id === 'email' || f.id === 'tel') ? 5 : GROUP[f.kind]; f.grp = GNAME[g]; f.ord = g * 100 + i; });
+  out.sort((a, b) => a.ord - b.ord);
+  return { type, fields: out };
+}
+
+/* ================= highlighting in the document ================= */
+const rxFromRaw = raw => Array.from(raw).map(ch => /\s/.test(ch) ? '\\s*' : ch.replace(/[.*+?^${}()|[\]\\\/]/g, '\\$&')).join('').replace(/(\\s\*)+/g, '\\s*');
+function applyMarks(root, fields) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = []; let full = '', n;
+  while ((n = walker.nextNode())) { nodes.push({ n, s: full.length }); full += n.nodeValue; }
+  const claimed = [], segs = [];
+  for (const f of fields) {
+    f.found = false;
+    if (!f.raw) continue;
+    const rx = new RegExp(rxFromRaw(f.raw), 'gi');
+    let mm, k = 0, hit = null, first = null;
+    while ((mm = rx.exec(full))) { if (!mm[0].length) { rx.lastIndex++; continue; } if (!first) first = mm; if (k === f.occ) { hit = mm; break; } k++; }
+    hit = hit || first;
+    if (!hit) continue;
+    const s = hit.index, e = s + hit[0].length;
+    if (claimed.some(c => s < c[1] && e > c[0])) continue;
+    claimed.push([s, e]); f.found = true;
+    for (const nd of nodes) {
+      const ns = nd.s, ne = ns + nd.n.nodeValue.length;
+      if (ne <= s || ns >= e) continue;
+      segs.push({ node: nd.n, a: Math.max(s, ns) - ns, b: Math.min(e, ne) - ns, f });
+    }
+  }
+  const byNode = new Map();
+  segs.forEach(sg => { if (!byNode.has(sg.node)) byNode.set(sg.node, []); byNode.get(sg.node).push(sg); });
+  byNode.forEach((list, node) => {
+    list.sort((x, y) => y.a - x.a);
+    for (const sg of list) {
+      if (sg.b < node.nodeValue.length) node.splitText(sg.b);
+      const mid = sg.a > 0 ? node.splitText(sg.a) : node;
+      const mk = document.createElement('mark');
+      mk.className = 'hl k-' + sg.f.kind; mk.dataset.fid = sg.f.id; mk.title = sg.f.label;
+      mid.parentNode.insertBefore(mk, mid); mk.appendChild(mid);
+    }
+  });
+}
+
+/* ================= state & UI ================= */
+const DOCS = {
+  nota: { name: 'Nota fiscal', meta: 'DANFE · NF-e 000.012.487 · 1 página' },
+  boleto: { name: 'Boleto bancário', meta: 'Ficha de compensação · 1 página' },
+  contrato: { name: 'Contrato de prestação de serviços', meta: 'Contrato nº 2026/118 · 1 página' },
+  recibo: { name: 'Recibo', meta: 'Recibo nº 0347 · 1 página' },
+  texto: { name: 'Cole seu texto', meta: 'Funciona com e-mails, PDFs copiados e mensagens' }
+};
+const SAMPLE_TEXT = `Olá, equipe financeira!
+
+Segue a cobrança referente à manutenção preventiva dos elevadores do mês de setembro.
+
+Fornecedor: Elevadores Horizonte Serviços Ltda
+CNPJ 12.345.678/0001-00
+Valor total: R$ 2.475,90
+Vencimento: 30/10/2026
+Multa de 2% após o vencimento.
+
+Pagamento via PIX ou boleto. Dúvidas: financeiro@horizonte.exemplo.com.br ou (11) 3456-7890.
+
+Att.,
+Renata Okada`;
+
+const state = { cur: 'nota', results: {}, busy: false, paste: '', pasteEditing: true };
+const stage = $('#stage'), fieldsEl = $('#fields'), statusEl = $('#status');
+const btnRead = $('#btn-read'), btnEdit = $('#btn-edit'), reviewed = $('#reviewed');
+const btnJson = $('#btn-json'), btnCsv = $('#btn-csv'), btnSend = $('#btn-send');
+const typePill = $('#doc-type');
+
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('is-on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('is-on'), 3200); }
+
+function renderDoc() {
+  const key = state.cur;
+  stage.scrollTop = 0;
+  if (key === 'texto' && state.pasteEditing) {
+    stage.innerHTML = `<div class="paste">
+      <label for="paste-ta">Cole o texto de um e-mail, PDF ou mensagem</label>
+      <p class="d-muted">A mesma leitura dos exemplos roda sobre o seu texto: CNPJ e CPF (com validação), valores, datas, linha digitável, multa, vigência, e-mail e telefone.</p>
+      <textarea id="paste-ta" class="d-input" spellcheck="false" placeholder="Ex.: Segue o boleto da manutenção, valor R$ 1.250,00, vencimento 15/11/2026, CNPJ 00.000.000/0001-91…"></textarea>
+      <div class="paste-actions"><button type="button" class="d-btn" id="paste-ex">Usar texto de exemplo</button><span class="d-muted" style="font-size:.8rem">Nada sai do seu navegador.</span></div>
+    </div>`;
+    const ta = $('#paste-ta'); ta.value = state.paste;
+    ta.addEventListener('input', () => { state.paste = ta.value; });
+    $('#paste-ex').addEventListener('click', () => { ta.value = state.paste = SAMPLE_TEXT; ta.focus(); });
+  } else if (key === 'texto') {
+    stage.innerHTML = '<div class="sheet"><article class="paper txt" aria-label="Texto colado"><pre></pre></article></div>';
+    $('pre', stage).textContent = state.paste;
+  } else {
+    const sheet = document.createElement('div'); sheet.className = 'sheet';
+    sheet.appendChild($('#tpl-' + key).content.cloneNode(true));
+    stage.replaceChildren(sheet);
+  }
+  const res = state.results[key];
+  const paper = $('.paper', stage);
+  if (res && paper) applyMarks(paper, res.fields);
+  $('#doc-name').textContent = DOCS[key].name;
+  $('#doc-meta').textContent = DOCS[key].meta;
+  btnEdit.hidden = !(key === 'texto' && !state.pasteEditing);
+  $('span', btnRead).textContent = key === 'texto' ? (res && !state.pasteEditing ? 'Ler novamente' : 'Ler texto') : (res ? 'Ler novamente' : 'Ler documento');
+  renderPanel(false);
+}
+
+const EMPTY_ICON = '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M13 5h16l10 10v26a2 2 0 0 1-2 2H13a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M29 5v10h10M17 24h14M17 30h14M17 36h8"/></svg>';
+function renderPanel(animate) {
+  const res = state.results[state.cur];
+  const has = !!(res && res.fields.length);
+  [btnJson, btnCsv, btnSend, reviewed].forEach(b => { b.disabled = !has || state.busy; });
+  reviewed.checked = !!(res && res.reviewed);
+  typePill.textContent = res ? TYPE_LABEL[res.type] : 'Aguardando';
+  if (!res) {
+    fieldsEl.innerHTML = `<div class="empty">${EMPTY_ICON}<h3>Nada lido ainda</h3><p>${state.cur === 'texto' ? 'Cole um texto ao lado e clique em “Ler texto”.' : 'Clique em “Ler documento” para extrair os dados desta página.'}</p>
+      <ul><li class="d-pill">CNPJ e CPF</li><li class="d-pill">Valores</li><li class="d-pill">Datas</li><li class="d-pill">Linha digitável</li><li class="d-pill">Partes</li><li class="d-pill">Vigência e multa</li></ul></div>`;
+    return;
+  }
+  if (!res.fields.length) {
+    fieldsEl.innerHTML = `<div class="empty">${EMPTY_ICON}<h3>Nenhum campo encontrado</h3><p>Não achamos CNPJ, CPF, valores em R$, datas ou códigos neste texto. Tente colar o corpo de uma cobrança, nota ou contrato.</p></div>`;
+    return;
+  }
+  let html = '', last = null;
+  res.fields.forEach((f, i) => {
+    if (f.grp !== last) { html += `<h3 class="grp">${f.grp}</h3>`; last = f.grp; }
+    html += `<div class="field k-${f.kind}${animate && !reduced() ? ' f-in' : ''}" data-fid="${f.id}" style="--i:${i}">
+      <div class="field-top"><label for="f-${f.id}">${esc(f.label)}</label>${pills(f)}</div>
+      ${String(f.value).length > 40 ? `<textarea id="f-${f.id}" class="d-input" rows="2" spellcheck="false">${esc(f.value)}</textarea>` : `<input id="f-${f.id}" class="d-input" value="${esc(f.value)}" autocomplete="off" spellcheck="false">`}
+    </div>`;
+  });
+  fieldsEl.innerHTML = html;
+}
+function pills(f) {
+  const cl = { alta: 'ok', media: 'warn', baixa: 'bad' }[f.conf];
+  const tx = { alta: 'Alta', media: 'Média', baixa: 'Baixa' }[f.conf];
+  let h = `<span class="pills" data-pills>`;
+  if (f.edited) h += `<span class="d-pill">editado</span> `;
+  if (f.check) h += `<span class="d-pill d-pill--${f.check.ok ? 'ok' : 'bad'}">${f.check.label}</span> `;
+  h += `<span class="d-pill d-pill--${cl} conf conf--${f.conf}" title="Confiança da leitura"><i aria-hidden="true"><b></b><b></b><b></b></i>${tx}<span class="sr-only"> confiança</span></span></span>`;
+  return h;
+}
+
+function setBusy(b) {
+  state.busy = b;
+  btnRead.disabled = b; btnEdit.disabled = b;
+  $$('.thumb').forEach(t => { t.disabled = b; });
+}
+
+function scanAnimation(sheet) {
+  return new Promise(resolve => {
+    if (reduced()) { setTimeout(resolve, 250); return; }
+    const bar = document.createElement('div'); bar.className = 'scan'; bar.setAttribute('aria-hidden', 'true');
+    sheet.appendChild(bar); sheet.classList.add('is-reading');
+    const H = sheet.offsetHeight, D = Math.min(2400, Math.max(1300, H * 1.4));
+    const t0 = performance.now(), sTop = sheet.offsetTop;
+    const step = now => {
+      const p = Math.min(1, (now - t0) / D), e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+      const y = e * H;
+      bar.style.transform = `translateY(${y - 90}px)`;
+      stage.scrollTop = Math.max(0, sTop + y - stage.clientHeight * .6);
+      if (p < 1) requestAnimationFrame(step);
+      else { bar.remove(); sheet.classList.remove('is-reading'); stage.scrollTo({ top: 0, behavior: 'smooth' }); resolve(); }
+    };
+    requestAnimationFrame(step);
+  });
+}
+
+async function read() {
+  if (state.busy) return;
+  const key = state.cur;
+  if (key === 'texto') {
+    if (state.pasteEditing) {
+      const ta = $('#paste-ta');
+      state.paste = ta ? ta.value : state.paste;
+      if (!state.paste.trim()) { toast('Cole um texto (ou use o exemplo) para ler.'); ta && ta.focus(); return; }
+      state.pasteEditing = false;
+    }
+  }
+  delete state.results[key];
+  renderDoc();
+  setBusy(true);
+  renderPanel(false);
+  fieldsEl.innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>';
+  statusEl.textContent = 'Lendo documento…';
+  typePill.textContent = 'Lendo';
+  const paper = $('.paper', stage);
+  const t0 = performance.now();
+  const res = extract(paper.innerText);
+  res.reviewed = false; res.when = new Date().toISOString();
+  await scanAnimation($('.sheet', stage));
+  state.results[key] = res;
+  applyMarks(paper, res.fields);
+  setBusy(false);
+  renderPanel(true);
+  $('span', btnRead).textContent = 'Ler novamente';
+  btnEdit.hidden = key !== 'texto';
+  $(`.thumb[data-doc="${key}"]`).classList.add('has-result');
+  const secs = ((performance.now() - t0) / 1000).toFixed(1).replace('.', ',');
+  const nChecks = res.fields.filter(f => f.check && f.check.ok).length;
+  const nBad = res.fields.filter(f => f.check && !f.check.ok).length;
+  statusEl.textContent = res.fields.length
+    ? `${res.fields.length} ${res.fields.length === 1 ? 'campo encontrado' : 'campos encontrados'} em ${secs} s · ${nChecks} ${nChecks === 1 ? 'validação ok' : 'validações ok'}${nBad ? ` · ${nBad} com problema` : ''}. Passe o mouse para ver no documento.`
+    : 'Nenhum campo encontrado neste texto.';
+}
+
+function status0() {
+  const res = state.results[state.cur];
+  if (!res) statusEl.textContent = state.cur === 'texto' ? 'Cole um texto e clique em “Ler texto”.' : 'Escolha um documento e clique em “Ler documento”.';
+  else statusEl.textContent = res.fields.length ? `${res.fields.length} campos lidos${res.reviewed ? ' · revisado' : ' · aguardando revisão'}.` : 'Nenhum campo encontrado neste texto.';
+}
+
+/* field <-> document linking */
+let activeFid = null;
+function activate(fid, scroll) {
+  if (activeFid === fid) return;
+  deactivate();
+  activeFid = fid;
+  const row = $(`.field[data-fid="${fid}"]`, fieldsEl); if (row) row.classList.add('is-on');
+  const marks = $$(`mark[data-fid="${fid}"]`, stage);
+  marks.forEach(m => m.classList.add('is-on'));
+  if (scroll && marks[0]) {
+    const r = marks[0].getBoundingClientRect(), sr = stage.getBoundingClientRect();
+    if (r.top < sr.top + 20 || r.bottom > sr.bottom - 20) stage.scrollTo({ top: stage.scrollTop + (r.top - sr.top) - sr.height / 2 + r.height / 2, behavior: reduced() ? 'auto' : 'smooth' });
+  }
+}
+function deactivate() {
+  if (!activeFid) return;
+  $$('.is-on', fieldsEl).forEach(e => e.classList.remove('is-on'));
+  $$('mark.is-on', stage).forEach(e => e.classList.remove('is-on'));
+  activeFid = null;
+}
+fieldsEl.addEventListener('mouseover', e => { const row = e.target.closest('.field'); if (row) activate(row.dataset.fid, true); });
+fieldsEl.addEventListener('mouseleave', () => { if (!fieldsEl.contains(document.activeElement)) deactivate(); });
+fieldsEl.addEventListener('focusin', e => { const row = e.target.closest('.field'); if (row) { activeFid = null; activate(row.dataset.fid, true); } });
+fieldsEl.addEventListener('focusout', e => { if (!fieldsEl.contains(e.relatedTarget)) deactivate(); });
+stage.addEventListener('click', e => {
+  const mk = e.target.closest('mark.hl'); if (!mk) return;
+  const inp = $(`#f-${CSS.escape(mk.dataset.fid)}`);
+  if (inp) { inp.focus({ preventScroll: window.innerWidth > 1020 ? true : false }); inp.select(); }
+});
+stage.addEventListener('mouseover', e => { const mk = e.target.closest('mark.hl'); if (mk) activate(mk.dataset.fid, false); });
+stage.addEventListener('mouseout', e => { if (e.target.closest('mark.hl') && !fieldsEl.contains(document.activeElement)) deactivate(); });
+
+/* human review: edits re-validate */
+fieldsEl.addEventListener('input', e => {
+  const row = e.target.closest('.field'); if (!row) return;
+  const res = state.results[state.cur]; const f = res.fields.find(x => x.id === row.dataset.fid); if (!f) return;
+  f.value = e.target.value; f.edited = f.value !== f.original;
+  if (f.validator === 'cnpj' || f.validator === 'cpf') {
+    const ok = f.validator === 'cnpj' ? validCNPJ(f.value) : validCPF(f.value);
+    f.check = { ok, label: ok ? 'válido' : 'inválido' }; f.conf = ok ? 'alta' : 'baixa';
+  } else if (f.validator === 'linha') {
+    const ok = checkLinha(f.value).ok; f.check = { ok, label: ok ? 'DV válido' : 'DV inválido' }; f.conf = ok ? 'alta' : 'baixa';
+  } else if (f.validator === 'date') {
+    const mm = f.value.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    const ok = !!(mm && toDate(mm[1], mm[2], mm[3]));
+    if (!ok) { f.check = { ok: false, label: 'data inválida' }; f.conf = 'baixa'; }
+    else if (f.check && !f.check.ok && f.check.label === 'data inválida') { f.check = null; f.conf = 'alta'; }
+  } else if (f.edited) { f.conf = 'alta'; }
+  const p = $('[data-pills]', row); p.outerHTML = pills(f);
+  if (res.reviewed) { res.reviewed = false; reviewed.checked = false; }
+});
+reviewed.addEventListener('change', () => {
+  const res = state.results[state.cur]; if (!res) return;
+  res.reviewed = reviewed.checked;
+  status0();
+});
+
+/* export */
+function payload() {
+  const res = state.results[state.cur];
+  return {
+    documento: DOCS[state.cur].name, tipo_detectado: TYPE_LABEL[res.type], lido_em: res.when, revisado: !!res.reviewed,
+    campos: Object.fromEntries(res.fields.map(f => [f.key, f.value])),
+    detalhes: res.fields.map(f => ({ campo: f.key, rotulo: f.label, valor: f.value, confianca: f.conf, validacao: f.check ? f.check.label : null, editado: !!f.edited }))
+  };
+}
+function download(name, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+}
+btnJson.addEventListener('click', () => { download(`alfa-demo-${state.cur}.json`, JSON.stringify(payload(), null, 2), 'application/json'); toast('JSON baixado.'); });
+btnCsv.addEventListener('click', () => {
+  const p = payload(); const q = v => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
+  const lines = [['campo', 'rotulo', 'valor', 'confianca', 'validacao', 'editado'].join(';')]
+    .concat(p.detalhes.map(d => [d.campo, d.rotulo, d.valor, d.confianca, d.validacao, d.editado ? 'sim' : 'não'].map(q).join(';')));
+  download(`alfa-demo-${state.cur}.csv`, '\ufeff' + lines.join('\r\n'), 'text/csv;charset=utf-8');
+  toast('CSV baixado (separado por ponto e vírgula).');
+});
+
+/* processed table (localStorage) */
+const LS_KEY = 'alfa-demo-docs:processados';
+const SEED = [
+  { nome: 'NF 000.012.391 · Moinho Têxtil Ateliê', tipo: 'Nota fiscal', campos: 12, valor: 'R$ 3.120,00', revisado: true, quando: '10/10/2026 16:42' },
+  { nome: 'Boleto 2026-0977 · Energia Sul', tipo: 'Boleto', campos: 9, valor: 'R$ 612,37', revisado: true, quando: '11/10/2026 09:15' }
+];
+function loadRows() { try { const v = JSON.parse(localStorage.getItem(LS_KEY)); return Array.isArray(v) ? v : SEED.slice(); } catch (e) { return SEED.slice(); } }
+function saveRows(rows) { try { localStorage.setItem(LS_KEY, JSON.stringify(rows)); } catch (e) { /* storage unavailable */ } }
+let rows = loadRows();
+function renderRows(newIdx) {
+  $('#done-body').innerHTML = rows.map((r, i) => `<tr${i === newIdx ? ' class="is-new"' : ''}>
+    <td data-label="Documento">${esc(r.nome)}</td><td data-label="Tipo">${esc(r.tipo)}</td><td data-label="Campos" class="num">${r.campos}</td>
+    <td data-label="Valor" class="num">${esc(r.valor)}</td>
+    <td data-label="Revisão"><span class="d-pill d-pill--${r.revisado ? 'ok' : 'warn'}">${r.revisado ? 'Revisado' : 'Pendente'}</span></td>
+    <td data-label="Enviado em" class="num">${esc(r.quando)}</td></tr>`).join('');
+}
+btnSend.addEventListener('click', () => {
+  const res = state.results[state.cur]; if (!res || !res.fields.length) return;
+  const get = id => (res.fields.find(f => f.id === id) || {}).value;
+  const party = res.fields.find(f => f.id.startsWith('nome-'));
+  const num = get('numero');
+  const base = { nota: 'NF', boleto: 'Boleto', contrato: 'Contrato', recibo: 'Recibo', livre: 'Texto' }[res.type];
+  const nome = [base + (num ? ' ' + num : ''), party ? party.value : null].filter(Boolean).join(' · ');
+  const now = new Date();
+  rows.unshift({ nome, tipo: TYPE_LABEL[res.type], campos: res.fields.length, valor: get('total') || '—', revisado: !!res.reviewed,
+    quando: `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}` });
+  saveRows(rows); renderRows(0);
+  toast(res.reviewed ? `Enviado para o sistema: ${nome}` : `Enviado para o sistema (revisão pendente): ${nome}`);
+});
+$('#btn-restore').addEventListener('click', () => {
+  try { Object.keys(localStorage).filter(k => k.startsWith('alfa-demo-docs')).forEach(k => localStorage.removeItem(k)); } catch (e) { /* ignore */ }
+  rows = SEED.slice(); renderRows();
+  state.results = {}; state.paste = ''; state.pasteEditing = true;
+  $$('.thumb').forEach(t => t.classList.remove('has-result'));
+  renderDoc(); status0();
+  toast('Demonstração restaurada.');
+});
+
+/* navigation */
+function selectDoc(key) {
+  if (state.busy || !DOCS[key]) return;
+  deactivate();
+  state.cur = key;
+  $$('.thumb').forEach(t => t.setAttribute('aria-pressed', String(t.dataset.doc === key)));
+  renderDoc(); status0();
+}
+$$('.thumb').forEach(t => t.addEventListener('click', () => selectDoc(t.dataset.doc)));
+btnRead.addEventListener('click', read);
+btnEdit.addEventListener('click', () => { state.pasteEditing = true; delete state.results.texto; $('.thumb[data-doc="texto"]').classList.remove('has-result'); renderDoc(); status0(); const ta = $('#paste-ta'); if (ta) ta.focus(); });
+
+// test hook (read-only access to the extractor)
+window.__docsDemo = { extract, validCNPJ, validCPF, checkLinha, validChave };
+
+renderRows();
+renderDoc();
+})();
+</script>
+</body>
+</html>
