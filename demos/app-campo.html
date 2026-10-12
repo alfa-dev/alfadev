@@ -1,0 +1,1136 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>App de equipe em campo · Demonstração · Alfa Dev</title>
+<meta name="description" content="Demonstração de aplicativo para equipes em campo: visitas, checklist, fotos e assinatura do cliente funcionando sem internet, com sincronização automática e relatório do dia.">
+<meta name="robots" content="noindex,follow">
+<meta name="theme-color" content="#0A0812">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0812'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Georgia,serif' font-style='italic' font-size='44' fill='%239B6BFF'%3E%CE%B1%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="demo.css">
+<style>
+/* ===== layout ===== */
+#app { padding: clamp(20px, 3.5vw, 40px) clamp(14px, 3vw, 28px) 56px; overflow-x: clip; }
+.stage {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start;
+  gap: 40px 64px; max-width: 1080px; margin: 0 auto;
+}
+
+/* ===== device frame ===== */
+.device {
+  position: relative; flex: none; width: 410px;
+  height: clamp(680px, calc(100vh - 150px), 820px);
+  padding: 10px; border-radius: 58px;
+  background: linear-gradient(155deg, #2E2645 0%, #17121F 45%, #241D36 100%);
+  box-shadow: inset 0 0 0 1px rgba(196,168,255,.18), inset 0 0 0 4px #0B0911,
+    0 50px 100px -40px rgba(107,59,232,.55), 0 30px 60px -30px rgba(0,0,0,.9);
+}
+.device::before, .device::after { /* side buttons */
+  content: ""; position: absolute; width: 3px; border-radius: 2px; background: #2A2240;
+}
+.device::before { left: -3px; top: 150px; height: 64px; box-shadow: 0 84px 0 #2A2240; }
+.device::after { right: -3px; top: 190px; height: 92px; }
+.phone {
+  position: relative; height: 100%; border-radius: 48px; overflow: hidden; isolation: isolate;
+  background: #0C0916; display: flex; flex-direction: column;
+  background-image: radial-gradient(120% 50% at 50% -10%, rgba(155,107,255,.14), transparent 60%);
+}
+.island {
+  position: absolute; top: 11px; left: 50%; transform: translateX(-50%); z-index: 20;
+  width: 116px; height: 32px; border-radius: 20px; background: #000;
+}
+.statusbar {
+  flex: none; height: 50px; display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 30px 0 38px; font-size: .86rem; font-weight: 600; letter-spacing: .01em;
+}
+.statusbar__icons { display: flex; align-items: center; gap: 6px; }
+.statusbar svg { width: 18px; height: 12px; }
+.statusbar .sig rect { fill: currentColor; }
+.statusbar .wifi path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.statusbar .wifi circle { fill: currentColor; }
+.statusbar .wifi .slash { stroke: var(--bad); display: none; }
+.statusbar .bat { width: 25px; }
+.statusbar .nosig { display: none; font-family: var(--f-mono); font-size: .62rem; font-weight: 500; color: var(--warn); letter-spacing: .02em; }
+.phone.is-offline .statusbar .sig rect:not(:first-child) { opacity: .25; }
+.phone.is-offline .statusbar .wifi path:not(.slash), .phone.is-offline .statusbar .wifi circle { opacity: .3; }
+.phone.is-offline .statusbar .wifi .slash { display: block; opacity: 1; }
+.phone.is-offline .statusbar .nosig { display: inline; }
+
+/* ===== app header ===== */
+.apphead { flex: none; padding: 6px 18px 10px; display: flex; align-items: center; gap: 12px; }
+.apphead__who { min-width: 0; flex: 1; }
+.apphead__co { font-family: var(--f-mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--violet-2); }
+.apphead__hi { font-size: 1.12rem; font-weight: 600; letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.apphead__hi em { font-family: var(--f-serif); font-weight: 400; font-size: 1.25em; color: var(--violet-2); }
+.net { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex: none; }
+
+.switch {
+  display: inline-flex; align-items: center; gap: 8px; padding: 4px 4px 4px 10px; min-height: 34px;
+  border-radius: var(--r-pill); border: 1px solid var(--line-d); background: var(--ink-2);
+  font-size: .76rem; color: var(--mut-d);
+}
+.switch__track { position: relative; width: 36px; height: 22px; border-radius: 99px; background: #2A2240; transition: background-color .2s; }
+.switch__track::after {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; transition: transform .25s var(--ease); box-shadow: 0 1px 3px rgba(0,0,0,.4);
+}
+.switch[aria-checked="true"] { color: var(--warn); border-color: rgba(242,181,68,.4); }
+.switch[aria-checked="true"] .switch__track { background: var(--warn); }
+.switch[aria-checked="true"] .switch__track::after { transform: translateX(14px); }
+.qbadge { display: none; }
+.qbadge.is-on { display: inline-flex; }
+
+.netstrip {
+  flex: none; margin: 0 14px 8px; border-radius: 12px; padding: 9px 12px; font-size: .78rem;
+  display: none; align-items: center; gap: 10px; line-height: 1.35;
+}
+.netstrip.is-on { display: flex; animation: drop .3s var(--ease); }
+.netstrip svg { width: 18px; height: 18px; flex: none; }
+.netstrip--off { background: rgba(242,181,68,.1); border: 1px solid rgba(242,181,68,.25); color: #F6CF85; }
+.netstrip--sync { background: rgba(155,107,255,.12); border: 1px solid rgba(155,107,255,.3); color: var(--violet-2); flex-wrap: wrap; }
+.netstrip--sync .bar { flex-basis: 100%; height: 4px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; }
+.netstrip--sync .bar i { display: block; height: 100%; width: 0; background: var(--grad); transition: width .5s var(--ease); }
+.netstrip--sync svg { animation: spin 1.1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes drop { from { opacity: 0; transform: translateY(-6px); } }
+
+/* ===== screens ===== */
+.screens { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.screen {
+  position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain;
+  padding: 4px 16px 24px; scrollbar-width: thin; scrollbar-color: #2A2240 transparent;
+  opacity: 0; visibility: hidden; transform: translateX(28px);
+  transition: opacity .26s, transform .34s var(--ease), visibility 0s .34s;
+}
+.screen.is-left { transform: translateX(-28px); }
+.screen.is-active { opacity: 1; visibility: visible; transform: none; transition: opacity .26s, transform .34s var(--ease), visibility 0s; }
+.screen h2 { font-size: 1.05rem; }
+.sec-label { font-family: var(--f-mono); font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: var(--mut-d); margin: 18px 2px 8px; display: flex; justify-content: space-between; align-items: center; }
+
+/* hoje */
+.prog { padding: 14px 16px; border-radius: 16px; background: linear-gradient(140deg, rgba(155,107,255,.2), rgba(107,59,232,.06) 60%), var(--ink-2); border: 1px solid rgba(155,107,255,.25); }
+.prog__top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.prog__n { font-size: 1.5rem; font-weight: 600; letter-spacing: -.03em; }
+.prog__n small { font-size: .82rem; font-weight: 400; color: var(--mut-d); letter-spacing: 0; }
+.prog__date { font-size: .74rem; color: var(--mut-d); }
+.prog__bar { margin-top: 10px; height: 6px; border-radius: 6px; background: rgba(255,255,255,.08); overflow: hidden; }
+.prog__bar i { display: block; height: 100%; border-radius: 6px; background: var(--grad); transition: width .6s var(--ease); }
+.prog__next { margin-top: 10px; font-size: .78rem; color: var(--mut-d); }
+.prog__next b { color: var(--fg-d); font-weight: 500; }
+
+.visits { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.vcard {
+  width: 100%; text-align: left; display: grid; grid-template-columns: 50px 1fr auto; gap: 4px 12px; align-items: start;
+  padding: 12px 12px 12px 10px; border-radius: 14px; border: 1px solid var(--line-d); background: var(--ink-2);
+  position: relative; overflow: hidden; transition: border-color .2s, background-color .2s, transform .15s;
+}
+.vcard:hover { border-color: rgba(155,107,255,.5); }
+.vcard:active { transform: scale(.985); }
+.vcard::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: #3A3157; }
+.vcard[data-s="andamento"]::before { background: var(--violet); }
+.vcard[data-s="fila"]::before { background: var(--warn); }
+.vcard[data-s="concluida"]::before { background: var(--ok); }
+.vcard__time { font-family: var(--f-mono); font-size: .8rem; color: var(--fg-d); padding-left: 6px; padding-top: 1px; }
+.vcard__main { min-width: 0; }
+.vcard__name { display: block; font-weight: 600; font-size: .92rem; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vcard__addr { display: block; font-size: .76rem; color: var(--mut-d); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vcard__meta { grid-column: 2 / 4; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 4px; }
+.vcard__chev { width: 16px; height: 16px; color: var(--mut-d); margin-top: 2px; }
+.vcard.is-flash { animation: flash 1.2s var(--ease); }
+.vcard.is-flip .d-pill { animation: flip .55s var(--ease); }
+@keyframes flash { 0% { background: rgba(155,107,255,.28); border-color: var(--violet); } 100% { background: var(--ink-2); } }
+@keyframes flip { 0% { transform: rotateX(90deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
+.tag { display: inline-flex; align-items: center; gap: 4px; font-family: var(--f-mono); font-size: .64rem; color: var(--mut-d); }
+.tag svg { width: 13px; height: 13px; }
+.tag--ok { color: var(--ok-2); }
+.d-pill--mute { background: rgba(255,255,255,.07); color: var(--mut-d); }
+.d-pill svg { width: 11px; height: 11px; }
+
+/* detalhe */
+.back { display: inline-flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 10px 0 4px; margin-left: -4px; border: 0; background: none; color: var(--violet-2); font-size: .86rem; border-radius: 8px; }
+.back svg { width: 18px; height: 18px; }
+.dhead { padding: 4px 2px 0; }
+.dhead h2 { font-size: 1.3rem; margin: 2px 0 4px; outline: none; }
+.dhead p { font-size: .8rem; color: var(--mut-d); }
+.dhead__row { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-top: 10px; }
+.box { margin-top: 12px; padding: 14px; border-radius: 16px; border: 1px solid var(--line-d); background: var(--ink-2); transition: border-color .2s; }
+.box.has-err { border-color: rgba(240,89,122,.6); }
+.box__title { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: .86rem; font-weight: 600; margin-bottom: 10px; }
+.box__title .d-mono { font-weight: 400; font-size: .72rem; color: var(--mut-d); }
+.err { display: none; margin-top: 8px; font-size: .76rem; color: #FF8FA8; }
+.has-err .err { display: block; }
+.checkin { display: flex; align-items: center; gap: 12px; }
+.checkin .d-btn { flex: 1; }
+.checkin__ok { display: flex; align-items: center; gap: 10px; font-size: .84rem; }
+.checkin__ok .dot { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: rgba(43,182,115,.16); color: var(--ok-2); flex: none; }
+.checkin__ok .dot svg { width: 18px; height: 18px; }
+.checkin__ok small { display: block; color: var(--mut-d); font-size: .72rem; }
+
+.cl { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.cl li { display: flex; align-items: center; gap: 8px; }
+.cl label { flex: 1; display: flex; align-items: center; gap: 10px; min-height: 40px; font-size: .84rem; cursor: pointer; border-radius: 8px; }
+.cl input { appearance: none; -webkit-appearance: none; margin: 0; flex: none; width: 22px; height: 22px; border-radius: 7px; border: 1.5px solid #4A3F6B; background: var(--ink); display: grid; place-items: center; cursor: pointer; transition: background-color .15s, border-color .15s; }
+.cl input::after { content: ""; width: 10px; height: 6px; border: 2px solid #fff; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px,-1px) scale(0); transition: transform .15s var(--ease); }
+.cl input:checked { background: var(--violet-3); border-color: var(--violet); }
+.cl input:checked::after { transform: rotate(-45deg) translate(1px,-1px) scale(1); }
+.cl input:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+.cl input:disabled { cursor: default; opacity: .8; }
+.cl li.is-checked label { color: var(--fg-d); }
+.flag { flex: none; min-height: 30px; padding: 0 9px; border-radius: 8px; border: 1px solid var(--line-d); background: transparent; color: var(--mut-d); font-size: .7rem; display: inline-flex; align-items: center; gap: 4px; }
+.flag svg { width: 13px; height: 13px; }
+.flag[aria-pressed="true"] { background: rgba(240,89,122,.15); border-color: rgba(240,89,122,.45); color: #FF8FA8; }
+.flag:disabled { cursor: default; }
+.cl-ro { font-size: .72rem; font-family: var(--f-mono); color: var(--ok-2); }
+.cl-ro.bad { color: #FF8FA8; }
+textarea.d-input { min-height: 74px; resize: vertical; font-size: .88rem; line-height: 1.45; }
+
+.photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ph { position: relative; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; background: var(--ink-3); animation: pop .35s var(--ease); }
+.ph img { width: 100%; height: 100%; object-fit: cover; }
+.ph button { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; border-radius: 50%; border: 0; background: rgba(10,8,18,.75); color: #fff; display: grid; place-items: center; }
+.ph button svg { width: 12px; height: 12px; }
+@keyframes pop { from { transform: scale(.85); opacity: 0; } }
+.ph-empty { grid-column: 1 / -1; font-size: .78rem; color: var(--mut-d); padding: 14px; text-align: center; border: 1px dashed var(--line-d); border-radius: 10px; }
+.row-btns { display: flex; gap: 8px; margin-top: 10px; }
+.row-btns .d-btn { flex: 1 1 auto; font-size: .8rem; padding: 0 12px; white-space: nowrap; }
+.row-btns .d-btn:first-child { flex: 0 1 auto; }
+.d-btn svg { width: 16px; height: 16px; flex: none; }
+
+.pad { position: relative; height: 140px; border-radius: 12px; background: #0A0812; border: 1px dashed #3A3157; overflow: hidden; }
+.pad canvas { width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+.pad__hint { position: absolute; left: 14px; right: 14px; bottom: 28px; border-top: 1px solid #3A3157; padding-top: 6px; font-size: .7rem; color: var(--mut-d); pointer-events: none; display: flex; justify-content: space-between; }
+.pad__hint span:first-child::before { content: "✕ "; color: var(--violet-2); }
+.pad.is-signed .pad__ph { display: none; }
+.pad__ph { position: absolute; inset: 0 0 40px; display: grid; place-items: center; font-family: var(--f-serif); font-style: italic; font-size: 1.3rem; color: #3A3157; pointer-events: none; }
+.sig-img { height: 110px; border-radius: 12px; background: #0A0812; border: 1px solid var(--line-d); display: grid; place-items: center; overflow: hidden; }
+.sig-img img { max-height: 100%; }
+
+.errsum { display: none; margin-top: 14px; padding: 10px 12px; border-radius: 12px; background: rgba(240,89,122,.1); border: 1px solid rgba(240,89,122,.35); color: #FFB3C4; font-size: .8rem; }
+.errsum.is-on { display: block; }
+.errsum ul { margin: 4px 0 0; padding-left: 18px; }
+.done-btn { width: 100%; margin-top: 14px; min-height: 50px; font-size: .95rem; border-radius: 14px; }
+.ro-note { margin-top: 14px; padding: 12px; border-radius: 12px; font-size: .8rem; display: flex; gap: 10px; align-items: center; }
+.ro-note svg { width: 18px; height: 18px; flex: none; }
+.ro-note--ok { background: rgba(43,182,115,.1); color: var(--ok-2); }
+.ro-note--warn { background: rgba(242,181,68,.1); color: #F6CF85; }
+.kv { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; }
+.kv div { padding: 8px 4px; border-radius: 10px; background: var(--ink); }
+.kv b { display: block; font-family: var(--f-mono); font-weight: 500; font-size: .95rem; }
+.kv span { font-size: .66rem; color: var(--mut-d); }
+.obs-ro { font-size: .84rem; color: var(--fg-d); white-space: pre-wrap; }
+
+/* relatório */
+.rep-head { padding: 6px 2px 2px; }
+.rep-head h2 { font-size: 1.3rem; }
+.rep-head h2 em { font-family: var(--f-serif); font-weight: 400; font-size: 1.15em; color: var(--violet-2); }
+.rep-head p { font-size: .78rem; color: var(--mut-d); margin-top: 2px; }
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+.kpi { padding: 12px 10px; border-radius: 14px; background: var(--ink-2); border: 1px solid var(--line-d); }
+.kpi b { display: block; font-size: 1.25rem; font-weight: 600; letter-spacing: -.03em; line-height: 1.1; }
+.kpi span { display: block; margin-top: 4px; font-size: .68rem; color: var(--mut-d); line-height: 1.25; }
+.kpi--hl { background: linear-gradient(150deg, rgba(155,107,255,.22), rgba(107,59,232,.05)), var(--ink-2); border-color: rgba(155,107,255,.3); }
+.kpi--warn b { color: var(--warn); }
+.issues, .tl { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.issues li { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: rgba(240,89,122,.07); border: 1px solid rgba(240,89,122,.2); font-size: .8rem; }
+.issues li svg { width: 16px; height: 16px; color: #FF8FA8; flex: none; margin-top: 1px; }
+.issues small { display: block; color: var(--mut-d); font-size: .72rem; }
+.none { font-size: .8rem; color: var(--mut-d); padding: 10px 12px; border-radius: 12px; border: 1px dashed var(--line-d); }
+.tl li { display: grid; grid-template-columns: 86px 1fr auto; gap: 10px; align-items: center; padding: 9px 12px; border-radius: 12px; background: var(--ink-2); border: 1px solid var(--line-d); font-size: .8rem; }
+.tl .d-mono { font-size: .7rem; color: var(--mut-d); }
+.tl b { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rep-btn { width: 100%; margin-top: 16px; min-height: 48px; border-radius: 14px; }
+.rep-warn { margin-top: 12px; font-size: .76rem; color: #F6CF85; display: none; }
+.rep-warn.is-on { display: block; }
+
+/* perfil */
+.prof { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 16px; background: var(--ink-2); border: 1px solid var(--line-d); margin-top: 6px; }
+.avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--grad); display: grid; place-items: center; font-weight: 600; font-size: 1.1rem; color: #fff; flex: none; }
+.prof b { display: block; font-size: 1.02rem; }
+.prof span { font-size: .78rem; color: var(--mut-d); }
+.rows { list-style: none; margin: 0; padding: 0; border-radius: 16px; border: 1px solid var(--line-d); background: var(--ink-2); overflow: hidden; }
+.rows li { display: flex; justify-content: space-between; gap: 10px; padding: 12px 14px; font-size: .82rem; border-top: 1px solid var(--line-d); }
+.rows li:first-child { border-top: 0; }
+.rows li span:first-child { color: var(--mut-d); }
+.rows li span:last-child { text-align: right; }
+.prof-btn { width: 100%; margin-top: 14px; }
+
+/* tab bar */
+.tabbar { flex: none; display: grid; grid-template-columns: repeat(3, 1fr); padding: 6px 10px 22px; border-top: 1px solid var(--line-d); background: rgba(12,9,22,.94); position: relative; }
+.tabbar::after { content: ""; position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%); width: 128px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.55); }
+.tab { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 48px; padding: 6px 0 0; border: 0; background: none; color: var(--mut-d); font-size: .68rem; border-radius: 10px; transition: color .2s; }
+.tab svg { width: 22px; height: 22px; }
+.tab[aria-current="page"] { color: var(--fg-d); }
+.tab[aria-current="page"] svg { color: var(--violet); }
+.tab .tdot { position: absolute; top: 3px; left: calc(50% + 8px); min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--warn); color: #1A1300; font-size: .6rem; font-weight: 600; display: none; place-items: center; }
+.tab .tdot.is-on { display: grid; }
+
+/* in-app toast */
+.phone .d-toast { position: absolute; bottom: 92px; max-width: calc(100% - 40px); width: max-content; text-align: center; font-size: .84rem; z-index: 30; display: flex; align-items: center; gap: 8px; }
+.phone .d-toast svg { width: 16px; height: 16px; color: var(--ok-2); flex: none; }
+
+/* ===== side panel ===== */
+.panel { flex: 1 1 340px; max-width: 440px; min-width: 0; display: grid; gap: 18px; padding-top: 8px; }
+.panel h1 { font-size: clamp(1.6rem, 3vw, 2.1rem); letter-spacing: -.03em; }
+.panel h1 em { font-family: var(--f-serif); font-weight: 400; font-size: 1.12em; color: var(--violet-2); }
+.panel__lead { color: var(--mut-d); font-size: .95rem; margin-top: 8px; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.steps li { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line-d); background: var(--ink-2); font-size: .88rem; transition: border-color .3s, background-color .3s; }
+.steps li .n { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-family: var(--f-mono); font-size: .75rem; border: 1px solid var(--line-d); color: var(--violet-2); transition: background-color .3s; }
+.steps li small { display: block; color: var(--mut-d); font-size: .78rem; margin-top: 2px; }
+.steps li.is-done { border-color: rgba(43,182,115,.35); background: rgba(43,182,115,.06); }
+.steps li.is-done .n { background: var(--ok); border-color: var(--ok); color: #fff; font-size: 0; }
+.steps li.is-done .n::after { content: "✓"; font-size: .8rem; }
+.live { padding: 18px; }
+.live__head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px; }
+.live__head h2 { font-size: 1rem; }
+.pulse { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-mono); font-size: .66rem; color: var(--ok-2); letter-spacing: .04em; text-transform: uppercase; }
+.pulse::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(43,182,115,.6); animation: ping 2s infinite; }
+@keyframes ping { 70% { box-shadow: 0 0 0 7px rgba(43,182,115,0); } 100% { box-shadow: 0 0 0 0 rgba(43,182,115,0); } }
+.live .kpis { margin-top: 0; }
+.live .kpi { background: var(--ink); }
+.live .kpi.is-bump { animation: bump .6s var(--ease); }
+@keyframes bump { 30% { border-color: var(--violet); transform: translateY(-2px); } }
+.live__foot { margin-top: 12px; display: flex; justify-content: space-between; gap: 10px; align-items: center; font-size: .76rem; color: var(--mut-d); flex-wrap: wrap; }
+.panel__tools { display: flex; gap: 10px; flex-wrap: wrap; }
+.panel__tools .d-btn svg { width: 16px; height: 16px; }
+.panel__note { font-size: .8rem; color: var(--mut-d); }
+
+/* ===== mobile: app fills the screen ===== */
+@media (max-width: 699px) {
+  #app { padding: 0 0 40px; }
+  .stage { gap: 28px; }
+  .device { width: 100%; height: calc(100svh - var(--bar-h)); min-height: 560px; padding: 0; border-radius: 0; background: none; box-shadow: none; }
+  .device::before, .device::after, .island, .statusbar { display: none; }
+  .phone { border-radius: 0; border-bottom: 1px solid var(--line-d); }
+  .apphead { padding-top: 12px; }
+  .tabbar { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+  .tabbar::after { display: none; }
+  .phone .d-toast { bottom: 80px; }
+  .panel { padding: 0 16px; flex-basis: 100%; }
+}
+@media (max-width: 359px) {
+  .switch__txt { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .screen { transform: none !important; }
+}
+</style>
+</head>
+<body>
+<header class="demo-bar">
+  <a class="demo-brand" href="../index.html" aria-label="Alfa Dev, voltar ao site">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.5 5.5c-1.6 6.2-4.6 13-9.4 13-3.1 0-5.1-2.6-5.1-6 0-3.8 2.5-7 5.6-7 4.2 0 5.6 5.4 7.4 10.2.8 2 1.9 2.8 3 2.8"/></svg>
+    <b>Alfa <span>Dev</span></b>
+  </a>
+  <div class="demo-title"><strong>App de equipe em campo</strong><span class="demo-badge">Demonstração</span></div>
+  <div class="demo-bar__end">
+    <a class="demo-back" href="../index.html#cases">← <span>Voltar ao site</span></a>
+    <a class="demo-cta" href="../index.html#contato">Quero algo assim <span aria-hidden="true">→</span></a>
+  </div>
+</header>
+<div class="demo-intro">
+  <p>Visitas, fotos e assinaturas registradas mesmo sem internet. Tudo sincroniza e vira relatório sozinho.</p>
+  <p class="demo-intro__note">Dados fictícios · roda no seu navegador</p>
+</div>
+
+<main id="app">
+  <div class="stage">
+    <div class="device">
+      <section class="phone" id="phone" aria-label="Aplicativo Manutenção Atlas (simulação)">
+        <div class="island" aria-hidden="true"></div>
+        <div class="statusbar" aria-hidden="true">
+          <span id="clock">9:41</span>
+          <span class="statusbar__icons">
+            <span class="nosig">Sem rede</span>
+            <svg class="sig" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+            <svg class="wifi" viewBox="0 0 18 13"><path d="M1.5 4.6a10.6 10.6 0 0 1 15 0"/><path d="M4.3 7.4a6.6 6.6 0 0 1 9.4 0"/><circle cx="9" cy="10.6" r="1.6"/><path class="slash" d="M2 1.5l14 10" stroke-width="2"/></svg>
+            <svg class="bat" viewBox="0 0 25 12"><rect x=".5" y=".5" width="21" height="11" rx="3" fill="none" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="15" height="8" rx="1.6" fill="currentColor"/><rect x="22.5" y="4" width="1.8" height="4" rx=".9" fill="currentColor" opacity=".45"/></svg>
+          </span>
+        </div>
+
+        <div class="apphead">
+          <div class="apphead__who">
+            <div class="apphead__co">Manutenção Atlas</div>
+            <div class="apphead__hi"><span id="greet">Bom dia</span>, <em>Carla</em></div>
+          </div>
+          <div class="net">
+            <button type="button" class="switch" id="offSwitch" role="switch" aria-checked="false">
+              <span class="switch__txt">Sem internet</span><span class="switch__track" aria-hidden="true"></span>
+            </button>
+            <span class="d-pill d-pill--warn qbadge" id="qBadge" aria-live="polite"></span>
+          </div>
+        </div>
+        <div class="netstrip" id="netStrip" role="status"></div>
+
+        <div class="screens">
+          <section class="screen is-active" id="scr-hoje" aria-labelledby="hojeTitle">
+            <h2 class="sr-only" id="hojeTitle">Visitas de hoje</h2>
+            <div class="prog">
+              <div class="prog__top">
+                <div class="prog__n" id="progN">2 <small>de 5 concluídas</small></div>
+                <div class="prog__date" id="progDate"></div>
+              </div>
+              <div class="prog__bar" role="progressbar" aria-label="Visitas concluídas" aria-valuemin="0" aria-valuemax="5" id="progBar"><i></i></div>
+              <p class="prog__next" id="progNext"></p>
+            </div>
+            <div class="sec-label"><span>Roteiro de hoje</span><span id="routeKm">5 paradas · 23 km</span></div>
+            <ul class="visits" id="visitList"></ul>
+          </section>
+
+          <section class="screen" id="scr-detalhe" aria-label="Detalhe da visita" inert></section>
+
+          <section class="screen" id="scr-relatorio" aria-labelledby="repTitle" inert>
+            <div class="rep-head">
+              <h2 id="repTitle">Relatório <em>do dia</em></h2>
+              <p id="repSub">Gerado automaticamente a partir das visitas</p>
+            </div>
+            <div class="kpis" id="repKpis"></div>
+            <div class="sec-label"><span>Problemas encontrados</span></div>
+            <div id="repIssues"></div>
+            <div class="sec-label"><span>Visitas</span></div>
+            <ul class="tl" id="repTl"></ul>
+            <p class="rep-warn" id="repWarn"></p>
+            <button type="button" class="d-btn d-btn--primary rep-btn" data-act="download">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+              Baixar relatório
+            </button>
+          </section>
+
+          <section class="screen" id="scr-perfil" aria-labelledby="perfTitle" inert>
+            <h2 class="sr-only" id="perfTitle">Perfil</h2>
+            <div class="prof">
+              <div class="avatar" aria-hidden="true">CM</div>
+              <div><b>Carla Mendes</b><span>Técnica de refrigeração · Equipe Zona Sul</span></div>
+            </div>
+            <div class="sec-label"><span>Este aparelho</span></div>
+            <ul class="rows" id="profRows"></ul>
+            <button type="button" class="d-btn prof-btn" data-act="reset">Restaurar demonstração</button>
+          </section>
+        </div>
+
+        <nav class="tabbar" aria-label="Navegação do aplicativo">
+          <button type="button" class="tab" data-tab="hoje" aria-current="page">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+            Hoje<span class="tdot" id="tabDot"></span>
+          </button>
+          <button type="button" class="tab" data-tab="relatorio">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5h7l4.5 4.5v12.5H7z"/><path d="M14 3.5V8h4.5M10 13h5.5M10 16.5h5.5"/></svg>
+            Relatório
+          </button>
+          <button type="button" class="tab" data-tab="perfil">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.3-3.6 4.2-5.4 7.5-5.4s6.2 1.8 7.5 5.4"/></svg>
+            Perfil
+          </button>
+        </nav>
+
+        <div class="d-toast" id="toast" aria-hidden="true"></div>
+        <input type="file" id="photoInput" accept="image/*" capture="environment" class="sr-only" tabindex="-1" aria-hidden="true">
+      </section>
+    </div>
+
+    <aside class="panel" aria-label="Como usar a demonstração">
+      <div>
+        <h1>Funciona <em>sem sinal</em>.</h1>
+        <p class="panel__lead">Um app para técnicos em campo: o trabalho é registrado no aparelho e sobe para o escritório assim que a conexão volta. Experimente:</p>
+      </div>
+      <ol class="steps" id="steps">
+        <li data-step="offline"><span class="n">1</span><div>Ative o modo <b>Sem internet</b><small>O botão fica no topo do app.</small></div></li>
+        <li data-step="queued"><span class="n">2</span><div>Conclua uma visita<small>Check-in, checklist, foto e assinatura do cliente.</small></div></li>
+        <li data-step="synced"><span class="n">3</span><div>Volte a ficar online e veja sincronizar<small>As visitas sobem uma a uma, sem ninguém fazer nada.</small></div></li>
+      </ol>
+      <section class="d-card live" aria-labelledby="liveTitle">
+        <div class="live__head"><h2 id="liveTitle">Relatório do dia</h2><span class="pulse">ao vivo</span></div>
+        <div class="kpis" id="liveKpis"></div>
+        <div class="live__foot"><span id="liveFoot"></span><button type="button" class="d-btn" data-act="download" style="min-height:34px;font-size:.8rem">Baixar .txt</button></div>
+      </section>
+      <div class="panel__tools">
+        <button type="button" class="d-btn" data-act="reset">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5"/></svg>
+          Restaurar demonstração
+        </button>
+      </div>
+      <p class="panel__note">Tudo fica salvo neste navegador. No app de verdade, fotos e assinaturas vão para o servidor da empresa com data, hora e localização.</p>
+    </aside>
+  </div>
+  <div class="sr-only" id="live" aria-live="polite"></div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var KEY = 'alfa-demo-campo-v1';
+  var CHECKS = [
+    'Equipamento desligado com segurança',
+    'Filtros limpos ou substituídos',
+    'Pressão do gás dentro da faixa',
+    'Dreno sem obstrução',
+    'Teste de funcionamento aprovado'
+  ];
+  var reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  var I = {
+    chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>',
+    back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    cloudOk: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18.5h10a4 4 0 0 0 .6-8 6 6 0 0 0-11.5 1.6A3.3 3.3 0 0 0 7 18.5z"/><path d="M9.5 14l2 2 3.5-3.5"/></svg>',
+    cloudOff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18.5h10a4 4 0 0 0 .6-8 6 6 0 0 0-11.5 1.6A3.3 3.3 0 0 0 7 18.5z"/><path d="M3 3l18 18"/></svg>',
+    sync: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9M18.5 3v4.2h-4.2M5.5 21v-4.2h4.2"/></svg>',
+    cam: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l1.6-2.5h6.8L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.3"/></svg>',
+    img: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="M20.5 15.5l-5-5-9 9"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg>',
+    pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>'
+  };
+
+  /* ---------- helpers ---------- */
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function todayAt(h, m) { var d = new Date(); d.setHours(h, m, 0, 0); return d.getTime(); }
+  function hm(ts) { var d = new Date(ts); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+  function mins(v) { return v.checkin && v.checkout ? Math.max(1, Math.round((v.checkout - v.checkin) / 60000)) : 0; }
+  function dur(m) { if (!m) return '0 min'; var h = Math.floor(m / 60), r = m % 60; return h ? h + 'h' + (r ? ' ' + String(r).padStart(2, '0') + 'min' : '') : r + ' min'; }
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, reduceMQ.matches ? Math.min(ms, 150) : ms); }); }
+  function uid() { return Math.random().toString(36).slice(2, 9); }
+  function isDone(v) { return v.status === 'concluida' || v.status === 'fila'; }
+
+  /* ---------- state ---------- */
+  function seed() {
+    return {
+      offline: false,
+      tour: { offline: false, queued: false, synced: false },
+      visits: [
+        { id: 'v1', cliente: 'Padaria Pão Dourado', end: 'R. Barata Ribeiro, 214 · Copacabana', hora: '08:00', tipo: 'Preventiva · split 18.000 BTUs',
+          status: 'concluida', checkin: todayAt(8, 4), checkout: todayAt(8, 51), checks: [true, true, true, true, true], issues: [false, true, false, false, false],
+          obs: 'Filtro muito sujo, substituído. Recomendar limpeza mensal ao cliente.', photos: [{ id: 's1', src: 'sample:1' }, { id: 's2', src: 'sample:2' }], signature: 'sample:1', syncedAt: todayAt(8, 52) },
+        { id: 'v2', cliente: 'Clínica Sorriso Leve', end: 'R. Voluntários da Pátria, 1180 · Botafogo', hora: '09:30', tipo: 'Corretiva · split 12.000 BTUs',
+          status: 'concluida', checkin: todayAt(9, 36), checkout: todayAt(10, 20), checks: [true, true, true, true, true], issues: [false, false, false, false, false],
+          obs: 'Sensor de temperatura trocado. Equipamento operando normalmente.', photos: [{ id: 's3', src: 'sample:3' }], signature: 'sample:2', syncedAt: todayAt(10, 21) },
+        { id: 'v3', cliente: 'Escritório Nexo Contábil', end: 'Av. Rio Branco, 902 · 5º andar · Centro', hora: '11:00', tipo: 'Preventiva · 3 evaporadoras',
+          status: 'pendente', checkin: null, checkout: null, checks: [false, false, false, false, false], issues: [false, false, false, false, false], obs: '', photos: [], signature: null, syncedAt: null },
+        { id: 'v4', cliente: 'Mercado Bom Preço', end: 'R. Conde de Bonfim, 3050 · Tijuca', hora: '14:00', tipo: 'Corretiva · balcão refrigerado',
+          status: 'pendente', checkin: null, checkout: null, checks: [false, false, false, false, false], issues: [false, false, false, false, false], obs: '', photos: [], signature: null, syncedAt: null },
+        { id: 'v5', cliente: 'Academia Forma Livre', end: 'Av. das Américas, 1720 · Barra da Tijuca', hora: '16:00', tipo: 'Instalação · split 24.000 BTUs',
+          status: 'pendente', checkin: null, checkout: null, checks: [false, false, false, false, false], issues: [false, false, false, false, false], obs: '', photos: [], signature: null, syncedAt: null }
+      ]
+    };
+  }
+  function load() {
+    try {
+      var s = JSON.parse(localStorage.getItem(KEY));
+      if (s && Array.isArray(s.visits) && s.visits.length === 5 && s.tour) return s;
+    } catch (e) { /* ignore */ }
+    return seed();
+  }
+  var state = load();
+  var warnedQuota = false;
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch (e) {
+      if (!warnedQuota) { warnedQuota = true; toast('Armazenamento do navegador cheio: algumas fotos não serão guardadas.'); }
+    }
+  }
+  function byId(id) { return state.visits.filter(function (v) { return v.id === id; })[0]; }
+  function queue() { return state.visits.filter(function (v) { return v.status === 'fila'; }); }
+
+  /* ---------- generated images (sample photos + signatures) ---------- */
+  var imgCache = {};
+  var objUrls = {};
+  function rr(x, X, Y, W, H, R) { x.beginPath(); x.moveTo(X + R, Y); x.arcTo(X + W, Y, X + W, Y + H, R); x.arcTo(X + W, Y + H, X, Y + H, R); x.arcTo(X, Y + H, X, Y, R); x.arcTo(X, Y, X + W, Y, R); x.closePath(); }
+  function samplePhoto(n, label) {
+    var c = document.createElement('canvas'); c.width = 480; c.height = 360;
+    var x = c.getContext('2d');
+    var hue = [250, 205, 30, 160, 330][n % 5];
+    var g = x.createLinearGradient(0, 0, 0, 360);
+    g.addColorStop(0, 'hsl(' + hue + ',14%,78%)'); g.addColorStop(1, 'hsl(' + hue + ',12%,56%)');
+    x.fillStyle = g; x.fillRect(0, 0, 480, 360);
+    // tile lines on the wall
+    x.strokeStyle = 'rgba(255,255,255,.18)'; x.lineWidth = 1;
+    for (var i = 1; i < 6; i++) { x.beginPath(); x.moveTo(0, i * 60); x.lineTo(480, i * 60); x.stroke(); }
+    var ox = (n * 37) % 50 - 25, oy = (n * 23) % 30 - 10;
+    // pipe
+    x.fillStyle = 'hsl(' + hue + ',6%,88%)'; x.fillRect(372 + ox, 196 + oy, 14, 170);
+    // unit shadow + body
+    x.save(); x.shadowColor = 'rgba(0,0,0,.35)'; x.shadowBlur = 24; x.shadowOffsetY = 10;
+    x.fillStyle = '#F7F7FA'; rr(x, 50 + ox, 78 + oy, 380, 128, 22); x.fill(); x.restore();
+    x.fillStyle = '#E4E3EA'; rr(x, 66 + ox, 168 + oy, 348, 24, 10); x.fill();
+    x.strokeStyle = '#B9B7C4'; x.lineWidth = 2;
+    for (var j = 0; j < 14; j++) { x.beginPath(); x.moveTo(84 + ox + j * 23, 174 + oy); x.lineTo(96 + ox + j * 23, 186 + oy); x.stroke(); }
+    x.fillStyle = '#2BB673'; x.beginPath(); x.arc(392 + ox, 110 + oy, 5, 0, 7); x.fill();
+    x.fillStyle = '#9A98A8'; x.font = '600 15px Archivo, Arial, sans-serif'; x.fillText('ATLAS', 80 + ox, 114 + oy);
+    // overlay stamp
+    x.fillStyle = 'rgba(10,8,18,.72)'; x.fillRect(0, 316, 480, 44);
+    x.fillStyle = '#fff'; x.font = '500 15px "JetBrains Mono", Menlo, monospace';
+    x.fillText(label || ('Manutenção Atlas · foto ' + n), 16, 344);
+    x.fillStyle = '#9B6BFF'; x.beginPath(); x.arc(456, 338, 6, 0, 7); x.fill();
+    return c.toDataURL('image/jpeg', 0.78);
+  }
+  function sampleSig(n) {
+    var c = document.createElement('canvas'); c.width = 520; c.height = 200;
+    var x = c.getContext('2d');
+    x.strokeStyle = '#F3F0FA'; x.lineWidth = 3.2; x.lineCap = 'round'; x.lineJoin = 'round';
+    x.beginPath();
+    var base = 110, t;
+    for (t = 0; t <= 1; t += 0.004) {
+      var px = 40 + t * 420;
+      var py = base + Math.sin(t * (n === 1 ? 30 : 24)) * 34 * (1 - t * .5) + Math.cos(t * 9 + n) * 14;
+      if (t === 0) x.moveTo(px, py); else x.lineTo(px, py);
+    }
+    x.stroke();
+    x.beginPath(); x.moveTo(60, 160); x.quadraticCurveTo(260, 140 + n * 6, 470, 152); x.stroke();
+    return c.toDataURL('image/png');
+  }
+  function photoSrc(p) {
+    if (objUrls[p.id]) return objUrls[p.id];
+    if (p.src && p.src.indexOf('sample:') === 0) {
+      return imgCache[p.src] || (imgCache[p.src] = samplePhoto(+p.src.split(':')[1]));
+    }
+    return p.src;
+  }
+  function sigSrc(s) {
+    if (s && s.indexOf('sample:') === 0) return imgCache['sig' + s] || (imgCache['sig' + s] = sampleSig(+s.split(':')[1]));
+    return s;
+  }
+
+  /* ---------- toast + live region ---------- */
+  var toastEl = $('#toast'), liveEl = $('#live'), toastT;
+  function announce(msg) { liveEl.textContent = ''; setTimeout(function () { liveEl.textContent = msg; }, 30); }
+  function toast(msg, ok) {
+    toastEl.innerHTML = (ok ? I.check : '') + '<span>' + esc(msg) + '</span>';
+    toastEl.classList.add('is-on');
+    announce(msg);
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { toastEl.classList.remove('is-on'); }, 3200);
+  }
+
+  /* ---------- pills ---------- */
+  function pill(v) {
+    if (v.status === 'pendente') return '<span class="d-pill d-pill--mute">Pendente</span>';
+    if (v.status === 'andamento') return '<span class="d-pill">Em andamento</span>';
+    if (v.status === 'fila') return '<span class="d-pill d-pill--warn">' + I.cloudOff + 'Aguardando sincronização</span>';
+    return '<span class="d-pill d-pill--ok">' + I.check + 'Concluída</span>';
+  }
+
+  /* ---------- HOJE ---------- */
+  var flashId = null, flipId = null;
+  function renderToday() {
+    var done = state.visits.filter(isDone).length;
+    $('#progN').innerHTML = done + ' <small>de 5 concluídas</small>';
+    var bar = $('#progBar'); bar.setAttribute('aria-valuenow', done); bar.firstElementChild.style.width = (done / 5 * 100) + '%';
+    var next = state.visits.filter(function (v) { return !isDone(v); })[0];
+    $('#progNext').innerHTML = next ? 'Próxima: <b>' + esc(next.cliente) + '</b> · ' + next.hora : '<b>Roteiro completo.</b> Bom trabalho!';
+    $('#visitList').innerHTML = state.visits.map(function (v) {
+      var meta = pill(v);
+      if (v.status === 'concluida') meta += '<span class="tag tag--ok">' + I.cloudOk + 'sincronizada ' + hm(v.syncedAt) + '</span>';
+      if (v.status === 'andamento') meta += '<span class="tag">check-in ' + hm(v.checkin) + '</span>';
+      if (v.status === 'pendente') meta += '<span class="tag">' + esc(v.tipo.split(' · ')[0]) + '</span>';
+      if (v.photos.length && isDone(v)) meta += '<span class="tag">' + I.img + v.photos.length + '</span>';
+      var cls = 'vcard' + (v.id === flashId ? ' is-flash' : '') + (v.id === flipId ? ' is-flip' : '');
+      return '<li><button type="button" class="' + cls + '" data-open="' + v.id + '" data-s="' + v.status + '" aria-label="' + esc(v.hora + ', ' + v.cliente + ', ' + statusText(v)) + '">' +
+        '<span class="vcard__time">' + v.hora + '</span>' +
+        '<span class="vcard__main"><span class="vcard__name">' + esc(v.cliente) + '</span><span class="vcard__addr">' + esc(v.end) + '</span></span>' +
+        '<span class="vcard__chev">' + I.chev + '</span>' +
+        '<span class="vcard__meta">' + meta + '</span></button></li>';
+    }).join('');
+    flashId = null; flipId = null;
+  }
+  function statusText(v) {
+    return { pendente: 'pendente', andamento: 'em andamento', fila: 'aguardando sincronização', concluida: 'concluída e sincronizada' }[v.status];
+  }
+
+  /* ---------- network UI ---------- */
+  var syncing = false, syncDone = 0, syncTotal = 0;
+  function renderNet() {
+    var q = queue().length;
+    $('#phone').classList.toggle('is-offline', state.offline);
+    var sw = $('#offSwitch'); sw.setAttribute('aria-checked', String(state.offline));
+    var b = $('#qBadge');
+    b.classList.toggle('is-on', q > 0);
+    b.innerHTML = q ? I.cloudOff + q + (q > 1 ? ' pendentes' : ' pendente') : '';
+    var td = $('#tabDot'); td.classList.toggle('is-on', q > 0); td.textContent = q || '';
+    var strip = $('#netStrip');
+    if (syncing) {
+      strip.className = 'netstrip netstrip--sync is-on';
+      strip.innerHTML = I.sync + '<span>Sincronizando ' + Math.min(syncDone + 1, syncTotal) + ' de ' + syncTotal + '…</span><span class="bar"><i style="width:' + (syncDone / syncTotal * 100) + '%"></i></span>';
+    } else if (state.offline) {
+      strip.className = 'netstrip netstrip--off is-on';
+      strip.innerHTML = I.cloudOff + '<span>Sem internet. Pode continuar trabalhando: ' + (q ? '<b>' + q + (q > 1 ? ' visitas aguardam' : ' visita aguarda') + '</b> envio.' : 'tudo fica salvo no aparelho.') + '</span>';
+    } else {
+      strip.className = 'netstrip'; strip.innerHTML = '';
+    }
+  }
+  function setOffline(off, silent) {
+    if (state.offline === off) return;
+    state.offline = off;
+    if (off) state.tour.offline = true;
+    save(); renderNet(); renderSteps(); renderProfile();
+    if (!silent) announce(off ? 'Modo sem internet ativado. As visitas concluídas ficarão salvas no aparelho.' : 'Conexão restabelecida.');
+    if (!off) startSync();
+  }
+  function startSync() {
+    if (syncing || state.offline) return;
+    var q = queue();
+    if (!q.length) return;
+    syncing = true; syncDone = 0; syncTotal = q.length;
+    renderNet();
+    announce('Sincronizando ' + syncTotal + (syncTotal > 1 ? ' visitas.' : ' visita.'));
+    (function step(i) {
+      wait(i === 0 ? 700 : 900).then(function () {
+        if (state.offline) { syncing = false; renderNet(); return; }
+        var v = q[i];
+        v.status = 'concluida'; v.syncedAt = Date.now();
+        syncDone = i + 1; flipId = v.id;
+        save(); renderNet(); renderToday(); renderReport(); refreshDetailIf(v);
+        if (i + 1 < q.length) step(i + 1);
+        else wait(500).then(function () {
+          syncing = false; state.tour.synced = true; save();
+          renderNet(); renderSteps(); renderProfile();
+          toast('Tudo sincronizado', true);
+        });
+      });
+    })(0);
+  }
+
+  /* ---------- screens / navigation ---------- */
+  var screens = { hoje: $('#scr-hoje'), detalhe: $('#scr-detalhe'), relatorio: $('#scr-relatorio'), perfil: $('#scr-perfil') };
+  var current = 'hoje', openId = null;
+  function go(name, dir) {
+    if (name === current) return;
+    var from = screens[current], to = screens[name];
+    dir = dir || 1;
+    to.classList.toggle('is-left', dir < 0);
+    to.classList.remove('is-active');
+    void to.offsetWidth;
+    from.classList.remove('is-active'); from.classList.toggle('is-left', dir > 0);
+    from.setAttribute('inert', '');
+    to.removeAttribute('inert'); to.classList.remove('is-left'); to.classList.add('is-active');
+    to.scrollTop = 0;
+    current = name;
+    var tab = name === 'detalhe' ? 'hoje' : name;
+    $$('.tab').forEach(function (t) { if (t.dataset.tab === tab) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current'); });
+  }
+
+  /* ---------- DETALHE ---------- */
+  var pad = null;
+  function openDetail(id) {
+    openId = id;
+    renderDetail();
+    go('detalhe', 1);
+    var h = $('#dTitle'); if (h) h.focus({ preventScroll: true });
+  }
+  function closeDetail() {
+    var id = openId;
+    go('hoje', -1);
+    openId = null;
+    var b = $('[data-open="' + id + '"]'); if (b) b.focus({ preventScroll: true });
+  }
+  function refreshDetailIf(v) { if (openId === v.id) renderDetail(true); }
+
+  function renderDetail(keepScroll) {
+    var v = byId(openId), el = screens.detalhe, st = el.scrollTop;
+    var ro = isDone(v);
+    var html = '<button type="button" class="back" data-act="back">' + I.back + 'Hoje</button>' +
+      '<div class="dhead"><p class="d-mono">' + v.hora + ' · ' + esc(v.tipo) + '</p>' +
+      '<h2 id="dTitle" tabindex="-1">' + esc(v.cliente) + '</h2><p>' + esc(v.end) + '</p>' +
+      '<div class="dhead__row">' + pill(v) + (v.status === 'concluida' ? '<span class="tag tag--ok">' + I.cloudOk + 'sincronizada ' + hm(v.syncedAt) + '</span>' : '') + '</div></div>';
+
+    if (ro) {
+      html += '<div class="box"><div class="kv">' +
+        '<div><b>' + hm(v.checkin) + '</b><span>check-in</span></div>' +
+        '<div><b>' + hm(v.checkout) + '</b><span>saída</span></div>' +
+        '<div><b>' + dur(mins(v)) + '</b><span>no local</span></div></div></div>';
+      html += '<div class="box"><div class="box__title">Checklist<span class="d-mono">' + v.issues.filter(Boolean).length + ' problema(s)</span></div><ul class="cl">' +
+        CHECKS.map(function (c, i) { return '<li><label style="cursor:default">' + c + '</label><span class="cl-ro' + (v.issues[i] ? ' bad">Problema' : '">OK') + '</span></li>'; }).join('') + '</ul></div>';
+      if (v.obs) html += '<div class="box"><div class="box__title">Observações</div><p class="obs-ro">' + esc(v.obs) + '</p></div>';
+      html += '<div class="box"><div class="box__title">Fotos<span class="d-mono">' + v.photos.length + '</span></div><div class="photos">' +
+        (v.photos.length ? v.photos.map(function (p, i) { return '<div class="ph"><img src="' + photoSrc(p) + '" alt="Foto ' + (i + 1) + ' da visita"></div>'; }).join('') : '<p class="ph-empty">Nenhuma foto.</p>') + '</div></div>';
+      html += '<div class="box"><div class="box__title">Assinatura do cliente</div><div class="sig-img">' + (v.signature ? '<img src="' + sigSrc(v.signature) + '" alt="Assinatura do cliente">' : '') + '</div></div>';
+      html += v.status === 'fila'
+        ? '<div class="ro-note ro-note--warn">' + I.cloudOff + '<span>Salva no aparelho. Será enviada assim que houver internet.</span></div>'
+        : '<div class="ro-note ro-note--ok">' + I.cloudOk + '<span>Recebida pelo escritório às ' + hm(v.syncedAt) + '.</span></div>';
+      el.innerHTML = html;
+      pad = null;
+    } else {
+      html += '<div class="box" id="bxCheckin"><div class="box__title">Chegada</div><div id="checkinBody"></div><p class="err" id="errCheckin">Faça o check-in antes de concluir.</p></div>';
+      html += '<fieldset class="box" id="bxChecklist" style="margin-inline:0;min-width:0" aria-describedby="errChecklist"><legend class="sr-only">Checklist</legend>' +
+        '<div class="box__title" aria-hidden="true">Checklist<span class="d-mono" id="clCount"></span></div><ul class="cl">' +
+        CHECKS.map(function (c, i) {
+          return '<li class="' + (v.checks[i] ? 'is-checked' : '') + '"><label><input type="checkbox" data-ck="' + i + '"' + (v.checks[i] ? ' checked' : '') + '>' + c + '</label>' +
+            '<button type="button" class="flag" data-flag="' + i + '" aria-pressed="' + v.issues[i] + '" aria-label="Marcar problema: ' + c + '">' + I.warn + 'Problema</button></li>';
+        }).join('') + '</ul><p class="err" id="errChecklist"></p></fieldset>';
+      html += '<div class="box"><label class="box__title" for="obs">Observações</label><textarea class="d-input" id="obs" placeholder="Ex.: peça trocada, recomendação ao cliente…"></textarea></div>';
+      html += '<div class="box" id="bxPhotos"><div class="box__title">Fotos<span class="d-mono" id="phCount"></span></div><div class="photos" id="photos"></div>' +
+        '<div class="row-btns"><button type="button" class="d-btn" data-act="camera">' + I.cam + 'Tirar foto</button>' +
+        '<button type="button" class="d-btn" data-act="sample">' + I.img + 'Usar foto de exemplo</button></div></div>';
+      html += '<div class="box" id="bxSig"><div class="box__title"><span id="sigLbl">Assinatura do cliente</span><button type="button" class="d-btn" data-act="clearsig" style="min-height:30px;padding:0 10px;font-size:.74rem">Limpar</button></div>' +
+        '<div class="pad' + (v.signature ? ' is-signed' : '') + '" id="pad"><canvas id="sigCanvas" role="img" aria-labelledby="sigLbl" aria-describedby="sigHelp errSig"></canvas>' +
+        '<span class="pad__ph" aria-hidden="true">Assine aqui</span><span class="pad__hint" aria-hidden="true"><span>' + esc(v.cliente) + '</span><span>' + new Date().toLocaleDateString('pt-BR') + '</span></span></div>' +
+        '<p class="sr-only" id="sigHelp">Desenhe a assinatura com o dedo ou o mouse.</p><p class="err" id="errSig">Colete a assinatura do cliente.</p></div>';
+      html += '<div class="errsum" id="errSum" role="alert"></div>';
+      html += '<button type="button" class="d-btn d-btn--primary done-btn" data-act="conclude">' + I.check + 'Concluir visita</button>';
+      el.innerHTML = html;
+      $('#obs').value = v.obs;
+      renderCheckin(v); renderClCount(v); renderPhotos(v);
+      pad = setupPad($('#sigCanvas'), v);
+    }
+    if (keepScroll) el.scrollTop = st;
+  }
+  function renderCheckin(v) {
+    $('#checkinBody').innerHTML = v.checkin
+      ? '<div class="checkin__ok"><span class="dot">' + I.pin + '</span><div>Check-in às <b class="d-mono">' + hm(v.checkin) + '</b><small>Localização confirmada · precisão de 8 m</small></div></div>'
+      : '<div class="checkin"><button type="button" class="d-btn d-btn--primary" data-act="checkin">' + I.pin + 'Fazer check-in</button></div>';
+  }
+  function renderClCount(v) {
+    var n = v.checks.filter(Boolean).length, p = v.issues.filter(Boolean).length;
+    $('#clCount').textContent = n + '/' + CHECKS.length + (p ? ' · ' + p + ' problema' + (p > 1 ? 's' : '') : '');
+  }
+  function renderPhotos(v) {
+    $('#phCount').textContent = v.photos.length + '/6';
+    $('#photos').innerHTML = v.photos.length ? v.photos.map(function (p, i) {
+      return '<div class="ph"><img src="' + photoSrc(p) + '" alt="Foto ' + (i + 1) + ' da visita"><button type="button" data-rmphoto="' + p.id + '" aria-label="Remover foto ' + (i + 1) + '">' + I.x + '</button></div>';
+    }).join('') : '<p class="ph-empty">Registre o equipamento antes e depois do serviço.</p>';
+  }
+
+  function setupPad(canvas, v) {
+    var ctx = canvas.getContext('2d'), drawing = false, last = null, inked = false, dpr = Math.max(1, window.devicePixelRatio || 1);
+    function size() {
+      var r = canvas.getBoundingClientRect();
+      if (!r.width) return;
+      canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#F3F0FA';
+      if (v.signature) {
+        var im = new Image();
+        im.onload = function () { ctx.drawImage(im, 0, 0, r.width, r.height); };
+        im.src = sigSrc(v.signature);
+      }
+    }
+    size();
+    function pt(e) { var r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+    canvas.addEventListener('pointerdown', function (e) {
+      if (e.button !== undefined && e.button > 0) return;
+      e.preventDefault();
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      drawing = true; last = pt(e);
+      ctx.beginPath(); ctx.arc(last.x, last.y, 1.1, 0, 7); ctx.fillStyle = '#F3F0FA'; ctx.fill();
+      inked = true;
+      $('#pad').classList.add('is-signed');
+    });
+    canvas.addEventListener('pointermove', function (e) {
+      if (!drawing) return;
+      var p = pt(e);
+      ctx.beginPath(); ctx.moveTo(last.x, last.y);
+      ctx.quadraticCurveTo(last.x, last.y, (last.x + p.x) / 2, (last.y + p.y) / 2);
+      ctx.lineTo(p.x, p.y); ctx.stroke();
+      last = p;
+    });
+    function end() {
+      if (!drawing) return;
+      drawing = false;
+      if (inked) {
+        v.signature = canvas.toDataURL('image/png');
+        save();
+        $('#bxSig').classList.remove('has-err');
+        updateErrSummary();
+      }
+    }
+    canvas.addEventListener('pointerup', end);
+    canvas.addEventListener('pointercancel', end);
+    canvas.addEventListener('lostpointercapture', end);
+    return {
+      clear: function () { ctx.clearRect(0, 0, canvas.width, canvas.height); inked = false; v.signature = null; save(); $('#pad').classList.remove('is-signed'); },
+      size: size
+    };
+  }
+
+  /* ---------- photos ---------- */
+  function addPhotoFromFile(file) {
+    var v = byId(openId); if (!v || isDone(v)) return;
+    if (v.photos.length >= 6) { toast('Limite de 6 fotos por visita.'); return; }
+    var p = { id: uid(), src: '' };
+    objUrls[p.id] = URL.createObjectURL(file);
+    v.photos.push(p);
+    renderPhotos(v); toast('Foto adicionada', true);
+    // downscale a copy so it survives a reload (localStorage)
+    var im = new Image();
+    im.onload = function () {
+      var s = Math.min(1, 480 / Math.max(im.naturalWidth, im.naturalHeight));
+      var c = document.createElement('canvas'); c.width = Math.round(im.naturalWidth * s); c.height = Math.round(im.naturalHeight * s);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      try { p.src = c.toDataURL('image/jpeg', 0.72); } catch (e) { p.src = ''; }
+      save(); renderReport();
+    };
+    im.onerror = function () { save(); };
+    im.src = objUrls[p.id];
+    renderReport();
+  }
+  function addSamplePhoto() {
+    var v = byId(openId); if (!v || isDone(v)) return;
+    if (v.photos.length >= 6) { toast('Limite de 6 fotos por visita.'); return; }
+    var n = v.photos.length + 1;
+    v.photos.push({ id: uid(), src: samplePhoto(n + 2, v.cliente.split(' ')[0] + ' · ' + hm(Date.now()) + ' · foto ' + n) });
+    save(); renderPhotos(v); renderReport();
+    toast('Foto de exemplo adicionada', true);
+  }
+
+  /* ---------- validation + conclude ---------- */
+  var triedConclude = false;
+  function problems(v) {
+    var out = [];
+    if (!v.checkin) out.push(['bxCheckin', 'Faça o check-in antes de concluir.']);
+    var miss = v.checks.filter(function (c) { return !c; }).length;
+    if (miss) out.push(['bxChecklist', 'Marque todos os itens do checklist (falta' + (miss > 1 ? 'm ' : ' ') + miss + ').']);
+    if (!v.signature) out.push(['bxSig', 'Colete a assinatura do cliente.']);
+    return out;
+  }
+  function updateErrSummary() {
+    if (!triedConclude || !openId) return;
+    var v = byId(openId), list = problems(v), sum = $('#errSum');
+    if (!sum) return;
+    ['bxCheckin', 'bxChecklist', 'bxSig'].forEach(function (id) {
+      var bad = list.some(function (p) { return p[0] === id; });
+      $('#' + id).classList.toggle('has-err', bad);
+    });
+    var cl = list.filter(function (p) { return p[0] === 'bxChecklist'; })[0];
+    $('#errChecklist').textContent = cl ? cl[1] : '';
+    if (list.length) {
+      sum.classList.add('is-on');
+      sum.innerHTML = '<b>Falta pouco para concluir:</b><ul>' + list.map(function (p) { return '<li>' + esc(p[1]) + '</li>'; }).join('') + '</ul>';
+    } else { sum.classList.remove('is-on'); sum.innerHTML = ''; }
+  }
+  function conclude() {
+    var v = byId(openId);
+    triedConclude = true;
+    var list = problems(v);
+    updateErrSummary();
+    if (list.length) {
+      var first = $('#' + list[0][0]);
+      var scr = screens.detalhe, top = first.getBoundingClientRect().top - scr.getBoundingClientRect().top + scr.scrollTop - 16;
+      scr.scrollTo({ top: Math.max(0, top), behavior: reduceMQ.matches ? 'auto' : 'smooth' });
+      var f = first.querySelector('button[data-act="checkin"], input:not(:checked), canvas');
+      if (f) { if (f.tagName === 'CANVAS') f.setAttribute('tabindex', '-1'); f.focus({ preventScroll: true }); }
+      return;
+    }
+    v.obs = $('#obs').value.trim();
+    v.checkout = Date.now();
+    triedConclude = false;
+    if (state.offline) {
+      v.status = 'fila'; state.tour.queued = true;
+      toast('Salva no aparelho. Enviaremos quando a internet voltar.');
+    } else {
+      v.status = 'concluida'; v.syncedAt = Date.now();
+      toast('Visita concluída e enviada ao escritório', true);
+    }
+    save();
+    flashId = v.id;
+    renderAll();
+    closeDetail();
+  }
+
+  /* ---------- report ---------- */
+  function reportData() {
+    var done = state.visits.filter(isDone);
+    var issues = [];
+    done.forEach(function (v) { v.issues.forEach(function (b, i) { if (b) issues.push({ cliente: v.cliente, item: CHECKS[i], hora: hm(v.checkout) }); }); });
+    return {
+      done: done,
+      total: done.reduce(function (s, v) { return s + mins(v); }, 0),
+      issues: issues,
+      photos: state.visits.reduce(function (s, v) { return s + v.photos.length; }, 0),
+      sigs: done.filter(function (v) { return v.signature; }).length,
+      pending: queue().length
+    };
+  }
+  function kpiHtml(d) {
+    return [
+      ['kpi--hl', d.done.length + '<small style="font-size:.6em;color:var(--mut-d)">/5</small>', 'visitas concluídas'],
+      ['', dur(d.total), 'tempo em campo'],
+      [d.issues.length ? 'kpi--warn' : '', d.issues.length, 'problema' + (d.issues.length === 1 ? '' : 's') + ' no checklist'],
+      ['', d.photos, 'fotos registradas'],
+      ['', d.sigs, 'assinatura' + (d.sigs === 1 ? '' : 's') + ' coletada' + (d.sigs === 1 ? '' : 's')],
+      [d.pending ? 'kpi--warn' : '', d.pending, 'aguardando envio']
+    ].map(function (k, i) { return '<div class="kpi ' + k[0] + '" data-k="' + i + '"><b>' + k[1] + '</b><span>' + k[2] + '</span></div>'; }).join('');
+  }
+  var lastLive = '';
+  function renderReport() {
+    var d = reportData();
+    $('#repSub').textContent = 'Carla Mendes · ' + new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+    $('#repKpis').innerHTML = kpiHtml(d);
+    $('#repIssues').innerHTML = d.issues.length
+      ? '<ul class="issues">' + d.issues.map(function (x) { return '<li>' + I.warn + '<div>' + esc(x.item) + '<small>' + esc(x.cliente) + ' · ' + x.hora + '</small></div></li>'; }).join('') + '</ul>'
+      : '<p class="none">Nenhum problema registrado até agora.</p>';
+    $('#repTl').innerHTML = state.visits.map(function (v) {
+      var t = isDone(v) ? hm(v.checkin) + '–' + hm(v.checkout) : v.hora;
+      var r = isDone(v) ? dur(mins(v)) : (v.status === 'andamento' ? 'em curso' : 'pendente');
+      return '<li><span class="d-mono">' + t + '</span><b>' + esc(v.cliente) + '</b><span class="d-mono">' + r + '</span></li>';
+    }).join('');
+    var w = $('#repWarn');
+    w.classList.toggle('is-on', d.pending > 0);
+    w.textContent = d.pending ? d.pending + (d.pending > 1 ? ' visitas ainda não chegaram' : ' visita ainda não chegou') + ' ao escritório. O relatório se atualiza sozinho quando a internet voltar.' : '';
+
+    // live preview in side panel, with a small bump on changed numbers
+    var prev = $$('#liveKpis .kpi b').map(function (b) { return b.textContent; });
+    $('#liveKpis').innerHTML = kpiHtml(d);
+    if (lastLive) $$('#liveKpis .kpi').forEach(function (k, i) { if (prev[i] !== undefined && prev[i] !== k.querySelector('b').textContent) k.classList.add('is-bump'); });
+    lastLive = 'x';
+    $('#liveFoot').textContent = 'Atualizado às ' + hm(Date.now()) + (d.pending ? ' · ' + d.pending + ' fora do servidor' : ' · tudo no servidor');
+  }
+  function download() {
+    var d = reportData(), L = [];
+    var date = new Date().toLocaleDateString('pt-BR');
+    L.push('MANUTENÇÃO ATLAS · RELATÓRIO DO DIA', 'Técnica: Carla Mendes · Equipe Zona Sul', 'Data: ' + date, 'Gerado automaticamente pelo app às ' + hm(Date.now()), '');
+    L.push('RESUMO', '- Visitas concluídas: ' + d.done.length + ' de 5', '- Tempo em campo: ' + dur(d.total), '- Problemas no checklist: ' + d.issues.length, '- Fotos registradas: ' + d.photos, '- Assinaturas coletadas: ' + d.sigs, '- Aguardando sincronização: ' + d.pending, '');
+    L.push('VISITAS');
+    state.visits.forEach(function (v) {
+      L.push('', v.hora + '  ' + v.cliente + ' (' + v.tipo + ')', '      ' + v.end);
+      if (isDone(v)) {
+        L.push('      Check-in ' + hm(v.checkin) + ' · saída ' + hm(v.checkout) + ' · ' + dur(mins(v)));
+        L.push('      Checklist: ' + CHECKS.map(function (c, i) { return c + (v.issues[i] ? ' [PROBLEMA]' : ' [ok]'); }).join('; '));
+        if (v.obs) L.push('      Obs.: ' + v.obs);
+        L.push('      Fotos: ' + v.photos.length + ' · Assinatura: ' + (v.signature ? 'sim' : 'não') + ' · ' + (v.status === 'fila' ? 'aguardando envio' : 'sincronizada às ' + hm(v.syncedAt)));
+      } else {
+        L.push('      Situação: ' + (v.status === 'andamento' ? 'em andamento (check-in ' + hm(v.checkin) + ')' : 'pendente'));
+      }
+    });
+    if (d.issues.length) { L.push('', 'PROBLEMAS ENCONTRADOS'); d.issues.forEach(function (x) { L.push('- ' + x.cliente + ': ' + x.item); }); }
+    L.push('', '---', 'Demonstração Alfa Dev · dados fictícios');
+    var blob = new Blob([L.join('\n')], { type: 'text/plain;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'relatorio-atlas-' + date.split('/').reverse().join('-') + '.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
+    toast('Relatório baixado', true);
+  }
+
+  /* ---------- profile + steps ---------- */
+  function renderProfile() {
+    var stored = state.visits.reduce(function (s, v) { return s + v.photos.length; }, 0);
+    var lastSync = state.visits.filter(function (v) { return v.syncedAt; }).map(function (v) { return v.syncedAt; }).sort().pop();
+    $('#profRows').innerHTML = [
+      ['Conexão', state.offline ? '<span style="color:var(--warn)">Sem internet</span>' : '<span style="color:var(--ok-2)">Online</span>'],
+      ['Último envio', lastSync ? hm(lastSync) : '—'],
+      ['Na fila de envio', queue().length + ' visita(s)'],
+      ['Fotos no aparelho', stored],
+      ['Veículo', 'Fiorino · KXR-4F21'],
+      ['Versão do app', '2.8.0']
+    ].map(function (r) { return '<li><span>' + r[0] + '</span><span>' + r[1] + '</span></li>'; }).join('');
+  }
+  function renderSteps() {
+    $$('#steps li').forEach(function (li) { li.classList.toggle('is-done', !!state.tour[li.dataset.step]); });
+  }
+  function renderClock() {
+    var d = new Date();
+    $('#clock').textContent = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+    var h = d.getHours();
+    $('#greet').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+    var ds = d.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
+    $('#progDate').textContent = ds.charAt(0).toUpperCase() + ds.slice(1);
+  }
+  function renderAll() { renderToday(); renderNet(); renderReport(); renderProfile(); renderSteps(); }
+
+  function reset() {
+    Object.keys(objUrls).forEach(function (k) { URL.revokeObjectURL(objUrls[k]); });
+    objUrls = {};
+    syncing = false;
+    state = seed();
+    if (!navigator.onLine) state.offline = true;
+    save();
+    if (current !== 'hoje') go('hoje', -1);
+    openId = null; triedConclude = false;
+    renderAll();
+    toast('Demonstração restaurada', true);
+  }
+
+  /* ---------- events ---------- */
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-act],[data-open],[data-tab],[data-flag],[data-rmphoto]');
+    if (!t) return;
+    if (t.dataset.open) { openDetail(t.dataset.open); return; }
+    if (t.dataset.tab) {
+      var name = t.dataset.tab, order = ['hoje', 'relatorio', 'perfil'];
+      var cur = current === 'detalhe' ? 'hoje' : current;
+      if (current === 'detalhe' && name === 'hoje') { closeDetail(); return; }
+      go(name, order.indexOf(name) >= order.indexOf(cur) ? 1 : -1);
+      if (current === 'detalhe') openId = null;
+      return;
+    }
+    var v = openId && byId(openId);
+    if (t.dataset.flag !== undefined && v) {
+      var i = +t.dataset.flag;
+      v.issues[i] = !v.issues[i];
+      t.setAttribute('aria-pressed', String(v.issues[i]));
+      if (v.issues[i] && !v.checks[i]) { v.checks[i] = true; var cb = $('[data-ck="' + i + '"]'); cb.checked = true; cb.closest('li').classList.add('is-checked'); }
+      save(); renderClCount(v); updateErrSummary();
+      return;
+    }
+    if (t.dataset.rmphoto && v) {
+      var id = t.dataset.rmphoto;
+      if (objUrls[id]) { URL.revokeObjectURL(objUrls[id]); delete objUrls[id]; }
+      v.photos = v.photos.filter(function (p) { return p.id !== id; });
+      save(); renderPhotos(v); renderReport(); announce('Foto removida.');
+      var nb = $('[data-act="camera"]'); if (nb) nb.focus();
+      return;
+    }
+    switch (t.dataset.act) {
+      case 'back': closeDetail(); break;
+      case 'checkin':
+        v.checkin = Date.now(); v.status = 'andamento';
+        save(); renderCheckin(v); renderToday(); renderReport();
+        $('#bxCheckin').classList.remove('has-err'); updateErrSummary();
+        $('.dhead__row').innerHTML = pill(v);
+        toast('Check-in registrado às ' + hm(v.checkin), true);
+        break;
+      case 'camera': $('#photoInput').click(); break;
+      case 'sample': addSamplePhoto(); break;
+      case 'clearsig': if (pad) { pad.clear(); announce('Assinatura apagada.'); } break;
+      case 'conclude': conclude(); break;
+      case 'download': download(); break;
+      case 'reset': reset(); break;
+    }
+  });
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.matches('[data-ck]') && openId) {
+      var v = byId(openId), i = +t.dataset.ck;
+      v.checks[i] = t.checked;
+      if (!t.checked) { v.issues[i] = false; $('[data-flag="' + i + '"]').setAttribute('aria-pressed', 'false'); }
+      t.closest('li').classList.toggle('is-checked', t.checked);
+      save(); renderClCount(v); updateErrSummary();
+    }
+  });
+  var obsT;
+  document.addEventListener('input', function (e) {
+    if (e.target.id === 'obs' && openId) {
+      var v = byId(openId); v.obs = e.target.value;
+      clearTimeout(obsT); obsT = setTimeout(save, 300);
+    }
+  });
+  $('#photoInput').addEventListener('change', function () {
+    var files = Array.prototype.slice.call(this.files || []);
+    files.forEach(addPhotoFromFile);
+    this.value = '';
+  });
+  $('#offSwitch').addEventListener('click', function () { setOffline(!state.offline); });
+  window.addEventListener('offline', function () { setOffline(true); toast('Você ficou sem internet. O app continua funcionando.'); });
+  window.addEventListener('online', function () { setOffline(false); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && current === 'detalhe') closeDetail();
+  });
+  var rT;
+  window.addEventListener('resize', function () { clearTimeout(rT); rT = setTimeout(function () { if (pad) pad.size(); }, 150); });
+
+  /* ---------- boot ---------- */
+  if (!navigator.onLine && !state.offline) state.offline = true;
+  renderClock(); setInterval(renderClock, 15000);
+  renderAll();
+  if (!state.offline && queue().length) startSync();
+})();
+</script>
+</body>
+</html>

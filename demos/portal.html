@@ -1,0 +1,1033 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Portal de gestão · Demonstração · Alfa Dev</title>
+<meta name="description" content="Demonstração de portal de gestão web: vendas, estoque e financeiro de uma rede de cafeterias num só painel, com alertas automáticos.">
+<meta name="robots" content="noindex,follow">
+<meta name="theme-color" content="#0A0812">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0812'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Georgia,serif' font-style='italic' font-size='44' fill='%239B6BFF'%3E%CE%B1%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="demo.css">
+<style>
+/* ---------- layout ---------- */
+.portal { display: grid; grid-template-columns: 236px minmax(0, 1fr); overflow-x: clip; max-width: 1480px; margin: 0 auto; }
+.side {
+  position: sticky; top: var(--bar-h); align-self: start; height: calc(100vh - var(--bar-h));
+  display: flex; flex-direction: column; gap: 22px; padding: 22px 14px;
+  border-right: 1px solid var(--line-d);
+}
+.org { display: flex; align-items: center; gap: 11px; padding: 4px 8px; }
+.org__logo {
+  width: 36px; height: 36px; border-radius: 10px; flex: none; display: grid; place-items: center;
+  background: linear-gradient(135deg, #3a2a5e, #1d1530); border: 1px solid var(--line-d);
+  font-family: var(--f-serif); font-style: italic; font-size: 1.25rem; color: var(--violet-2);
+}
+.org b { display: block; font-weight: 600; font-size: .95rem; letter-spacing: -.01em; }
+.org small { display: block; font-size: .74rem; color: var(--mut-d); }
+.nav { display: flex; flex-direction: column; gap: 3px; }
+.nav__label { font-family: var(--f-mono); font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; color: var(--mut-d); padding: 0 10px 8px; }
+.nav button {
+  display: flex; align-items: center; gap: 11px; width: 100%; min-height: 40px; padding: 0 10px;
+  border: 0; border-radius: 10px; background: transparent; color: var(--mut-d); font-size: .9rem; text-align: left;
+  transition: background-color .2s, color .2s;
+}
+.nav button svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.nav button:hover { color: var(--fg-d); background: rgba(255,255,255,.04); }
+.nav button[aria-current="page"] { color: var(--fg-d); background: var(--ink-3); box-shadow: inset 0 0 0 1px var(--line-d); }
+.nav button[aria-current="page"] svg { stroke: var(--violet-2); }
+.nav__count { margin-left: auto; font-family: var(--f-mono); font-size: .66rem; padding: 1px 7px; border-radius: 99px; background: rgba(240,89,122,.18); color: #FF8FA8; }
+.nav__count:empty { display: none; }
+.side__foot { margin-top: auto; padding: 14px 10px 0; border-top: 1px solid var(--line-d); font-size: .76rem; color: var(--mut-d); display: flex; align-items: center; gap: 8px; }
+.dot-live { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px rgba(43,182,115,.18); flex: none; }
+
+.content { min-width: 0; padding: 26px clamp(14px, 3vw, 34px) 40px; }
+.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px 18px; flex-wrap: wrap; margin-bottom: 22px; }
+.top h1 { font-size: clamp(1.45rem, 2.4vw, 1.9rem); }
+.top h1:focus { outline: none; }
+.top h1 em { font-family: var(--f-serif); font-weight: 400; color: var(--violet-2); }
+.top__sub { color: var(--mut-d); font-size: .88rem; margin-top: 4px; }
+.top__tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.field-inline[hidden] { display: none; }
+.field-inline { display: flex; align-items: center; gap: 8px; font-size: .8rem; color: var(--mut-d); }
+.select {
+  appearance: none; -webkit-appearance: none; min-height: 40px; padding: 0 34px 0 12px; border-radius: 10px;
+  border: 1px solid var(--line-d); background: var(--ink-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23A39CB8' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;
+  color: var(--fg-d); font-size: .88rem;
+}
+.select:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+.seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 11px; background: var(--ink-2); border: 1px solid var(--line-d); }
+.seg button { min-height: 34px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: var(--mut-d); font-size: .84rem; white-space: nowrap; }
+.seg button:hover { color: var(--fg-d); }
+.seg button[aria-pressed="true"] { background: var(--ink-3); color: var(--fg-d); box-shadow: inset 0 0 0 1px var(--line-d); }
+
+/* bell + alerts popover */
+.bell-wrap { position: relative; }
+.bell {
+  position: relative; width: 42px; height: 42px; display: grid; place-items: center; border-radius: 11px;
+  border: 1px solid var(--line-d); background: var(--ink-2); color: var(--fg-d);
+}
+.bell:hover, .bell[aria-expanded="true"] { border-color: var(--violet); }
+.bell svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.bell__n {
+  position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 99px;
+  background: var(--bad); color: #fff; font-family: var(--f-mono); font-size: .68rem; font-weight: 500; display: grid; place-items: center;
+  border: 2px solid var(--ink);
+}
+.bell__n[hidden] { display: none; }
+.bell__n.pop { animation: pop .35s var(--ease); }
+@keyframes pop { 50% { transform: scale(1.3); } }
+.alerts-pop {
+  position: absolute; right: 0; top: calc(100% + 10px); z-index: 60; width: min(400px, calc(100vw - 28px));
+  background: var(--ink-2); border: 1px solid var(--line-d); border-radius: var(--r-lg);
+  box-shadow: 0 30px 60px -20px rgba(0,0,0,.8); overflow: hidden;
+}
+.alerts-pop[hidden] { display: none; }
+.alerts-pop__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line-d); }
+.alerts-pop__head h2 { font-size: .95rem; }
+.alerts-pop__head p { font-size: .74rem; color: var(--mut-d); }
+.alerts-pop__body { max-height: min(60vh, 460px); overflow-y: auto; }
+
+.alert { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; padding: 14px 16px; border-bottom: 1px solid var(--line-d); }
+.alert:last-child { border-bottom: 0; }
+.alert__ico { grid-row: span 3; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; }
+.alert__ico svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.alert--bad .alert__ico { background: rgba(240,89,122,.14); color: #FF8FA8; }
+.alert--warn .alert__ico { background: rgba(242,181,68,.14); color: var(--warn); }
+.alert__t { font-size: .88rem; font-weight: 500; line-height: 1.35; }
+.alert__m { font-size: .76rem; color: var(--mut-d); }
+.alert__rule { font-family: var(--f-mono); font-size: .64rem; letter-spacing: .03em; color: var(--mut-d); opacity: .8; }
+.alert__act { display: flex; gap: 8px; margin-top: 8px; }
+.btn-sm { min-height: 32px; padding: 0 11px; font-size: .78rem; border-radius: 8px; }
+.empty { padding: 28px 16px; text-align: center; color: var(--mut-d); font-size: .86rem; }
+.empty b { display: block; color: var(--fg-d); font-weight: 500; margin-bottom: 2px; }
+.alert.leaving { opacity: 0; transform: translateX(14px); transition: opacity .25s, transform .25s var(--ease); }
+
+/* views */
+.view[hidden] { display: none; }
+.view { animation: fadein .3s var(--ease); }
+@keyframes fadein { from { opacity: 0; transform: translateY(6px); } }
+
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 14px; }
+.kpi { padding: 18px 18px 16px; position: relative; overflow: hidden; }
+.kpi__l { font-size: .8rem; color: var(--mut-d); display: flex; align-items: center; gap: 8px; }
+.kpi__v { font-size: clamp(1.3rem, 2.2vw, 1.75rem); font-weight: 600; letter-spacing: -.03em; margin: 8px 0 6px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kpi__d { font-size: .76rem; color: var(--mut-d); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.delta { font-family: var(--f-mono); font-size: .72rem; font-weight: 500; padding: 1px 6px; border-radius: 6px; }
+.delta--up { color: var(--ok-2); background: rgba(43,182,115,.12); }
+.delta--down { color: #FF8FA8; background: rgba(240,89,122,.12); }
+.kpi:first-child::after { content: ""; position: absolute; inset: 0 0 auto; height: 2px; background: var(--grad); }
+
+.card-h { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 18px 20px 0; }
+.card-h h2 { font-size: 1rem; }
+.card-h p { font-size: .8rem; color: var(--mut-d); margin-top: 2px; }
+.legend { display: flex; gap: 14px; font-size: .76rem; color: var(--mut-d); }
+.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+
+.chart-wrap { position: relative; padding: 8px 12px 12px; }
+.chart-wrap:focus-visible { outline-offset: -4px; border-radius: var(--r-lg); }
+.chart-wrap svg { width: 100%; overflow: visible; }
+.chart-wrap text { fill: var(--mut-d); font-family: var(--f-mono); font-size: 10px; }
+.tip {
+  position: absolute; top: 0; z-index: 3; pointer-events: none; transform: translate(-50%, 0);
+  padding: 8px 11px; border-radius: 10px; background: var(--ink-3); border: 1px solid var(--line-d);
+  box-shadow: 0 12px 30px -10px rgba(0,0,0,.8); font-size: .78rem; white-space: nowrap; opacity: 0; transition: opacity .15s;
+}
+.tip.on { opacity: 1; }
+.tip b { display: block; font-size: .92rem; font-variant-numeric: tabular-nums; }
+.tip span { color: var(--mut-d); }
+
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 14px; margin-top: 14px; }
+.stores { padding: 16px 20px 20px; display: grid; gap: 14px; }
+.store-row { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; font-size: .86rem; }
+.store-row .bar { grid-column: 1 / -1; }
+.store-row b { font-weight: 500; font-variant-numeric: tabular-nums; }
+.store-row.dim { opacity: .4; }
+.bar { height: 8px; border-radius: 99px; background: var(--ink-3); overflow: hidden; position: relative; }
+.bar > span { display: block; height: 100%; border-radius: inherit; background: var(--grad); transition: width .6s var(--ease); }
+.watch { padding: 6px 0 4px; }
+.watch .alert { padding: 12px 20px; align-items: center; }
+.watch .alert__ico { grid-row: span 2; }
+.watch-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 20px 16px; border-top: 1px solid var(--line-d); font-size: .8rem; color: var(--mut-d); }
+.mix { padding: 4px 20px 20px; }
+.mix h3 { font-size: .82rem; font-weight: 500; color: var(--mut-d); margin: 4px 0 10px; }
+.mix__bar { display: flex; height: 10px; border-radius: 99px; overflow: hidden; gap: 2px; }
+.mix__bar span { display: block; height: 100%; transition: width .6s var(--ease); }
+.mix__leg { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: .78rem; color: var(--mut-d); }
+.mix__leg i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+.mix__leg b { color: var(--fg-d); font-weight: 500; }
+
+/* tables */
+.toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--line-d); }
+.search { position: relative; flex: 1 1 240px; max-width: 380px; }
+.search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: none; stroke: var(--mut-d); stroke-width: 2; stroke-linecap: round; pointer-events: none; }
+.search .d-input { padding-left: 36px; font-size: .9rem; background: var(--ink); }
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+th { text-align: left; font-weight: 500; color: var(--mut-d); font-size: .76rem; padding: 0; border-bottom: 1px solid var(--line-d); white-space: nowrap; }
+th button { display: inline-flex; align-items: center; gap: 6px; width: 100%; padding: 12px 14px; border: 0; background: none; color: inherit; font-size: inherit; text-align: left; }
+th button:hover { color: var(--fg-d); }
+th button::after { content: "↕"; font-size: .7rem; opacity: .35; }
+th[aria-sort="ascending"] button::after { content: "↑"; opacity: 1; color: var(--violet-2); }
+th[aria-sort="descending"] button::after { content: "↓"; opacity: 1; color: var(--violet-2); }
+th[aria-sort="ascending"] button, th[aria-sort="descending"] button { color: var(--fg-d); }
+th.num, td.num { text-align: right; }
+th.num button { justify-content: flex-end; }
+td { padding: 12px 14px; border-bottom: 1px solid rgba(42,34,64,.6); white-space: nowrap; font-variant-numeric: tabular-nums; }
+tbody tr { transition: background-color .15s; }
+tbody tr:hover { background: rgba(255,255,255,.02); }
+td small { display: block; color: var(--mut-d); font-size: .74rem; }
+.tbl-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 20px; font-size: .8rem; color: var(--mut-d); }
+.only-m { display: none; }
+mark { background: rgba(155,107,255,.3); color: var(--fg-d); border-radius: 3px; padding: 0 1px; }
+
+/* stock */
+.stock-sum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 14px; }
+.stock-list { list-style: none; margin: 0; padding: 0; }
+.prod { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.8fr) 240px; align-items: center; gap: 10px 22px; padding: 16px 20px; border-bottom: 1px solid var(--line-d); }
+.prod:last-child { border-bottom: 0; }
+.prod__name { font-weight: 500; font-size: .92rem; }
+.prod__name small { display: block; font-weight: 400; color: var(--mut-d); font-size: .76rem; margin-top: 2px; }
+.prod__lvl { display: grid; gap: 7px; }
+.prod__nums { display: flex; justify-content: space-between; gap: 10px; font-size: .78rem; color: var(--mut-d); }
+.prod__nums b { color: var(--fg-d); font-weight: 500; font-size: .86rem; font-variant-numeric: tabular-nums; }
+.prod .bar { height: 10px; overflow: visible; }
+.prod .bar > span { background: var(--violet); }
+.prod.is-low .bar > span { background: var(--bad); }
+.prod.is-warn .bar > span { background: var(--warn); }
+.bar__min { position: absolute; top: -3px; bottom: -3px; width: 2px; border-radius: 2px; background: var(--fg-d); opacity: .55; }
+.prod__act { display: flex; align-items: center; gap: 10px; justify-content: flex-end; }
+.restock { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 14px; border-radius: 12px; background: var(--ink); border: 1px solid var(--line-d); }
+.restock label { display: grid; gap: 6px; font-size: .78rem; color: var(--mut-d); flex: 0 1 180px; }
+.restock .hint { font-size: .76rem; color: var(--mut-d); flex: 1 1 180px; }
+.restock .err { color: #FF8FA8; }
+.prod.flash { animation: flash 1s var(--ease); }
+@keyframes flash { 0% { background: rgba(43,182,115,.16); } 100% { background: transparent; } }
+
+/* finance */
+.fin-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 14px; margin-top: 14px; align-items: start; }
+.bars-wrap { padding: 8px 14px 14px; }
+.bars-wrap text { fill: var(--mut-d); font-family: var(--f-mono); font-size: 10px; }
+.fin-list { list-style: none; margin: 0; padding: 0; }
+.fin { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 14px; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--line-d); }
+.fin:last-child { border-bottom: 0; }
+.fin__dir { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; font-size: .9rem; }
+.fin__dir--in { background: rgba(155,107,255,.14); color: var(--violet-2); }
+.fin__dir--out { background: rgba(240,89,122,.12); color: #FF8FA8; }
+.fin__d { font-size: .9rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fin__d small { display: flex; gap: 8px; align-items: center; font-weight: 400; font-size: .76rem; color: var(--mut-d); margin-top: 3px; flex-wrap: wrap; }
+.fin__r { display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
+.fin__r .d-btn { min-width: 90px; }
+.fin-grid > .d-card:first-child { position: sticky; top: calc(var(--bar-h) + 16px); }
+.fin__v { font-variant-numeric: tabular-nums; font-weight: 500; font-size: .92rem; text-align: right; min-width: 92px; }
+.fin.is-paid .fin__d, .fin.is-paid .fin__v { color: var(--mut-d); }
+.fin.is-paid .fin__v { text-decoration: line-through; text-decoration-color: rgba(163,156,184,.5); }
+
+.foot { margin-top: 28px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-size: .78rem; color: var(--mut-d); }
+.linkish { border: 0; background: none; color: var(--mut-d); font-size: .78rem; text-decoration: underline; text-underline-offset: 3px; padding: 6px 2px; }
+.linkish:hover { color: var(--fg-d); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1180px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fin-grid { grid-template-columns: 1fr; }
+  .fin-grid > .d-card:first-child { position: static; }
+}
+@media (max-width: 920px) {
+  .portal { grid-template-columns: minmax(0, 1fr); }
+  .side { min-width: 0; }
+  .side {
+    height: auto; z-index: 50; flex-direction: row; align-items: center; gap: 0; padding: 8px clamp(10px, 3vw, 28px);
+    border-right: 0; border-bottom: 1px solid var(--line-d); background: rgba(10,8,18,.94);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  }
+  .org, .nav__label, .side__foot { display: none; }
+  .nav { min-width: 0; flex-direction: row; gap: 4px; overflow-x: auto; scrollbar-width: none; width: 100%; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav button { width: auto; flex: 1 0 auto; justify-content: center; white-space: nowrap; min-height: 38px; padding: 0 12px; font-size: .86rem; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .prod { grid-template-columns: minmax(0, 1fr) auto; }
+  .prod__act { min-width: 0; }
+  .prod__lvl { grid-column: 1 / -1; grid-row: 2; }
+}
+@media (max-width: 600px) {
+  .content { padding-top: 20px; }
+  .top { align-items: flex-start; }
+  .top > div:first-child { flex: 1 1 100%; }
+  .top__tools { width: 100%; }
+  .top__tools .field-inline { flex: 1; }
+  .top__tools .select { flex: 1; min-width: 0; }
+  .ov-tools { width: 100%; }
+  .ov-tools .seg { width: 100%; }
+  .ov-tools .seg button { flex: 1; }
+  .kpis { gap: 10px; }
+  .kpi { padding: 14px; }
+  .kpi__v { font-size: 1.2rem; }
+  .stock-sum { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .stock-sum .kpi__v { font-size: 1.1rem; }
+  .col-opt { display: none; }
+  .only-m { display: inline !important; }
+  td, th button { padding-left: 10px; padding-right: 10px; }
+  .fin { grid-template-columns: auto minmax(0, 1fr); padding: 14px 16px; }
+  .fin__r { grid-column: 2; justify-content: space-between; }
+  .fin__v { text-align: left; min-width: 0; }
+  .card-h, .toolbar { padding-left: 16px; padding-right: 16px; }
+  .prod { padding: 14px 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .view { animation: none; }
+}
+</style>
+</head>
+<body>
+<header class="demo-bar">
+  <a class="demo-brand" href="../index.html" aria-label="Alfa Dev, voltar ao site">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.5 5.5c-1.6 6.2-4.6 13-9.4 13-3.1 0-5.1-2.6-5.1-6 0-3.8 2.5-7 5.6-7 4.2 0 5.6 5.4 7.4 10.2.8 2 1.9 2.8 3 2.8"/></svg>
+    <b>Alfa <span>Dev</span></b>
+  </a>
+  <div class="demo-title"><strong>Portal de gestão</strong><span class="demo-badge">Demonstração</span></div>
+  <div class="demo-bar__end">
+    <a class="demo-back" href="../index.html#cases">← <span>Voltar ao site</span></a>
+    <a class="demo-cta" href="../index.html#contato">Quero algo assim <span aria-hidden="true">→</span></a>
+  </div>
+</header>
+<div class="demo-intro">
+  <p>Vendas, estoque e financeiro num só painel, com alertas automáticos quando algo foge do normal.</p>
+  <p class="demo-intro__note">Dados fictícios · roda no seu navegador</p>
+</div>
+
+<main id="app">
+  <div class="portal">
+    <aside class="side" aria-label="Navegação do portal">
+      <div class="org">
+        <div class="org__logo" aria-hidden="true">a</div>
+        <div><b>Café Aurora</b><small>3 lojas · Rio de Janeiro</small></div>
+      </div>
+      <nav class="nav" aria-label="Seções">
+        <div class="nav__label">Painel</div>
+        <button type="button" data-view="geral" aria-current="page">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>
+          Visão geral
+        </button>
+        <button type="button" data-view="vendas">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2l2.2 10.2a1.5 1.5 0 0 0 1.5 1.2h7.6a1.5 1.5 0 0 0 1.5-1.1L20 9H7"/><circle cx="10" cy="20" r="1"/><circle cx="17" cy="20" r="1"/></svg>
+          Vendas
+        </button>
+        <button type="button" data-view="estoque">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 7v10l8 4 8-4V7z"/><path d="m4 7 8 4 8-4M12 11v10"/></svg>
+          Estoque <span class="nav__count" id="navLow"></span>
+        </button>
+        <button type="button" data-view="financeiro">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M16 14.5h2"/></svg>
+          Financeiro
+        </button>
+      </nav>
+      <div class="side__foot"><span class="dot-live" aria-hidden="true"></span><span id="syncTxt">Dados atualizados agora</span></div>
+    </aside>
+
+    <div class="content">
+      <div class="top">
+        <div>
+          <h1 id="viewTitle" tabindex="-1">Visão geral</h1>
+          <p class="top__sub" id="viewSub">Resumo das três lojas</p>
+        </div>
+        <div class="top__tools">
+          <label class="field-inline" id="storeField">
+            <span>Loja</span>
+            <select class="select" id="storeSel">
+              <option value="all">Todas</option>
+              <option value="centro">Loja Centro</option>
+              <option value="barra">Loja Barra</option>
+              <option value="tijuca">Loja Tijuca</option>
+            </select>
+          </label>
+          <div class="bell-wrap">
+            <button type="button" class="bell" id="bellBtn" aria-expanded="false" aria-controls="alertsPop" aria-label="Alertas">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>
+              <span class="bell__n" id="bellN" aria-hidden="true">0</span>
+            </button>
+            <div class="alerts-pop" id="alertsPop" hidden role="dialog" aria-labelledby="alertsTitle">
+              <div class="alerts-pop__head">
+                <div><h2 id="alertsTitle">Alertas automáticos</h2><p>Gerados por regras sobre os dados do dia</p></div>
+                <button type="button" class="d-btn btn-sm" id="alertsClose">Fechar</button>
+              </div>
+              <div class="alerts-pop__body" id="alertsList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visão geral -->
+      <section class="view" id="view-geral" aria-labelledby="viewTitle">
+        <div class="top" style="margin:-8px 0 16px">
+          <div class="ov-tools">
+            <div class="seg" role="group" aria-label="Período">
+              <button type="button" data-period="7" aria-pressed="false">7 dias</button>
+              <button type="button" data-period="30" aria-pressed="true">30 dias</button>
+              <button type="button" data-period="90" aria-pressed="false">90 dias</button>
+            </div>
+          </div>
+        </div>
+        <div class="kpis" id="kpis"></div>
+        <div class="d-card">
+          <div class="card-h">
+            <div><h2>Faturamento diário</h2><p id="chartSub"></p></div>
+            <div class="legend" aria-hidden="true"><span><i style="background:var(--violet)"></i>Período atual</span><span><i style="background:repeating-linear-gradient(90deg,var(--mut-d) 0 4px,transparent 4px 7px)"></i>Período anterior</span></div>
+          </div>
+          <div class="chart-wrap" id="chartWrap" tabindex="0" role="group" aria-label="Gráfico de faturamento diário. Use as setas para percorrer os dias.">
+            <svg id="chart" height="260" aria-hidden="true"></svg>
+            <div class="tip" id="tip"></div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="d-card">
+            <div class="card-h"><div><h2>Faturamento por loja</h2><p id="storesSub"></p></div></div>
+            <div class="stores" id="storesBox"></div>
+            <div class="mix" id="mixBox"></div>
+          </div>
+          <div class="d-card">
+            <div class="card-h"><div><h2>Precisa de atenção</h2><p>Alertas automáticos em aberto</p></div></div>
+            <div class="watch" id="watchList"></div>
+            <div class="watch-row" id="watchMore"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vendas -->
+      <section class="view" id="view-vendas" hidden aria-labelledby="viewTitle">
+        <div class="d-card">
+          <div class="toolbar">
+            <label class="search">
+              <span class="sr-only">Buscar pedidos</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+              <input class="d-input" type="search" id="orderSearch" placeholder="Buscar por cliente, pedido ou loja" autocomplete="off">
+            </label>
+            <span class="d-muted" style="font-size:.8rem" id="orderCount" aria-live="polite"></span>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <caption class="sr-only">Pedidos recentes</caption>
+              <thead><tr id="orderHead">
+                <th scope="col" data-key="id"><button type="button">Pedido</button></th>
+                <th scope="col" data-key="ts" aria-sort="descending"><button type="button">Data</button></th>
+                <th scope="col" data-key="cliente" class="col-opt"><button type="button">Cliente</button></th>
+                <th scope="col" data-key="loja" class="col-opt"><button type="button">Loja</button></th>
+                <th scope="col" data-key="canal" class="col-opt"><button type="button">Canal</button></th>
+                <th scope="col" data-key="status"><button type="button">Status</button></th>
+                <th scope="col" data-key="valor" class="num"><button type="button">Valor</button></th>
+              </tr></thead>
+              <tbody id="orderBody"></tbody>
+            </table>
+          </div>
+          <div class="tbl-foot">
+            <span id="orderShown"></span>
+            <button type="button" class="d-btn" id="moreBtn">Carregar mais</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Estoque -->
+      <section class="view" id="view-estoque" hidden aria-labelledby="viewTitle">
+        <div class="stock-sum" id="stockSum"></div>
+        <div class="d-card">
+          <div class="card-h" style="padding-bottom:14px;border-bottom:1px solid var(--line-d)">
+            <div><h2>Insumos</h2><p>Estoque central · a linha clara marca o mínimo</p></div>
+          </div>
+          <ul class="stock-list" id="stockList"></ul>
+        </div>
+      </section>
+
+      <!-- Financeiro -->
+      <section class="view" id="view-financeiro" hidden aria-labelledby="viewTitle">
+        <div class="kpis" id="finSum" style="grid-template-columns:repeat(3,minmax(0,1fr))"></div>
+        <div class="fin-grid">
+          <div class="d-card">
+            <div class="card-h">
+              <div><h2>Fluxo por semana</h2><p>Próximas 4 semanas</p></div>
+              <div class="legend" aria-hidden="true"><span><i style="background:var(--violet)"></i>Entradas</span><span><i style="background:var(--bad)"></i>Saídas</span></div>
+            </div>
+            <div class="bars-wrap" id="barsWrap"><svg id="bars" height="220" role="img" aria-label="Entradas e saídas por semana"></svg></div>
+          </div>
+          <div class="d-card">
+            <div class="toolbar">
+              <div class="seg" role="group" aria-label="Filtrar lançamentos">
+                <button type="button" data-fin="all" aria-pressed="true">Todos</button>
+                <button type="button" data-fin="in" aria-pressed="false">A receber</button>
+                <button type="button" data-fin="out" aria-pressed="false">A pagar</button>
+              </div>
+            </div>
+            <ul class="fin-list" id="finList"></ul>
+          </div>
+        </div>
+      </section>
+
+      <div class="foot">
+        <span>Café Aurora é uma empresa fictícia. As alterações ficam salvas só neste navegador.</span>
+        <button type="button" class="linkish" id="resetBtn">Restaurar demonstração</button>
+      </div>
+    </div>
+  </div>
+  <div class="d-toast" id="toast" role="status" aria-live="polite"></div>
+</main>
+
+<script>
+(function () {
+'use strict';
+
+/* ---------- utils ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const brl0 = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+const brl2 = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+const brlC = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 });
+const num = new Intl.NumberFormat('pt-BR');
+const pct1 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const DAY = 864e5;
+const today = new Date(); today.setHours(0, 0, 0, 0);
+const addDays = (d, n) => new Date(d.getTime() + n * DAY);
+const fDay = d => d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' }).replace('.', '');
+const fDM = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+const fShort = d => d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' }).replace('.', '').replace(' de ', ' ');
+
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+const rnd = mulberry32(20261012);
+const rr = (a, b) => a + rnd() * (b - a);
+const pick = arr => arr[Math.floor(rnd() * arr.length)];
+
+/* ---------- persisted state ---------- */
+const KEY = 'alfa-demo-portal-v1';
+const blank = () => ({ restock: {}, paid: {}, dismissed: [] });
+let saved = blank();
+try { const raw = localStorage.getItem(KEY); if (raw) saved = Object.assign(blank(), JSON.parse(raw)); } catch (e) { saved = blank(); }
+const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) { /* storage indisponível */ } };
+
+/* ---------- data ---------- */
+const STORES = [
+  { id: 'centro', name: 'Loja Centro', base: 5200, ticket: 41 },
+  { id: 'barra', name: 'Loja Barra', base: 4300, ticket: 47 },
+  { id: 'tijuca', name: 'Loja Tijuca', base: 3500, ticket: 36 }
+];
+const storeName = id => (STORES.find(s => s.id === id) || {}).name;
+const DOW = [1.12, .84, .9, .96, 1.02, 1.2, 1.32]; // dom..sáb
+const HIST = 180;
+const days = []; // oldest -> yesterday
+for (let i = HIST; i >= 1; i--) {
+  const date = addDays(today, -i);
+  const k = HIST - i;
+  const row = { date, s: {} };
+  STORES.forEach(st => {
+    let rev = st.base * DOW[date.getDay()] * (1 + k * .0012) * rr(.88, 1.12);
+    const ticket = st.ticket * rr(.93, 1.07);
+    row.s[st.id] = { rev, orders: 0, cost: rev * rr(.57, .65), ticket };
+  });
+  days.push(row);
+}
+// a Barra teve uma terça fraca: a mais recente
+const lastTue = days.slice().reverse().find(d => d.date.getDay() === 2);
+lastTue.s.barra.rev *= .72; lastTue.s.barra.cost = lastTue.s.barra.rev * .63;
+days.forEach(d => STORES.forEach(st => { const x = d.s[st.id]; x.orders = Math.max(1, Math.round(x.rev / x.ticket)); }));
+
+const PRODUCTS = [
+  { id: 'graos', name: 'Grãos especiais', det: 'Bourbon amarelo · torra média', un: 'kg', qty: 6, min: 15, max: 40, use: 2.6 },
+  { id: 'leite', name: 'Leite integral', det: 'Laticínios Vale Verde', un: 'L', qty: 58, min: 30, max: 120, use: 14 },
+  { id: 'aveia', name: 'Bebida de aveia', det: 'Barista edition', un: 'L', qty: 9, min: 12, max: 40, use: 3.1 },
+  { id: 'copos', name: 'Copos 300 ml', det: 'Papel compostável', un: 'un', qty: 640, min: 300, max: 1500, use: 95 },
+  { id: 'croissant', name: 'Croissant congelado', det: 'Caixa com 40', un: 'un', qty: 52, min: 40, max: 160, use: 18 },
+  { id: 'paoqueijo', name: 'Pão de queijo', det: 'Massa congelada', un: 'kg', qty: 24, min: 10, max: 50, use: 3.4 },
+  { id: 'filtros', name: 'Filtros de papel V60', det: 'Pacote com 100', un: 'un', qty: 140, min: 200, max: 600, use: 30 },
+  { id: 'chocolate', name: 'Chocolate 70%', det: 'Para mocha e bolos', un: 'kg', qty: 6, min: 4, max: 15, use: .6 },
+  { id: 'acucar', name: 'Açúcar demerara', det: 'Sachês e granel', un: 'kg', qty: 18, min: 8, max: 30, use: 1.2 }
+];
+const qtyOf = p => p.qty + (saved.restock[p.id] || 0);
+
+const FIN = [
+  { id: 'f1', dir: 'in', desc: 'Cartões · antecipação', who: 'Adquirente', off: 1, v: 9870 },
+  { id: 'f2', dir: 'out', desc: 'Torrefação Serra Azul', who: 'Grãos · pedido 0921', off: 2, v: 6400 },
+  { id: 'f3', dir: 'in', desc: 'iFood · repasse semanal', who: 'Delivery', off: 3, v: 4820 },
+  { id: 'f4', dir: 'out', desc: 'Laticínios Vale Verde', who: 'Leite e derivados', off: 4, v: 2380 },
+  { id: 'f5', dir: 'out', desc: 'Aluguel · Loja Barra', who: 'Imobiliária Orla', off: 5, v: 8500 },
+  { id: 'f6', dir: 'in', desc: 'Buffet Ipanema', who: 'Evento corporativo', off: -3, v: 3200 },
+  { id: 'f7', dir: 'out', desc: 'Internet · 3 lojas', who: 'Fibra Rio', off: -2, v: 450, paid: true },
+  { id: 'f8', dir: 'out', desc: 'Embalagens Eco Pack', who: 'Copos e tampas', off: 9, v: 1250 },
+  { id: 'f9', dir: 'in', desc: 'iFood · repasse semanal', who: 'Delivery', off: 10, v: 5100 },
+  { id: 'f10', dir: 'in', desc: 'Rappi · repasse', who: 'Delivery', off: 11, v: 2150 },
+  { id: 'f11', dir: 'out', desc: 'Energia elétrica · 3 lojas', who: 'Concessionária', off: 12, v: 2940 },
+  { id: 'f12', dir: 'in', desc: 'Coworking Lapa', who: 'Contrato de café mensal', off: 16, v: 1800 },
+  { id: 'f13', dir: 'out', desc: 'Folha de pagamento', who: '18 colaboradores', off: 19, v: 24600 },
+  { id: 'f14', dir: 'in', desc: 'Cartões · antecipação', who: 'Adquirente', off: 15, v: 21400 },
+  { id: 'f15', dir: 'out', desc: 'Manutenção da espresso', who: 'Técnica Cremona', off: 22, v: 780 },
+  { id: 'f16', dir: 'in', desc: 'iFood · repasse semanal', who: 'Delivery', off: 24, v: 4960 }
+];
+FIN.forEach(f => { f.v = Math.round(f.v * rr(.97, 1.03) * 100) / 100; f.due = addDays(today, f.off); });
+const isPaid = f => !!(f.paid || saved.paid[f.id]);
+
+const NAMES = ['Mariana Costa', 'João Pereira', 'Beatriz Lima', 'Lucas Almeida', 'Fernanda Rocha', 'Rafael Souza', 'Camila Nunes', 'Pedro Henrique', 'Ana Clara Dias', 'Gustavo Melo', 'Larissa Freitas', 'Thiago Barros', 'Juliana Moura', 'Bruno Cardoso', 'Isabela Teixeira', 'Diego Martins', 'Paula Ribeiro', 'Vitor Azevedo', 'Helena Castro', 'Marcos Vinícius'];
+const CANAIS = ['Balcão', 'Balcão', 'Balcão', 'App', 'iFood', 'Rappi'];
+const STATUS = [['Entregue', 'ok'], ['Entregue', 'ok'], ['Entregue', 'ok'], ['Entregue', 'ok'], ['Em preparo', ''], ['Pendente', 'warn'], ['Cancelado', 'bad']];
+const orders = [];
+let oid = 18452;
+for (let i = 0; i < 74; i++) {
+  const st = pick(STORES);
+  const ts = today.getTime() - Math.floor(rr(.02, 5) * DAY);
+  const d = new Date(ts); d.setHours(7 + Math.floor(rr(0, 13)), Math.floor(rr(0, 60)));
+  const s = pick(STATUS);
+  orders.push({ id: oid - i * Math.ceil(rr(1, 4)), ts: d.getTime(), cliente: pick(NAMES), loja: st.id, canal: pick(CANAIS), itens: 1 + Math.floor(rr(0, 5)), valor: Math.round(st.ticket * rr(.4, 2.2) * 100) / 100, status: s[0], tone: s[1] });
+}
+
+/* ---------- UI state ---------- */
+const ui = { view: 'geral', period: 30, store: 'all', sortKey: 'ts', sortDir: -1, q: '', shown: 12, fin: 'all', openRestock: null };
+const VIEWS = {
+  geral: ['Visão geral', () => 'Resumo ' + (ui.store === 'all' ? 'das três lojas' : 'da ' + storeName(ui.store))],
+  vendas: ['Vendas', () => 'Pedidos dos últimos 5 dias · ' + (ui.store === 'all' ? 'todas as lojas' : storeName(ui.store))],
+  estoque: ['Estoque', () => 'Insumos do estoque central e reposições'],
+  financeiro: ['Financeiro', () => 'Contas a receber e a pagar']
+};
+
+/* ---------- toast ---------- */
+const toastEl = $('#toast'); let toastT;
+function toast(msg) {
+  toastEl.textContent = msg; toastEl.classList.add('is-on');
+  clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('is-on'), 2800);
+}
+
+/* ---------- aggregations ---------- */
+function agg(slice, store) {
+  let rev = 0, orders = 0, cost = 0;
+  slice.forEach(d => STORES.forEach(st => {
+    if (store !== 'all' && st.id !== store) return;
+    const x = d.s[st.id]; rev += x.rev; orders += x.orders; cost += x.cost;
+  }));
+  return { rev, orders, ticket: orders ? rev / orders : 0, margin: rev ? (rev - cost) / rev * 100 : 0 };
+}
+const series = (slice, store) => slice.map(d => STORES.reduce((a, st) => a + ((store === 'all' || st.id === store) ? d.s[st.id].rev : 0), 0));
+
+/* ---------- alerts (rule-based) ---------- */
+const ICO = {
+  box: '<svg viewBox="0 0 24 24"><path d="M12 3 4 7v10l8 4 8-4V7z"/><path d="M12 9v4M12 16.5v.01"/></svg>',
+  down: '<svg viewBox="0 0 24 24"><path d="m3 7 7 7 4-4 7 7"/><path d="M21 12v5h-5"/></svg>',
+  cal: '<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+  clock: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>'
+};
+function computeAlerts() {
+  const out = [];
+  PRODUCTS.forEach(p => {
+    const q = qtyOf(p);
+    if (q < p.min) out.push({ id: 'stock-' + p.id, sev: 'bad', ico: 'box', view: 'estoque', t: `Estoque de ${p.name} abaixo do mínimo`, m: `${num.format(q)} ${p.un} em estoque · mínimo ${num.format(p.min)} ${p.un} · dura ~${Math.max(1, Math.floor(q / p.use))} dia(s)`, rule: 'regra: estoque < mínimo' });
+  });
+  // vendas da Barra na última terça vs média das 8 terças anteriores
+  const tues = days.filter(d => d.date.getDay() === 2);
+  const last = tues[tues.length - 1];
+  const prev = tues.slice(-9, -1);
+  const avg = prev.reduce((a, d) => a + d.s.barra.rev, 0) / prev.length;
+  const drop = (1 - last.s.barra.rev / avg) * 100;
+  if (drop >= 20) out.push({ id: 'sales-barra-' + fDM(last.date), sev: 'warn', ico: 'down', view: 'geral', store: 'barra', t: `Vendas da Loja Barra ${Math.round(drop)}% abaixo da média de terça`, m: `${fShort(last.date)}: ${brl0.format(last.s.barra.rev)} · média das últimas 8 terças: ${brl0.format(avg)}`, rule: 'regra: queda > 20% vs. média do dia da semana' });
+  const week = FIN.filter(f => f.dir === 'out' && !isPaid(f) && f.off >= 0 && f.off <= 6);
+  if (week.length) out.push({ id: 'bills-week', sev: 'warn', ico: 'cal', view: 'financeiro', t: week.length === 1 ? '1 conta vence nesta semana' : `${week.length} contas vencem nesta semana`, m: `Total de ${brl2.format(week.reduce((a, f) => a + f.v, 0))} até ${fShort(addDays(today, 6))}`, rule: 'regra: vencimento ≤ 7 dias' });
+  FIN.filter(f => f.dir === 'in' && !isPaid(f) && f.off < 0).forEach(f => out.push({ id: 'late-' + f.id, sev: 'bad', ico: 'clock', view: 'financeiro', t: `Recebimento atrasado: ${f.desc}`, m: `${brl2.format(f.v)} · venceu há ${-f.off} dia(s)`, rule: 'regra: a receber vencido' }));
+  return out.filter(a => !saved.dismissed.includes(a.id));
+}
+
+function alertHTML(a) {
+  return `<div class="alert alert--${a.sev}" data-id="${a.id}">
+    <div class="alert__ico" aria-hidden="true">${ICO[a.ico]}</div>
+    <p class="alert__t">${esc(a.t)}</p>
+    <p class="alert__m">${esc(a.m)}</p>
+    <div><p class="alert__rule">${esc(a.rule)}</p>
+    <div class="alert__act"><button type="button" class="d-btn btn-sm" data-go="${a.view}"${a.store ? ` data-store="${a.store}"` : ''}>Ver detalhes</button><button type="button" class="d-btn btn-sm" data-dismiss="${a.id}">Resolvido</button></div></div>
+  </div>`;
+}
+let lastCount = null;
+function renderAlerts() {
+  const list = computeAlerts();
+  const empty = '<div class="empty"><b>Tudo em ordem</b>Nenhum alerta em aberto.</div>';
+  $('#alertsList').innerHTML = list.length ? list.map(alertHTML).join('') : empty;
+  $('#watchList').innerHTML = list.length ? list.slice(0, 3).map(a => `<div class="alert alert--${a.sev}" data-id="${a.id}"><div class="alert__ico" aria-hidden="true">${ICO[a.ico]}</div><p class="alert__t">${esc(a.t)}</p><p class="alert__m">${esc(a.m)}</p></div>`).join('') : empty;
+  $('#watchMore').innerHTML = list.length ? `<span>${list.length} alerta${list.length > 1 ? 's' : ''} em aberto</span><button type="button" class="d-btn btn-sm" id="watchOpen">Ver e resolver</button>` : '<span>Regras verificadas a cada atualização</span>';
+  const n = $('#bellN');
+  n.textContent = list.length; n.hidden = !list.length;
+  $('#bellBtn').setAttribute('aria-label', list.length ? `Alertas: ${list.length} em aberto` : 'Alertas: nenhum em aberto');
+  if (lastCount !== null && lastCount !== list.length && !reduce) { n.classList.remove('pop'); void n.offsetWidth; n.classList.add('pop'); }
+  lastCount = list.length;
+  const low = PRODUCTS.filter(p => qtyOf(p) < p.min).length;
+  $('#navLow').textContent = low || '';
+}
+
+/* ---------- overview ---------- */
+function deltaHTML(cur, prev, pp) {
+  const d = pp ? cur - prev : (prev ? (cur / prev - 1) * 100 : 0);
+  const up = d >= 0;
+  const txt = (up ? '+' : '−') + pct1.format(Math.abs(d)) + (pp ? ' p.p.' : '%');
+  return `<span class="delta delta--${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${txt}</span>`;
+}
+function renderKpis() {
+  const n = ui.period;
+  const cur = agg(days.slice(-n), ui.store), prev = agg(days.slice(-2 * n, -n), ui.store);
+  const cards = [
+    ['Faturamento', brl0.format(cur.rev), deltaHTML(cur.rev, prev.rev)],
+    ['Pedidos', num.format(cur.orders), deltaHTML(cur.orders, prev.orders)],
+    ['Ticket médio', brl2.format(cur.ticket), deltaHTML(cur.ticket, prev.ticket)],
+    ['Margem bruta', pct1.format(cur.margin) + '%', deltaHTML(cur.margin, prev.margin, true)]
+  ];
+  $('#kpis').innerHTML = cards.map(c => `<div class="d-card kpi"><p class="kpi__l">${c[0]}</p><p class="kpi__v">${c[1]}</p><p class="kpi__d">${c[2]}<span>vs. ${n} dias anteriores</span></p></div>`).join('');
+  // por loja
+  const tot = agg(days.slice(-n), 'all').rev;
+  $('#storesSub').textContent = `Últimos ${n} dias · total ${brl0.format(tot)}`;
+  $('#storesBox').innerHTML = STORES.map(st => {
+    const r = agg(days.slice(-n), st.id).rev;
+    const dim = ui.store !== 'all' && ui.store !== st.id;
+    return `<div class="store-row${dim ? ' dim' : ''}"><span>${st.name}</span><span><b>${brl0.format(r)}</b> <span class="d-muted">· ${Math.round(r / tot * 100)}%</span></span><div class="bar" aria-hidden="true"><span style="width:${(r / tot * 100 * 1.9).toFixed(1)}%"></span></div></div>`;
+  }).join('');
+  // mix de canais (proporção fixa por loja, derivada dos pedidos)
+  const ch = { 'Balcão': 0, 'App': 0, 'iFood': 0, 'Rappi': 0 };
+  orders.filter(o => ui.store === 'all' || o.loja === ui.store).forEach(o => { ch[o.canal] += o.valor; });
+  const chT = Object.values(ch).reduce((a, b) => a + b, 0) || 1;
+  const cols = ['#9B6BFF', '#C4A8FF', '#F0597A', '#F2B544'];
+  const ent = Object.entries(ch);
+  $('#mixBox').innerHTML = `<h3>Canais de venda${ui.store === 'all' ? '' : ' · ' + storeName(ui.store)}</h3><div class="mix__bar" aria-hidden="true">${ent.map(([k, v], i) => `<span style="width:${(v / chT * 100).toFixed(1)}%;background:${cols[i]}"></span>`).join('')}</div><div class="mix__leg">${ent.map(([k, v], i) => `<span><i style="background:${cols[i]}"></i>${k} <b>${Math.round(v / chT * 100)}%</b></span>`).join('')}</div>`;
+}
+
+/* chart */
+const chart = { from: null, to: null, prevTo: null, prevFrom: null, raf: 0, vals: [], prevVals: [], dates: [], hover: -1 };
+function resample(arr, n) {
+  if (!arr || !arr.length) return new Array(n).fill(0);
+  if (arr.length === n) return arr.slice();
+  return Array.from({ length: n }, (_, i) => {
+    const x = n === 1 ? 0 : i / (n - 1) * (arr.length - 1);
+    const a = Math.floor(x), b = Math.min(arr.length - 1, a + 1);
+    return arr[a] + (arr[b] - arr[a]) * (x - a);
+  });
+}
+function setChartData(animate) {
+  const n = ui.period;
+  const slice = days.slice(-n);
+  const to = series(slice, ui.store), prevTo = series(days.slice(-2 * n, -n), ui.store);
+  chart.dates = slice.map(d => d.date);
+  $('#chartSub').textContent = `Últimos ${n} dias · ${fShort(chart.dates[0])} a ${fShort(chart.dates[n - 1])}` + (ui.store === 'all' ? '' : ' · ' + storeName(ui.store));
+  const from = resample(chart.vals.length ? chart.vals : to.map(() => 0), n);
+  const prevFrom = resample(chart.prevVals.length ? chart.prevVals : prevTo.map(() => 0), n);
+  cancelAnimationFrame(chart.raf);
+  if (!animate || reduce) { chart.vals = to; chart.prevVals = prevTo; drawChart(); return; }
+  const t0 = performance.now(), dur = 650;
+  const step = now => {
+    const t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 3);
+    chart.vals = to.map((v, i) => from[i] + (v - from[i]) * e);
+    chart.prevVals = prevTo.map((v, i) => prevFrom[i] + (v - prevFrom[i]) * e);
+    drawChart();
+    if (t < 1) chart.raf = requestAnimationFrame(step); else { chart.vals = to; chart.prevVals = prevTo; drawChart(); }
+  };
+  chart.raf = requestAnimationFrame(step);
+}
+function niceMax(v, ticks = 4) { if (!(v > 0)) v = 1; const st = v / ticks, p = Math.pow(10, Math.floor(Math.log10(st))); const f = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 7.5, 8, 10].find(x => x * p >= st * .9999) || 10; return f * p * ticks; }
+function geom() {
+  const svg = $('#chart'), W = Math.max(280, $('#chartWrap').clientWidth - 24), H = W < 520 ? 210 : 260;
+  svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  return { W, H, l: W < 520 ? 44 : 56, r: 8, t: 14, b: 26 };
+}
+function drawChart() {
+  if (!chart.vals.length) return;
+  const g = geom(), v = chart.vals, pv = chart.prevVals, n = v.length;
+  const max = niceMax(Math.max(...v, ...pv) * 1.05);
+  const pw = g.W - g.l - g.r, ph = g.H - g.t - g.b;
+  const X = i => g.l + (n === 1 ? pw / 2 : i / (n - 1) * pw), Y = y => g.t + ph - y / max * ph;
+  const line = arr => arr.map((y, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(y).toFixed(1)).join('');
+  let grid = '';
+  for (let k = 0; k <= 4; k++) {
+    const val = max * k / 4, y = Y(val).toFixed(1);
+    grid += `<line x1="${g.l}" x2="${g.W - g.r}" y1="${y}" y2="${y}" stroke="#2A2240" ${k ? 'stroke-dasharray="2 4"' : ''}/><text x="${g.l - 8}" y="${+y + 3}" text-anchor="end">${k ? brlC.format(val).replace(/\s/g, ' ') : '0'}</text>`;
+  }
+  const ticks = Math.min(n, g.W < 520 ? 4 : 7);
+  let xl = '';
+  for (let k = 0; k < ticks; k++) {
+    const i = Math.round(k / (ticks - 1) * (n - 1));
+    const anchor = k === 0 ? 'start' : k === ticks - 1 ? 'end' : 'middle';
+    xl += `<text x="${X(i).toFixed(1)}" y="${g.H - 6}" text-anchor="${anchor}">${chart.dates[i] ? fDM(chart.dates[i]) : ''}</text>`;
+  }
+  const area = line(v) + `L${X(n - 1).toFixed(1)} ${g.t + ph}L${X(0).toFixed(1)} ${g.t + ph}Z`;
+  const h = chart.hover;
+  let hov = '';
+  if (h >= 0 && h < n) hov = `<line x1="${X(h)}" x2="${X(h)}" y1="${g.t}" y2="${g.t + ph}" stroke="#C4A8FF" stroke-opacity=".35"/><circle cx="${X(h)}" cy="${Y(v[h])}" r="5" fill="#0A0812" stroke="#C4A8FF" stroke-width="2.5"/>`;
+  $('#chart').innerHTML = `<defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9B6BFF" stop-opacity=".38"/><stop offset="1" stop-color="#9B6BFF" stop-opacity="0"/></linearGradient><linearGradient id="gl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6B3BE8"/><stop offset="1" stop-color="#C4A8FF"/></linearGradient></defs>
+    ${grid}${xl}
+    <path d="${line(pv)}" fill="none" stroke="#A39CB8" stroke-opacity=".45" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <path d="${area}" fill="url(#ga)"/>
+    <path d="${line(v)}" fill="none" stroke="url(#gl)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${n <= 30 ? v.map((y, i) => `<circle cx="${X(i).toFixed(1)}" cy="${Y(y).toFixed(1)}" r="${n <= 7 ? 3.5 : 2}" fill="#C4A8FF"/>`).join('') : ''}
+    ${hov}`;
+  chart.g = { ...g, X, Y, pw };
+}
+function showTip(i) {
+  const n = chart.vals.length; if (!n) return;
+  i = Math.max(0, Math.min(n - 1, i)); chart.hover = i; drawChart();
+  const tip = $('#tip'), g = chart.g, d = chart.dates[i];
+  const sl = days[days.length - n + i];
+  const ord = STORES.reduce((a, st) => a + ((ui.store === 'all' || st.id === ui.store) ? sl.s[st.id].orders : 0), 0);
+  tip.innerHTML = `<span>${fDay(d)}</span><b>${brl2.format(chart.vals[i])}</b><span>${num.format(ord)} pedidos</span>`;
+  const wrapW = $('#chartWrap').clientWidth, x = g.X(i) + 12, tw = tip.offsetWidth;
+  tip.style.left = Math.max(tw / 2 + 4, Math.min(wrapW - tw / 2 - 4, x)) + 'px';
+  tip.style.top = Math.max(0, g.Y(chart.vals[i]) - 76) + 'px';
+  tip.classList.add('on');
+}
+function hideTip() { chart.hover = -1; $('#tip').classList.remove('on'); drawChart(); }
+const cw = $('#chartWrap');
+cw.addEventListener('pointermove', e => {
+  if (!chart.g) return;
+  const rect = $('#chart').getBoundingClientRect(), x = e.clientX - rect.left, n = chart.vals.length;
+  showTip(Math.round((x - chart.g.l) / chart.g.pw * (n - 1)));
+});
+cw.addEventListener('pointerleave', hideTip);
+cw.addEventListener('blur', hideTip);
+cw.addEventListener('keydown', e => {
+  const n = chart.vals.length;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); showTip(chart.hover < 0 ? n - 1 : chart.hover + (e.key === 'ArrowRight' ? 1 : -1)); }
+  else if (e.key === 'Home') { e.preventDefault(); showTip(0); } else if (e.key === 'End') { e.preventDefault(); showTip(n - 1); }
+  else if (e.key === 'Escape') hideTip();
+});
+if ('ResizeObserver' in window) new ResizeObserver(() => { if (ui.view === 'geral') drawChart(); }).observe(cw);
+
+/* ---------- vendas ---------- */
+function filteredOrders() {
+  const q = ui.q.trim().toLowerCase();
+  let list = orders.filter(o => ui.store === 'all' || o.loja === ui.store);
+  if (q) list = list.filter(o => ('#' + o.id).includes(q) || String(o.id).includes(q) || o.cliente.toLowerCase().includes(q) || storeName(o.loja).toLowerCase().includes(q) || o.canal.toLowerCase().includes(q));
+  const k = ui.sortKey, dir = ui.sortDir;
+  return list.sort((a, b) => {
+    let x = a[k], y = b[k];
+    if (k === 'loja') { x = storeName(x); y = storeName(y); }
+    return (typeof x === 'string' ? x.localeCompare(y, 'pt-BR') : x - y) * dir;
+  });
+}
+function hl(s) {
+  const q = ui.q.trim(); if (!q) return esc(s);
+  const i = s.toLowerCase().indexOf(q.toLowerCase());
+  return i < 0 ? esc(s) : esc(s.slice(0, i)) + '<mark>' + esc(s.slice(i, i + q.length)) + '</mark>' + esc(s.slice(i + q.length));
+}
+function renderOrders() {
+  const list = filteredOrders(), vis = list.slice(0, ui.shown);
+  $('#orderBody').innerHTML = vis.length ? vis.map(o => {
+    const d = new Date(o.ts);
+    return `<tr><td class="d-mono">${hl('#' + o.id)}<small class="d-muted" style="font-family:var(--f-sans)"><span class="only-m">${hl(o.cliente)} · </span>${o.itens} ${o.itens > 1 ? 'itens' : 'item'}</small></td>
+      <td>${fDM(d)}<small>${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</small></td>
+      <td class="col-opt">${hl(o.cliente)}</td><td class="col-opt">${hl(storeName(o.loja))}</td><td class="col-opt">${hl(o.canal)}</td>
+      <td><span class="d-pill${o.tone ? ' d-pill--' + o.tone : ''}">${o.status}</span></td>
+      <td class="num">${brl2.format(o.valor)}</td></tr>`;
+  }).join('') : `<tr><td colspan="7"><div class="empty"><b>Nenhum pedido encontrado</b>Nada corresponde a “${esc(ui.q)}”.</div></td></tr>`;
+  const total = list.reduce((a, o) => a + (o.status === 'Cancelado' ? 0 : o.valor), 0);
+  $('#orderCount').textContent = `${list.length} pedido${list.length === 1 ? '' : 's'} · ${brl2.format(total)}`;
+  $('#orderShown').textContent = list.length ? `Mostrando ${vis.length} de ${list.length}` : '';
+  $('#moreBtn').hidden = vis.length >= list.length;
+  $$('#orderHead th').forEach(th => {
+    if (th.dataset.key === ui.sortKey) th.setAttribute('aria-sort', ui.sortDir > 0 ? 'ascending' : 'descending');
+    else th.removeAttribute('aria-sort');
+  });
+}
+$('#orderHead').addEventListener('click', e => {
+  const th = e.target.closest('th'); if (!th) return;
+  const k = th.dataset.key;
+  if (ui.sortKey === k) ui.sortDir *= -1; else { ui.sortKey = k; ui.sortDir = (k === 'ts' || k === 'valor' || k === 'id') ? -1 : 1; }
+  renderOrders();
+});
+$('#orderSearch').addEventListener('input', e => { ui.q = e.target.value; ui.shown = 12; renderOrders(); });
+$('#moreBtn').addEventListener('click', () => { ui.shown += 12; renderOrders(); });
+
+/* ---------- estoque ---------- */
+function renderStock(flashId) {
+  const low = PRODUCTS.filter(p => qtyOf(p) < p.min);
+  const warn = PRODUCTS.filter(p => qtyOf(p) >= p.min && qtyOf(p) < p.min * 1.5);
+  const reps = Object.keys(saved.restock).length;
+  $('#stockSum').innerHTML = [
+    ['Abaixo do mínimo', low.length, low.length ? 'delta--down' : 'delta--up', low.length ? 'repor agora' : 'tudo ok'],
+    ['Perto do mínimo', warn.length, 'delta--up', 'acompanhar'],
+    ['Reposições', reps, 'delta--up', 'nesta sessão']
+  ].map(c => `<div class="d-card kpi"><p class="kpi__l">${c[0]}</p><p class="kpi__v">${c[1]}</p><p class="kpi__d"><span>${c[3]}</span></p></div>`).join('');
+  $('#stockList').innerHTML = PRODUCTS.map(p => {
+    const q = qtyOf(p), isLow = q < p.min, isWarn = !isLow && q < p.min * 1.5;
+    const w = Math.min(100, q / p.max * 100), m = p.min / p.max * 100;
+    const days = Math.floor(q / p.use);
+    const pill = isLow ? '<span class="d-pill d-pill--bad">Abaixo do mínimo</span>' : isWarn ? '<span class="d-pill d-pill--warn">Atenção</span>' : '<span class="d-pill d-pill--ok">Ok</span>';
+    const open = ui.openRestock === p.id;
+    const sug = Math.max(1, Math.round(p.max - q));
+    return `<li class="prod${isLow ? ' is-low' : isWarn ? ' is-warn' : ''}${flashId === p.id ? ' flash' : ''}" data-id="${p.id}">
+      <div class="prod__name">${p.name}<small>${p.det}</small></div>
+      <div class="prod__lvl">
+        <div class="prod__nums"><span><b>${num.format(q)} ${p.un}</b> · mín. ${num.format(p.min)}</span><span>dura ~${days} dia${days === 1 ? '' : 's'}</span></div>
+        <div class="bar" role="meter" aria-label="Nível de ${p.name}" aria-valuemin="0" aria-valuemax="${p.max}" aria-valuenow="${q}"><span style="width:${w.toFixed(1)}%"></span><i class="bar__min" style="left:${m.toFixed(1)}%"></i></div>
+      </div>
+      <div class="prod__act">${pill}<button type="button" class="d-btn btn-sm${isLow ? ' d-btn--primary' : ''}" data-restock="${p.id}" aria-expanded="${open}">Repor</button></div>
+      ${open ? `<form class="restock" data-form="${p.id}" novalidate>
+        <label>Quantidade a repor (${p.un})<input class="d-input" type="number" name="q" min="1" max="99999" step="1" inputmode="numeric" value="${sug}" required></label>
+        <span class="hint" aria-live="polite">Sugestão: completar até o máximo (${num.format(p.max)} ${p.un}).</span>
+        <button type="submit" class="d-btn d-btn--primary">Confirmar</button>
+        <button type="button" class="d-btn" data-cancel>Cancelar</button>
+      </form>` : ''}
+    </li>`;
+  }).join('');
+  if (ui.openRestock) { const inp = $(`form[data-form="${ui.openRestock}"] input`); if (inp) { inp.focus(); inp.select(); } }
+}
+$('#stockList').addEventListener('click', e => {
+  const b = e.target.closest('[data-restock]');
+  if (b) { ui.openRestock = ui.openRestock === b.dataset.restock ? null : b.dataset.restock; renderStock(); if (!ui.openRestock) $(`[data-restock="${b.dataset.restock}"]`).focus(); return; }
+  if (e.target.closest('[data-cancel]')) { const id = ui.openRestock; ui.openRestock = null; renderStock(); $(`[data-restock="${id}"]`).focus(); }
+});
+$('#stockList').addEventListener('keydown', e => {
+  if (e.key === 'Escape' && ui.openRestock) { const id = ui.openRestock; ui.openRestock = null; renderStock(); $(`[data-restock="${id}"]`).focus(); }
+});
+$('#stockList').addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target, id = f.dataset.form, p = PRODUCTS.find(x => x.id === id);
+  const v = Number(f.q.value);
+  if (!Number.isInteger(v) || v < 1 || v > 99999) {
+    const h = $('.hint', f); h.textContent = 'Informe um número inteiro maior que zero.'; h.classList.add('err'); f.q.focus(); return;
+  }
+  saved.restock[id] = (saved.restock[id] || 0) + v; persist();
+  ui.openRestock = null; renderStock(id); renderAlerts();
+  $(`[data-restock="${id}"]`).focus();
+  toast(`Reposição registrada: +${num.format(v)} ${p.un} de ${p.name}`);
+});
+
+/* ---------- financeiro ---------- */
+function renderFin() {
+  const open = FIN.filter(f => !isPaid(f));
+  const rin = open.filter(f => f.dir === 'in').reduce((a, f) => a + f.v, 0);
+  const rout = open.filter(f => f.dir === 'out').reduce((a, f) => a + f.v, 0);
+  const late = open.filter(f => f.off < 0).length;
+  $('#finSum').innerHTML = [
+    ['A receber', brl2.format(rin), `${open.filter(f => f.dir === 'in').length} em aberto${late ? ` · <span style="color:#FF8FA8">${late} atrasado</span>` : ''}`],
+    ['A pagar', brl2.format(rout), `${open.filter(f => f.dir === 'out').length} em aberto`],
+    ['Saldo previsto', brl2.format(rin - rout), 'próximos 30 dias']
+  ].map(c => `<div class="d-card kpi"><p class="kpi__l">${c[0]}</p><p class="kpi__v">${c[1]}</p><p class="kpi__d"><span>${c[2]}</span></p></div>`).join('');
+  const list = FIN.filter(f => ui.fin === 'all' || f.dir === ui.fin).slice().sort((a, b) => (isPaid(a) - isPaid(b)) || a.off - b.off);
+  $('#finList').innerHTML = list.map(f => {
+    const paid = isPaid(f);
+    const st = paid ? '<span class="d-pill d-pill--ok">Pago</span>' : f.off < 0 ? '<span class="d-pill d-pill--bad">Vencido</span>' : f.off <= 6 ? '<span class="d-pill d-pill--warn">Esta semana</span>' : '<span class="d-pill">Em aberto</span>';
+    const lbl = f.dir === 'in' ? 'Marcar recebido' : 'Marcar pago';
+    return `<li class="fin${paid ? ' is-paid' : ''}">
+      <div class="fin__dir fin__dir--${f.dir}" aria-hidden="true">${f.dir === 'in' ? '↓' : '↑'}</div>
+      <div class="fin__d">${esc(f.desc)}<small><span>${f.dir === 'in' ? 'Receber' : 'Pagar'} · vence ${fShort(f.due)}</span>${st}</small></div>
+      <div class="fin__r"><span class="fin__v">${f.dir === 'in' ? '+' : '−'} ${brl2.format(f.v)}</span>${paid ? '' : `<button type="button" class="d-btn btn-sm" data-pay="${f.id}" aria-label="${lbl}: ${esc(f.desc)}">${f.dir === 'in' ? 'Recebido' : 'Pago'}</button>`}</div>
+    </li>`;
+  }).join('');
+  drawBars();
+}
+function drawBars() {
+  const svg = $('#bars'), W = Math.max(260, $('#barsWrap').clientWidth - 28), H = 220;
+  svg.setAttribute('width', W); svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const weeks = [0, 1, 2, 3].map(k => {
+    const items = FIN.filter(f => (k === 0 ? f.off <= 6 : f.off >= k * 7 && f.off <= k * 7 + 6));
+    return { k, label: `${fDM(addDays(today, k * 7))}`, in: items.filter(f => f.dir === 'in').reduce((a, f) => a + f.v, 0), out: items.filter(f => f.dir === 'out').reduce((a, f) => a + f.v, 0) };
+  });
+  const max = niceMax(Math.max(...weeks.map(w => Math.max(w.in, w.out))), 3);
+  const l = 48, b = 26, t = 10, ph = H - t - b, pw = W - l - 6, gw = pw / 4, bw = Math.min(26, gw / 3.4);
+  let s = '';
+  for (let k = 0; k <= 3; k++) { const y = t + ph - ph * k / 3; s += `<line x1="${l}" x2="${W - 6}" y1="${y}" y2="${y}" stroke="#2A2240" ${k ? 'stroke-dasharray="2 4"' : ''}/><text x="${l - 8}" y="${y + 3}" text-anchor="end">${k ? brlC.format(max * k / 3) : '0'}</text>`; }
+  weeks.forEach((w, i) => {
+    const cx = l + gw * i + gw / 2;
+    const hi = w.in / max * ph, ho = w.out / max * ph;
+    s += `<rect x="${cx - bw - 2}" y="${t + ph - hi}" width="${bw}" height="${hi}" rx="4" fill="#9B6BFF"><title>Entradas: ${brl2.format(w.in)}</title></rect>`;
+    s += `<rect x="${cx + 2}" y="${t + ph - ho}" width="${bw}" height="${ho}" rx="4" fill="#F0597A" fill-opacity=".8"><title>Saídas: ${brl2.format(w.out)}</title></rect>`;
+    s += `<text x="${cx}" y="${H - 6}" text-anchor="middle">${i === 0 ? 'esta sem.' : 'sem. ' + w.label}</text>`;
+  });
+  svg.innerHTML = s;
+  svg.setAttribute('aria-label', 'Entradas e saídas por semana: ' + weeks.map((w, i) => `${i === 0 ? 'esta semana' : 'semana de ' + w.label}, entradas ${brl0.format(w.in)}, saídas ${brl0.format(w.out)}`).join('; '));
+}
+$('#finList').addEventListener('click', e => {
+  const b = e.target.closest('[data-pay]'); if (!b) return;
+  const f = FIN.find(x => x.id === b.dataset.pay);
+  saved.paid[f.id] = true; persist();
+  renderFin(); renderAlerts();
+  toast(`${f.desc}: ${f.dir === 'in' ? 'recebimento' : 'pagamento'} de ${brl2.format(f.v)} registrado`);
+  const nb = $('#finList [data-pay]'); if (nb) nb.focus();
+});
+$$('[data-fin]').forEach(b => b.addEventListener('click', () => {
+  ui.fin = b.dataset.fin; $$('[data-fin]').forEach(x => x.setAttribute('aria-pressed', x === b)); renderFin();
+}));
+
+/* ---------- navigation & filters ---------- */
+function setView(v, focus) {
+  if (!VIEWS[v]) v = 'geral';
+  ui.view = v;
+  $$('.nav button').forEach(b => b.dataset.view === v ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
+  $$('.view').forEach(s => { s.hidden = s.id !== 'view-' + v; });
+  $('#viewTitle').textContent = VIEWS[v][0];
+  $('#viewSub').textContent = VIEWS[v][1]();
+  $('#storeField').hidden = !(v === 'geral' || v === 'vendas');
+  if (v === 'geral') { renderKpis(); setChartData(true); }
+  if (v === 'vendas') renderOrders();
+  if (v === 'estoque') renderStock();
+  if (v === 'financeiro') renderFin();
+  if (location.hash.slice(1) !== v) history.replaceState(null, '', '#' + v);
+  if (focus) $('#viewTitle').focus({ preventScroll: true });
+}
+$$('.nav button').forEach(b => b.addEventListener('click', () => setView(b.dataset.view, true)));
+$$('[data-period]').forEach(b => b.addEventListener('click', () => {
+  ui.period = +b.dataset.period; $$('[data-period]').forEach(x => x.setAttribute('aria-pressed', x === b));
+  renderKpis(); setChartData(true);
+}));
+$('#storeSel').addEventListener('change', e => {
+  ui.store = e.target.value; ui.shown = 12;
+  $('#viewSub').textContent = VIEWS[ui.view][1]();
+  if (ui.view === 'geral') { renderKpis(); setChartData(true); } else renderOrders();
+});
+
+/* alerts popover */
+const pop = $('#alertsPop'), bell = $('#bellBtn');
+function togglePop(open) {
+  pop.hidden = !open; bell.setAttribute('aria-expanded', open);
+  if (open) { const f = $('#alertsList button') || $('#alertsClose'); f.focus(); }
+}
+bell.addEventListener('click', () => togglePop(pop.hidden));
+$('#alertsClose').addEventListener('click', () => { togglePop(false); bell.focus(); });
+document.addEventListener('click', e => { if (!pop.hidden && !e.target.closest('.bell-wrap')) togglePop(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !pop.hidden) { togglePop(false); bell.focus(); } });
+function onAlertClick(e) {
+  const d = e.target.closest('[data-dismiss]'), go = e.target.closest('[data-go]');
+  if (d) {
+    const id = d.dataset.dismiss, inPop = !!e.target.closest('#alertsPop');
+    const finish = () => {
+      if (!saved.dismissed.includes(id)) saved.dismissed.push(id);
+      persist(); renderAlerts(); toast('Alerta marcado como resolvido');
+      if (inPop) { const f = $('#alertsList button') || $('#alertsClose'); f.focus(); }
+    };
+    const el = d.closest('.alert');
+    if (reduce || !el) finish(); else { $$(`.alert[data-id="${id}"]`).forEach(x => x.classList.add('leaving')); setTimeout(finish, 220); }
+  } else if (go) {
+    togglePop(false);
+    if (go.dataset.store) { ui.store = go.dataset.store; $('#storeSel').value = ui.store; }
+    setView(go.dataset.go, true);
+  }
+}
+$('#alertsList').addEventListener('click', onAlertClick);
+$('#watchMore').addEventListener('click', e => { if (e.target.closest('#watchOpen')) { e.stopPropagation(); window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); togglePop(true); } });
+
+$('#resetBtn').addEventListener('click', () => {
+  saved = blank(); try { localStorage.removeItem(KEY); } catch (e) { /* noop */ }
+  ui.openRestock = null; ui.store = 'all'; $('#storeSel').value = 'all';
+  renderAlerts(); setView(ui.view);
+  toast('Demonstração restaurada');
+});
+
+window.addEventListener('resize', () => { if (ui.view === 'financeiro') drawBars(); });
+
+/* sync label */
+const t0 = Date.now();
+setInterval(() => { const m = Math.floor((Date.now() - t0) / 60000); $('#syncTxt').textContent = m ? `Dados atualizados há ${m} min` : 'Dados atualizados agora'; }, 30000);
+
+/* init */
+renderAlerts();
+setView(location.hash.slice(1) || 'geral');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Monitoramento de equipamentos · Demonstração · Alfa Dev</title>
+<meta name="description" content="Demonstração de monitoramento de máquinas com sensores IoT: leituras em tempo real, limites de alerta e aviso de tendência antes da falha acontecer.">
+<meta name="robots" content="noindex,follow">
+<meta name="theme-color" content="#0A0812">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0812'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Georgia,serif' font-style='italic' font-size='44' fill='%239B6BFF'%3E%CE%B1%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="demo.css">
+<style>
+#app {
+  max-width: 1440px; margin: 0 auto;
+  padding: 20px clamp(14px, 3vw, 28px) 56px;
+  display: grid; gap: 18px;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-areas: "top top" "grid side" "detail side";
+  align-items: start;
+}
+.top { grid-area: top; }
+.machines { grid-area: grid; }
+.detail { grid-area: detail; }
+.side { grid-area: side; display: flex; flex-direction: column; gap: 18px; position: sticky; top: calc(var(--bar-h) + 16px); }
+
+/* ---------- top toolbar ---------- */
+.top {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px;
+}
+.top__id { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.eyebrow { font-family: var(--f-mono); font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; color: var(--mut-d); }
+.top h1 { font-size: clamp(1.25rem, 2.4vw, 1.6rem); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.top h1 em { font-family: var(--f-serif); font-weight: 400; font-style: italic; color: var(--violet-2); letter-spacing: 0; }
+.live {
+  display: inline-flex; align-items: center; gap: 7px; font-family: var(--f-mono); font-size: .64rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ok-2); padding: 4px 10px; border-radius: var(--r-pill); background: rgba(43,182,115,.12);
+}
+.live i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(43,182,115,.6); animation: pulse 1.6s infinite; }
+.live.is-paused { color: var(--warn); background: rgba(242,181,68,.12); }
+.live.is-paused i { background: var(--warn); animation: none; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(43,182,115,.55); } 70% { box-shadow: 0 0 0 7px rgba(43,182,115,0); } 100% { box-shadow: 0 0 0 0 rgba(43,182,115,0); } }
+.summary { display: flex; flex-wrap: wrap; gap: 6px; }
+.top__actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.top__actions .d-btn svg { width: 15px; height: 15px; }
+
+/* ---------- machine cards ---------- */
+.machines { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(188px, 1fr)); }
+.m-card {
+  position: relative; text-align: left; width: 100%; padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 10px;
+  background: var(--ink-2); border: 1px solid var(--line-d); border-radius: var(--r-lg); color: var(--fg-d);
+  transition: border-color .2s, background-color .2s, transform .15s var(--ease);
+}
+.m-card:hover { border-color: #3d3260; }
+.m-card[aria-pressed="true"] { border-color: var(--violet); background: linear-gradient(180deg, rgba(155,107,255,.10), rgba(155,107,255,.02) 60%), var(--ink-2); box-shadow: 0 10px 30px -18px rgba(155,107,255,.9); }
+.m-card.is-bad { border-color: rgba(240,89,122,.55); }
+.m-card.is-bad[aria-pressed="true"] { border-color: var(--bad); }
+.m-card.flash { animation: flash 1s var(--ease) 2; }
+@keyframes flash { 0%, 100% { box-shadow: 0 0 0 0 rgba(240,89,122,0); } 40% { box-shadow: 0 0 0 4px rgba(240,89,122,.35); } }
+.m-card__head { display: flex; flex-direction: column-reverse; align-items: flex-start; gap: 8px; min-width: 0; }
+.m-card__head > div { min-width: 0; width: 100%; }
+.m-card__name, .m-card__kind { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-card__name { font-weight: 600; font-size: .95rem; letter-spacing: -.01em; line-height: 1.2; }
+.m-card__kind { font-size: .72rem; color: var(--mut-d); margin-top: 2px; }
+.m-card .d-pill { flex: none; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.spark { width: 100%; height: 42px; }
+.m-vals { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+.m-vals div { min-width: 0; }
+.m-vals span { display: block; font-size: .6rem; font-family: var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--mut-d); }
+.m-vals b { display: block; font-family: var(--f-mono); font-weight: 500; font-size: .8rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.m-vals b.w { color: var(--warn); }
+.m-vals b.c { color: #FF8FA8; }
+.m-card__foot { display: flex; align-items: center; justify-content: space-between; gap: 6px; white-space: nowrap; font-size: .68rem; color: var(--mut-d); font-family: var(--f-mono); border-top: 1px solid var(--line-d); padding-top: 9px; min-height: 28px; }
+.pred-chip { color: var(--warn); white-space: nowrap; }
+.pred-chip.c { color: #FF8FA8; }
+
+/* ---------- detail panel ---------- */
+.detail { padding: clamp(16px, 2.2vw, 22px); display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.detail__head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px 16px; }
+.detail__title { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.detail__title h2 { font-size: 1.3rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.detail__title p { font-size: .8rem; color: var(--mut-d); }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; }
+.controls .d-btn { min-height: 38px; padding: 0 13px; font-size: .84rem; }
+.controls .d-btn svg { width: 15px; height: 15px; flex: none; }
+.d-btn--danger { border-color: rgba(240,89,122,.45); color: #FFC1CF; }
+.d-btn--danger:hover { border-color: var(--bad); background: rgba(240,89,122,.10); }
+
+.tabs { display: flex; gap: 4px; padding: 4px; background: var(--ink); border: 1px solid var(--line-d); border-radius: 12px; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: 1 0 auto; display: inline-flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 7px 12px; border-radius: 9px;
+  border: 0; background: transparent; color: var(--mut-d); font-size: .8rem; text-align: left; transition: background-color .2s, color .2s;
+}
+.tab b { font-family: var(--f-mono); font-weight: 500; font-size: .86rem; color: var(--fg-d); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tab:hover { color: var(--fg-d); }
+.tab[aria-selected="true"] { background: var(--ink-3); color: var(--violet-2); box-shadow: inset 0 0 0 1px rgba(155,107,255,.35); }
+.tab .tw { color: var(--warn); }
+.tab .tc { color: #FF8FA8; }
+
+.chart-wrap { position: relative; }
+.chart { width: 100%; height: clamp(220px, 30vw, 300px); }
+.chart-state {
+  position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); font-family: var(--f-mono); font-size: .72rem; letter-spacing: .08em;
+  text-transform: uppercase; padding: 6px 12px; border-radius: var(--r-pill); background: rgba(10,8,18,.85); border: 1px solid var(--line-d); color: var(--mut-d);
+  pointer-events: none;
+}
+.chart-state[hidden] { display: none; }
+
+.stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--line-d); border: 1px solid var(--line-d); border-radius: 12px; overflow: hidden; }
+.stats div { background: var(--ink-2); padding: 10px 12px; min-width: 0; }
+.stats span { display: block; font-size: .62rem; font-family: var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--mut-d); }
+.stats b { display: block; font-family: var(--f-mono); font-weight: 500; font-size: .92rem; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+
+.predict { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line-d); background: var(--ink); }
+.predict__icon { grid-row: span 2; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: rgba(43,182,115,.14); color: var(--ok-2); }
+.predict__icon svg { width: 18px; height: 18px; }
+.predict__title { font-weight: 600; font-size: .95rem; }
+.predict__text { font-size: .8rem; color: var(--mut-d); }
+.predict.is-warn { border-color: rgba(242,181,68,.45); background: linear-gradient(90deg, rgba(242,181,68,.08), transparent 70%), var(--ink); }
+.predict.is-warn .predict__icon { background: rgba(242,181,68,.16); color: var(--warn); }
+.predict.is-warn .predict__title { color: #FFD68A; }
+.predict.is-bad { border-color: rgba(240,89,122,.5); background: linear-gradient(90deg, rgba(240,89,122,.10), transparent 70%), var(--ink); }
+.predict.is-bad .predict__icon { background: rgba(240,89,122,.16); color: #FF8FA8; }
+.predict.is-bad .predict__title { color: #FFB3C4; }
+.predict.is-off .predict__icon { background: rgba(163,156,184,.14); color: var(--mut-d); }
+.how { font-size: .76rem; color: var(--mut-d); line-height: 1.55; }
+.how b { color: var(--fg-d); font-weight: 500; }
+
+/* ---------- side: device + alerts ---------- */
+.panel { padding: 16px; }
+.panel__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.panel__head h2 { font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+.diagram { display: flex; align-items: center; gap: 0; margin: 4px 0 14px; }
+.node { flex: none; display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: .64rem; font-family: var(--f-mono); color: var(--mut-d); letter-spacing: .04em; }
+.node__box { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--ink-3); border: 1px solid var(--line-d); color: var(--violet-2); }
+.node__box svg { width: 22px; height: 22px; }
+.node--chip .node__box { width: 52px; height: 52px; background: linear-gradient(160deg, #241b3d, #15102a); border-color: rgba(155,107,255,.45); }
+.link { flex: 1; height: 2px; margin: 0 6px 18px; border-radius: 2px; background-image: linear-gradient(90deg, var(--violet) 0 50%, transparent 50% 100%); background-size: 10px 2px; opacity: .8; animation: flow .9s linear infinite; }
+@keyframes flow { to { background-position: 10px 0; } }
+.diagram.is-paused .link { animation-play-state: paused; opacity: .4; }
+.diagram.is-off .link--a { background-image: linear-gradient(90deg, var(--bad) 0 30%, transparent 30% 100%); animation: none; opacity: .7; }
+.diagram.is-off .link--b { animation: none; opacity: .3; }
+.diagram.is-off .node--sensor .node__box { color: #FF8FA8; border-color: rgba(240,89,122,.45); }
+.dev { display: grid; grid-template-columns: auto 1fr; gap: 7px 12px; margin: 0; font-size: .8rem; }
+.dev dt { color: var(--mut-d); }
+.dev dd { margin: 0; text-align: right; font-family: var(--f-mono); font-size: .76rem; font-variant-numeric: tabular-nums; display: flex; justify-content: flex-end; align-items: center; gap: 8px; min-width: 0; }
+.bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
+.bars i { width: 3px; border-radius: 1px; background: var(--line-d); }
+.bars i:nth-child(1) { height: 4px; } .bars i:nth-child(2) { height: 7px; } .bars i:nth-child(3) { height: 10px; } .bars i:nth-child(4) { height: 12px; }
+.bars i.on { background: var(--ok-2); }
+.batt { width: 22px; height: 11px; border: 1px solid var(--mut-d); border-radius: 3px; padding: 1px; position: relative; }
+.batt::after { content: ""; position: absolute; right: -3px; top: 3px; width: 2px; height: 3px; background: var(--mut-d); border-radius: 0 1px 1px 0; }
+.batt i { display: block; height: 100%; background: var(--ok-2); border-radius: 1px; }
+
+.alerts .panel__head { margin-bottom: 10px; }
+.badge { min-width: 22px; height: 22px; padding: 0 7px; border-radius: var(--r-pill); display: inline-grid; place-items: center; font-family: var(--f-mono); font-size: .7rem; font-weight: 500; background: var(--line-d); color: var(--mut-d); }
+.badge.has { background: var(--bad); color: #fff; }
+.alerts.flash { animation: flash 1s var(--ease) 1; }
+.link-btn { border: 0; background: none; color: var(--violet-2); font-size: .78rem; padding: 6px 4px; border-radius: 6px; }
+.link-btn:hover { color: #fff; }
+.link-btn:disabled { color: var(--mut-d); opacity: .5; cursor: default; }
+.feed { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-height: 430px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--line-d) transparent; }
+.ev { position: relative; display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 10px 10px 10px 14px; border-radius: 11px; background: var(--ink); border: 1px solid var(--line-d); font-size: .8rem; }
+.ev::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--violet); }
+.ev--warn::before { background: var(--warn); }
+.ev--bad::before { background: var(--bad); }
+.ev--ok::before { background: var(--ok); }
+.ev--pred::before { background: linear-gradient(var(--warn), var(--violet)); }
+.ev.is-new { animation: slide .35s var(--ease); }
+@keyframes slide { from { opacity: 0; transform: translateY(-6px); } }
+.ev__meta { font-family: var(--f-mono); font-size: .66rem; color: var(--mut-d); letter-spacing: .02em; }
+.ev__meta b { color: var(--fg-d); font-weight: 500; font-family: var(--f-sans); font-size: .76rem; letter-spacing: 0; }
+.ev__text { grid-column: 1; line-height: 1.4; }
+.ev.is-ack { opacity: .62; }
+.ev__act { grid-column: 2; grid-row: 1 / span 2; }
+.ev__act .d-btn { min-height: 32px; padding: 0 10px; font-size: .74rem; border-radius: 8px; }
+.ev__done { font-family: var(--f-mono); font-size: .64rem; color: var(--mut-d); letter-spacing: .04em; }
+.empty { font-size: .8rem; color: var(--mut-d); padding: 14px 4px; text-align: center; }
+
+/* ---------- toast ---------- */
+.d-toast { max-width: calc(100vw - 32px); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1100px) {
+  #app { grid-template-columns: minmax(0, 1fr) 300px; }
+}
+@media (max-width: 920px) {
+  #app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "grid" "detail" "side"; }
+  .side { position: static; display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
+}
+@media (max-width: 640px) {
+  .side { grid-template-columns: 1fr; }
+  .machines { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .m-card { padding: 12px 11px 10px; gap: 8px; }
+  .m-card__name { font-size: .88rem; }
+  .m-card__kind { display: none; }
+  .m-vals b { font-size: .74rem; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stats div:last-child { grid-column: span 2; }
+  .top__actions { width: 100%; }
+  .top__actions .d-btn { flex: 1; white-space: nowrap; }
+  .long { display: none; }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; }
+  .controls { width: 100%; }
+  .controls .d-btn { flex: 1 1 auto; }
+  .tab { padding: 6px 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live i { animation: none; }
+  .link { animation: none; }
+}
+</style>
+</head>
+<body>
+<header class="demo-bar">
+  <a class="demo-brand" href="../index.html" aria-label="Alfa Dev, voltar ao site">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.5 5.5c-1.6 6.2-4.6 13-9.4 13-3.1 0-5.1-2.6-5.1-6 0-3.8 2.5-7 5.6-7 4.2 0 5.6 5.4 7.4 10.2.8 2 1.9 2.8 3 2.8"/></svg>
+    <b>Alfa <span>Dev</span></b>
+  </a>
+  <div class="demo-title"><strong>Monitoramento de equipamentos</strong><span class="demo-badge">Demonstração</span></div>
+  <div class="demo-bar__end">
+    <a class="demo-back" href="../index.html#cases">← <span>Voltar ao site</span></a>
+    <a class="demo-cta" href="../index.html#contato">Quero algo assim <span aria-hidden="true">→</span></a>
+  </div>
+</header>
+<div class="demo-intro">
+  <p>Sensores nas máquinas enviam dados em tempo real e <b>avisam antes da falha acontecer</b>.</p>
+  <p class="demo-intro__note">Dados fictícios · roda no seu navegador</p>
+</div>
+
+<main id="app">
+  <section class="top" aria-label="Planta monitorada">
+    <div class="top__id">
+      <span class="eyebrow">Planta monitorada</span>
+      <h1>Fábrica Norte <em>· Linha 2</em> <span class="live" id="live"><i aria-hidden="true"></i><span id="liveText">Ao vivo</span></span></h1>
+    </div>
+    <div class="summary" id="summary" aria-live="off"></div>
+    <div class="top__actions">
+      <button class="d-btn" id="pauseBtn" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+        <span>Pausar<span class="long"> transmissão</span></span>
+      </button>
+      <button class="d-btn" id="resetBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        <span>Restaurar<span class="long"> demonstração</span></span>
+      </button>
+    </div>
+  </section>
+
+  <section class="machines" id="machines" aria-label="Máquinas da linha"></section>
+
+  <section class="detail d-card" id="detail" aria-labelledby="dTitle">
+    <div class="detail__head">
+      <div class="detail__title">
+        <h2><span id="dTitle">—</span> <span class="d-pill" id="dPill">—</span></h2>
+        <p id="dSub">—</p>
+      </div>
+      <div class="controls">
+        <button class="d-btn d-btn--danger" id="faultBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+          Simular falha
+        </button>
+        <button class="d-btn" id="sensorBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v9"/><path d="M6.3 7.3a8 8 0 1 0 11.4 0"/></svg>
+          <span>Desligar sensor</span>
+        </button>
+        <button class="d-btn" id="normBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          Normalizar
+        </button>
+      </div>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Sensor exibido no gráfico" id="tabs"></div>
+
+    <div class="chart-wrap" role="tabpanel" id="chartPanel">
+      <canvas class="chart" id="chart" role="img" aria-label="Gráfico dos últimos 60 segundos"></canvas>
+      <span class="chart-state" id="chartState" hidden>Sensor offline · sem dados</span>
+    </div>
+
+    <div class="stats" id="stats">
+      <div><span>Atual</span><b id="sNow">—</b></div>
+      <div><span>Mín. 60 s</span><b id="sMin">—</b></div>
+      <div><span>Máx. 60 s</span><b id="sMax">—</b></div>
+      <div><span>Média 60 s</span><b id="sAvg">—</b></div>
+      <div><span>Uptime</span><b id="sUp">—</b></div>
+    </div>
+
+    <div class="predict" id="predict">
+      <div class="predict__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 9 11l4 4 8-8"/><path d="M15 7h6v6"/></svg>
+      </div>
+      <p class="predict__title" id="pTitle">Tendência estável</p>
+      <p class="predict__text" id="pText">—</p>
+    </div>
+    <p class="how"><b>Como o aviso antecipado funciona:</b> a cada leitura, o painel traça a reta de tendência das últimas 20 medições de cada sensor. Se essa reta cruza o limite crítico em menos de 5 minutos, você recebe o aviso <i>antes</i> da máquina chegar lá. Estatística simples, sem caixa-preta. Experimente em <b>Simular falha</b>.</p>
+  </section>
+
+  <aside class="side" aria-label="Dispositivo e alertas">
+    <section class="d-card panel" aria-labelledby="devTitle">
+      <div class="panel__head">
+        <h2 id="devTitle">Dispositivo de borda</h2>
+        <span class="d-pill d-pill--ok" id="devPill"><span class="dot"></span>Conectado</span>
+      </div>
+      <div class="diagram" id="diagram" aria-hidden="true">
+        <div class="node node--sensor"><div class="node__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 14V4"/><circle cx="12" cy="17" r="3"/><path d="M8.5 6.5a5 5 0 0 0 0 7M15.5 6.5a5 5 0 0 1 0 7"/></svg></div>Sensores</div>
+        <div class="link link--a"></div>
+        <div class="node node--chip"><div class="node__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg></div>ESP32</div>
+        <div class="link link--b"></div>
+        <div class="node"><div class="node__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/><path d="m7 13 3-3 2 2 4-4"/></svg></div>Painel</div>
+      </div>
+      <dl class="dev">
+        <dt>Equipamento</dt><dd id="dvName">—</dd>
+        <dt>Módulo</dt><dd>ESP32-S3 · <span id="dvFw">fw 1.4.2</span></dd>
+        <dt>Sinal Wi-Fi</dt><dd><span id="dvRssi">—</span><span class="bars" id="dvBars"><i></i><i></i><i></i><i></i></span></dd>
+        <dt>Bateria</dt><dd><span id="dvBat">—</span><span class="batt"><i id="dvBatBar"></i></span></dd>
+        <dt>Protocolo</dt><dd>MQTT · TLS · 1 leitura/s</dd>
+        <dt>Pacotes recebidos</dt><dd id="dvPk">—</dd>
+      </dl>
+    </section>
+
+    <section class="d-card panel alerts" id="alertsPanel" aria-labelledby="alTitle">
+      <div class="panel__head">
+        <h2 id="alTitle">Alertas <span class="badge" id="badge" aria-label="0 alertas não reconhecidos">0</span></h2>
+        <button class="link-btn" id="ackAll" type="button">Reconhecer todos</button>
+      </div>
+      <ol class="feed" id="feed"></ol>
+    </section>
+  </aside>
+
+  <div class="sr-only" aria-live="polite" id="announcer"></div>
+</main>
+<div class="d-toast" id="toast" role="status"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- configuração ---------- */
+  var SENS = {
+    temp: { label: 'Temperatura', low: 'temperatura', short: 'Temp.', unit: '°C', dec: 1 },
+    vib:  { label: 'Vibração', low: 'vibração', short: 'Vibr.', unit: 'mm/s', dec: 2 },
+    rpm:  { label: 'Rotação', low: 'rotação', short: 'Rot.', unit: 'rpm', dec: 0 },
+    kw:   { label: 'Consumo', low: 'consumo', short: 'Cons.', unit: 'kW', dec: 1 }
+  };
+  var KEYS = ['temp', 'vib', 'rpm', 'kw'];
+  // s: [base, ruído, limite atenção, limite crítico]
+  var DEFS = [
+    { id: 'cmp', name: 'Compressor A', kind: 'Compressor de parafuso', tag: 'CMP-A01', primary: 'temp', couple: 'vib', rssi: -58, bat: 87, fw: '1.4.2', up: 1580000,
+      s: { temp: [64, .45, 80, 90], vib: [2.1, .08, 4.5, 7.1], rpm: [1780, 5, 1900, 1980], kw: [18.5, .3, 24, 28] } },
+    { id: 'est', name: 'Esteira 1', kind: 'Transportador de correia', tag: 'EST-001', primary: 'vib', couple: 'temp', rssi: -66, bat: 74, fw: '1.4.2', up: 902000,
+      s: { temp: [41, .35, 60, 70], vib: [1.6, .07, 4.5, 7.1], rpm: [960, 4, 1050, 1100], kw: [5.2, .12, 7.5, 9] } },
+    { id: 'prs', name: 'Prensa hidráulica', kind: 'Prensa 250 t', tag: 'PRS-250', primary: 'vib', couple: 'temp', rssi: -61, bat: 92, fw: '1.4.1', up: 2210000,
+      s: { temp: [52, .4, 70, 80], vib: [2.8, .1, 4.5, 7.1], rpm: [1450, 6, 1550, 1620], kw: [30, .6, 38, 44] } },
+    { id: 'bmb', name: 'Bomba d’água', kind: 'Bomba centrífuga', tag: 'BMB-03', primary: 'kw', couple: 'vib', rssi: -71, bat: 63, fw: '1.4.2', up: 455000,
+      s: { temp: [38, .3, 60, 70], vib: [1.9, .07, 4.5, 7.1], rpm: [3480, 8, 3600, 3700], kw: [11, .18, 14, 16] } },
+    { id: 'frn', name: 'Forno 2', kind: 'Forno de cura', tag: 'FRN-002', primary: 'temp', couple: 'kw', rssi: -55, bat: 98, fw: '1.4.2', up: 3020000,
+      s: { temp: [212, .8, 235, 245], vib: [1.2, .05, 4.5, 7.1], rpm: [1150, 4, 1250, 1300], kw: [46, .5, 55, 60] } }
+  ];
+  var HIST = 60;           // segundos visíveis
+  var FIT_N = 20;          // leituras usadas na tendência
+  var HORIZON = 300;       // aviso se cruzar o crítico em até 5 min
+  var FAULT_SECS = 45;     // falha leva ~45 s do normal ao crítico
+
+  /* ---------- utilidades ---------- */
+  var $ = function (id) { return document.getElementById(id); };
+  var nfCache = {};
+  function fmt(v, dec) {
+    if (v == null || !isFinite(v)) return '—';
+    var f = nfCache[dec] || (nfCache[dec] = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: dec, maximumFractionDigits: dec }));
+    return f.format(v);
+  }
+  function fmtS(k, v) { return v == null ? '—' : fmt(v, SENS[k].dec) + ' ' + SENS[k].unit; }
+  function gauss() { var u = 1 - Math.random(), v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function clock(t) { var d = new Date(t); return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()); }
+  function eta(sec) { return sec < 60 ? '~' + Math.max(5, Math.round(sec / 5) * 5) + ' s' : '~' + Math.round(sec / 60) + ' min'; }
+  function uptime(s) {
+    var d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), ss = Math.floor(s % 60);
+    return (d ? d + 'd ' : '') + pad(h) + ':' + pad(m) + ':' + pad(ss);
+  }
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var css = getComputedStyle(document.documentElement);
+  var C = {
+    violet: css.getPropertyValue('--violet').trim() || '#9B6BFF', violet2: css.getPropertyValue('--violet-2').trim() || '#C4A8FF',
+    ok: css.getPropertyValue('--ok').trim() || '#2BB673', ok2: css.getPropertyValue('--ok-2').trim() || '#7BE0B0',
+    warn: css.getPropertyValue('--warn').trim() || '#F2B544', bad: css.getPropertyValue('--bad').trim() || '#F0597A',
+    line: css.getPropertyValue('--line-d').trim() || '#2A2240', mut: css.getPropertyValue('--mut-d').trim() || '#A39CB8'
+  };
+  var STATUS = {
+    ok: { txt: 'Normal', pill: 'd-pill--ok', color: C.ok2 },
+    warn: { txt: 'Atenção', pill: 'd-pill--warn', color: C.warn },
+    bad: { txt: 'Crítico', pill: 'd-pill--bad', color: '#FF8FA8' },
+    off: { txt: 'Offline', pill: '', color: C.mut }
+  };
+
+  /* ---------- estado ---------- */
+  var S, speed = 1, timer = null, raf = 0, lastTick = 0, paused = false, alertSeq = 0;
+
+  function newMachine(d) {
+    var m = { d: d, hist: {}, n: {}, off: {}, lvl: {}, fault: false, offline: false, offSince: 0, lastRead: 0,
+      pred: null, predShown: false, calm: 0, rssi: d.rssi, bat: d.bat, pk: 1000 + Math.floor(Math.random() * 40000), up: d.up,
+      phase: Math.random() * 6, status: 'ok', slope: {} };
+    KEYS.forEach(function (k) { m.hist[k] = []; m.n[k] = 0; m.off[k] = 0; m.lvl[k] = 0; });
+    return m;
+  }
+
+  function init() {
+    S = { t: 0, start: Date.now() - HIST * 1000, machines: DEFS.map(newMachine), sel: 0, sensor: null, alerts: [] };
+    S.sensor = S.machines[0].d.primary;
+    // pré-carrega 60 s de histórico (sem gerar alertas)
+    for (var i = 0; i < HIST + 1; i++) { S.t++; S.machines.forEach(step); }
+    S.machines.forEach(function (m) { m.lastRead = S.t; evaluate(m, true); });
+    var now = S.start + S.t * 1000;
+    S.alerts = [
+      mkAlert(now - 1000 * 60 * 47, 3, 'ok', 'vibração voltou ao normal', true),
+      mkAlert(now - 1000 * 60 * 52, 3, 'warn', 'vibração acima do limite de atenção (4,62 mm/s)', true),
+      mkAlert(now - 1000 * 60 * 138, 4, 'pred', 'tendência: temperatura deve atingir o limite crítico em ~4 min', true)
+    ];
+  }
+
+  function step(m) {
+    var d = m.d, t = S.t;
+    if (m.fault) {
+      var p = d.s[m.d.primary], c = d.s[m.d.couple];
+      m.off[d.primary] = Math.min(m.off[d.primary] + (p[3] - p[0]) / FAULT_SECS * (0.75 + Math.random() * 0.5), (p[3] - p[0]) * 1.16);
+      m.off[d.couple] = Math.min(m.off[d.couple] + (c[2] - c[0]) / 75 * (0.6 + Math.random() * 0.8), (c[2] - c[0]) * 0.92);
+    } else {
+      KEYS.forEach(function (k) { m.off[k] *= 0.8; if (Math.abs(m.off[k]) < d.s[k][1] * 0.05) m.off[k] = 0; });
+    }
+    KEYS.forEach(function (k) {
+      var s = d.s[k];
+      m.n[k] = m.n[k] * 0.78 + gauss() * s[1] * 0.65;
+      var v = s[0] + m.off[k] + m.n[k] + Math.sin(t / 17 + m.phase + k.length) * s[1] * 0.6;
+      var h = m.hist[k];
+      h.push(m.offline ? null : Math.max(0, v));
+      if (h.length > HIST + 2) h.shift();
+    });
+    if (!m.offline) { m.pk++; m.lastRead = t; }
+    m.up++;
+    m.rssi = Math.max(-82, Math.min(-48, Math.round(m.rssi + gauss() * 1.4 + (m.d.rssi - m.rssi) * 0.15)));
+    if (t % 90 === 0 && m.bat > 5) m.bat--;
+  }
+
+  function last(h) { for (var i = h.length - 1; i >= 0; i--) if (h[i] != null) return h[i]; return null; }
+
+  function trend(h) {
+    // regressão linear simples das últimas FIT_N leituras válidas
+    var xs = [], ys = [];
+    for (var i = h.length - 1; i >= 0 && xs.length < FIT_N; i--) { if (h[i] != null) { xs.push(i); ys.push(h[i]); } }
+    var n = xs.length; if (n < 12) return null;
+    var mx = 0, my = 0, j; for (j = 0; j < n; j++) { mx += xs[j]; my += ys[j]; } mx /= n; my /= n;
+    var sxx = 0, sxy = 0; for (j = 0; j < n; j++) { sxx += (xs[j] - mx) * (xs[j] - mx); sxy += (xs[j] - mx) * (ys[j] - my); }
+    var b = sxy / sxx, a = my - b * mx, sse = 0;
+    for (j = 0; j < n; j++) { var r = ys[j] - (a + b * xs[j]); sse += r * r; }
+    var se = Math.sqrt(sse / (n - 2) / sxx);
+    return { slope: b, se: se, fit: a + b * (h.length - 1) };
+  }
+
+  function evaluate(m, silent) {
+    var d = m.d, worst = 0, best = null;
+    if (!m.offline) {
+      KEYS.forEach(function (k) {
+        var s = d.s[k], v = last(m.hist[k]), lv = m.lvl[k], hy = (s[3] - s[2]) * 0.12, nl;
+        if (v == null) return;
+        if (v >= s[3]) nl = 2; else if (v >= s[2]) nl = lv === 2 && v > s[3] - hy ? 2 : 1; else nl = lv >= 1 && v > s[2] - hy ? 1 : 0;
+        if (!silent && nl !== lv) {
+          if (nl > lv) push(m, nl === 2 ? 'bad' : 'warn', SENS[k].low + ' acima do limite ' + (nl === 2 ? 'crítico' : 'de atenção') + ' (' + fmtS(k, v) + ')');
+          else if (nl === 0) push(m, 'ok', SENS[k].low + ' voltou ao normal', true);
+        }
+        m.lvl[k] = nl; worst = Math.max(worst, nl);
+        var tr = trend(m.hist[k]);
+        m.slope[k] = tr;
+        if (tr && nl < 2 && tr.slope > 0 && tr.slope > 3 * tr.se && tr.fit > s[0] + (s[2] - s[0]) * 0.2) {
+          var secs = (s[3] - tr.fit) / tr.slope;
+          if (secs > 0 && secs <= HORIZON && (!best || secs < best.secs)) best = { k: k, secs: secs, slope: tr.slope };
+        }
+      });
+    }
+    // suaviza a estimativa para não "piscar"
+    if (best) {
+      if (m.pred && m.pred.k === best.k) best.secs = Math.min(best.secs, m.pred.secs * 0.5 + best.secs * 0.5);
+      m.pred = best; m.calm = 0;
+      m.predN = (m.predN || 0) + 1;
+      if (!m.predShown && !silent && m.predN >= 4) { m.predShown = true; push(m, 'pred', 'tendência: ' + SENS[best.k].low + ' deve atingir o limite crítico em ' + eta(best.secs)); }
+    } else {
+      m.pred = null; m.predN = 0;
+      if (worst === 0 && ++m.calm > 8) m.predShown = false;
+    }
+    m.status = m.offline ? 'off' : worst === 2 ? 'bad' : worst === 1 ? 'warn' : 'ok';
+  }
+
+  /* ---------- alertas ---------- */
+  function mkAlert(time, mi, sev, text, ack) { return { id: ++alertSeq, time: time, mi: mi, sev: sev, text: text, ack: !!ack, fresh: false }; }
+  function push(m, sev, text, ack) {
+    var mi = S.machines.indexOf(m);
+    var a = mkAlert(S.start + S.t * 1000, mi, sev, text, ack); a.fresh = true;
+    S.alerts.unshift(a);
+    if (S.alerts.length > 40) S.alerts.length = 40;
+    S.alertsDirty = true;
+    announce(m.d.name + ': ' + text);
+    if (sev === 'bad') { flashEl(cards[mi].el); flashEl($('alertsPanel')); }
+  }
+  function flashEl(el) { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+  var annQ = [];
+  function announce(t) { annQ.push(t); }
+  function flushAnnounce() { if (annQ.length) { $('announcer').textContent = annQ.join('. '); annQ = []; } }
+
+  var feed = $('feed');
+  function renderFeed() {
+    S.alertsDirty = false;
+    var unack = 0, html = '';
+    S.alerts.forEach(function (a) {
+      if (!a.ack) unack++;
+      var m = S.machines[a.mi];
+      var cls = a.sev === 'bad' ? 'ev--bad' : a.sev === 'warn' ? 'ev--warn' : a.sev === 'ok' ? 'ev--ok' : a.sev === 'info' ? '' : 'ev--pred';
+      var label = a.sev === 'bad' ? 'Crítico' : a.sev === 'warn' ? 'Atenção' : a.sev === 'ok' || a.sev === 'info' ? 'Info' : 'Previsão';
+      html += '<li class="ev ' + cls + (a.ack ? ' is-ack' : '') + (a.fresh ? ' is-new' : '') + '">' +
+        '<div class="ev__meta">' + clock(a.time) + ' · <b>' + m.d.name + '</b> · ' + label + '</div>' +
+        '<div class="ev__text">' + a.text.charAt(0).toUpperCase() + a.text.slice(1) + '</div>' +
+        '<div class="ev__act">' + (a.ack ? '<span class="ev__done">' + (a.sev === 'ok' || a.sev === 'info' ? '' : '✓ ok') + '</span>' :
+          '<button class="d-btn" type="button" data-ack="' + a.id + '" aria-label="Reconhecer alerta: ' + m.d.name + ', ' + a.text + '">Reconhecer</button>') + '</div></li>';
+      a.fresh = false;
+    });
+    feed.innerHTML = html || '<li class="empty">Nenhum alerta. Tudo operando normalmente.</li>';
+    var b = $('badge');
+    b.textContent = unack; b.classList.toggle('has', unack > 0);
+    b.setAttribute('aria-label', unack + (unack === 1 ? ' alerta não reconhecido' : ' alertas não reconhecidos'));
+    $('ackAll').disabled = unack === 0;
+  }
+  feed.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-ack]'); if (!btn) return;
+    var id = +btn.getAttribute('data-ack');
+    var idx = -1;
+    S.alerts.forEach(function (a, i) { if (a.id === id) { a.ack = true; idx = i; } });
+    renderFeed();
+    // mantém o foco em um lugar útil
+    var next = feed.querySelector('[data-ack]');
+    (next || $('ackAll')).focus();
+  });
+  $('ackAll').addEventListener('click', function () {
+    S.alerts.forEach(function (a) { a.ack = true; });
+    renderFeed(); toast('Todos os alertas foram reconhecidos');
+  });
+
+  /* ---------- cards ---------- */
+  var cards = [];
+  function buildCards() {
+    var wrap = $('machines'); wrap.innerHTML = ''; cards = [];
+    S.machines.forEach(function (m, i) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'm-card';
+      b.innerHTML = '<div class="m-card__head"><div><div class="m-card__name">' + m.d.name + '</div><div class="m-card__kind">' + m.d.kind + '</div></div>' +
+        '<span class="d-pill"><span class="dot"></span><span class="st"></span></span></div>' +
+        '<canvas class="spark" aria-hidden="true"></canvas>' +
+        '<div class="m-vals">' + KEYS.map(function (k) { return '<div><span>' + SENS[k].short + '</span><b data-k="' + k + '">—</b></div>'; }).join('') + '</div>' +
+        '<div class="m-card__foot"><span class="rd"></span><span class="pred-chip"></span></div>';
+      b.addEventListener('click', function () { select(i, true); });
+      wrap.appendChild(b);
+      var vals = {}; b.querySelectorAll('b[data-k]').forEach(function (el) { vals[el.getAttribute('data-k')] = el; });
+      cards.push({ el: b, pill: b.querySelector('.d-pill'), st: b.querySelector('.st'), cv: b.querySelector('canvas'), vals: vals,
+        rd: b.querySelector('.rd'), pc: b.querySelector('.pred-chip'), last: {} });
+    });
+  }
+
+  function setText(el, t) { if (el.textContent !== t) el.textContent = t; }
+
+  function updateCard(i) {
+    var m = S.machines[i], c = cards[i], st = STATUS[m.status];
+    if (c.last.status !== m.status) {
+      c.pill.className = 'd-pill ' + st.pill; c.st.textContent = st.txt; c.last.status = m.status;
+      c.el.classList.toggle('is-bad', m.status === 'bad');
+    }
+    KEYS.forEach(function (k) {
+      var v = m.offline ? null : last(m.hist[k]), el = c.vals[k];
+      setText(el, fmtS(k, v));
+      var cl = m.offline ? '' : m.lvl[k] === 2 ? 'c' : m.lvl[k] === 1 ? 'w' : '';
+      if (el.className !== cl) el.className = cl;
+    });
+    setText(c.rd, m.offline ? 'sem sinal há ' + (S.t - m.offSince + 1) + 's' : (m.pred || m.status === 'bad' ? 'há 1s' : 'última leitura há 1s'));
+    var pt = m.status === 'bad' ? '● acima do crítico' : m.pred ? '⚠ crítico ' + eta(m.pred.secs) : '';
+    setText(c.pc, pt); c.pc.classList.toggle('c', m.status === 'bad');
+    c.el.setAttribute('aria-label', m.d.name + ', status ' + st.txt + (m.pred ? ', previsão de limite crítico em ' + eta(m.pred.secs) : ''));
+    c.el.setAttribute('aria-pressed', i === S.sel ? 'true' : 'false');
+    drawSpark(c.cv, m);
+  }
+
+  /* ---------- canvas ---------- */
+  function fitCanvas(cv) {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2), w = cv.clientWidth, h = cv.clientHeight;
+    var W = Math.round(w * dpr), H = Math.round(h * dpr);
+    if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    var ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx: ctx, w: w, h: h };
+  }
+
+  function drawSpark(cv, m) {
+    var f = fitCanvas(cv), ctx = f.ctx, w = f.w, h = f.h, k = m.d.primary, s = m.d.s[k], data = m.hist[k].slice(-HIST);
+    ctx.clearRect(0, 0, w, h);
+    if (!w) return;
+    var lo = Infinity, hi = -Infinity;
+    data.forEach(function (v) { if (v != null) { lo = Math.min(lo, v); hi = Math.max(hi, v); } });
+    if (lo === Infinity) { lo = s[0] - 1; hi = s[0] + 1; }
+    var span = Math.max(hi - lo, s[1] * 8), mid = (hi + lo) / 2; lo = mid - span / 2 - span * .1; hi = mid + span / 2 + span * .1;
+    var col = STATUS[m.status].color, step = w / (HIST - 1);
+    var y = function (v) { return h - 3 - (v - lo) / (hi - lo) * (h - 6); };
+    // limite de atenção, se visível
+    if (s[2] < hi && s[2] > lo) { ctx.strokeStyle = 'rgba(242,181,68,.45)'; ctx.setLineDash([3, 3]); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, y(s[2])); ctx.lineTo(w, y(s[2])); ctx.stroke(); ctx.setLineDash([]); }
+    ctx.lineWidth = 1.6; ctx.lineJoin = 'round'; ctx.strokeStyle = col;
+    var g = ctx.createLinearGradient(0, 0, 0, h); g.addColorStop(0, hexA(col, .22)); g.addColorStop(1, hexA(col, 0));
+    segments(data, function (seg) {
+      ctx.beginPath(); seg.forEach(function (p, j) { var x = p.i * step; j ? ctx.lineTo(x, y(p.v)) : ctx.moveTo(x, y(p.v)); }); ctx.stroke();
+      ctx.lineTo(seg[seg.length - 1].i * step, h); ctx.lineTo(seg[0].i * step, h); ctx.closePath(); ctx.fillStyle = g; ctx.fill();
+    });
+  }
+  function segments(data, fn) {
+    var seg = [];
+    data.forEach(function (v, i) { if (v == null) { if (seg.length) fn(seg); seg = []; } else seg.push({ i: i, v: v }); });
+    if (seg.length) fn(seg);
+  }
+  function hexA(hex, a) {
+    var h = hex.replace('#', ''); if (h.length === 3) h = h.replace(/./g, '$&$&');
+    var n = parseInt(h, 16); return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')';
+  }
+
+  var chart = $('chart');
+  function drawMain(phase) {
+    var m = S.machines[S.sel], k = S.sensor, s = m.d.s[k], meta = SENS[k];
+    var f = fitCanvas(chart), ctx = f.ctx, w = f.w, h = f.h;
+    ctx.clearRect(0, 0, w, h);
+    if (!w) return;
+    var L = 46, R = 10, T = 12, B = 24, pw = w - L - R, ph = h - T - B;
+    var fut = Math.round(pw * .16), xNow = L + pw - fut, step = (pw - fut) / (HIST - 1);
+    var data = m.hist[k];
+    var lo = Infinity, hi = -Infinity;
+    data.forEach(function (v) { if (v != null) { lo = Math.min(lo, v); hi = Math.max(hi, v); } });
+    var base = s[0];
+    lo = Math.min(lo === Infinity ? base : lo, base - (s[2] - base) * .35);
+    hi = Math.max(hi === -Infinity ? base : hi, s[3] + (s[3] - s[2]) * .45);
+    var pad = (hi - lo) * .04; lo -= pad; hi += pad;
+    var y = function (v) { return T + ph - (v - lo) / (hi - lo) * ph; };
+
+    // zonas de atenção e crítico
+    ctx.fillStyle = 'rgba(240,89,122,.07)'; ctx.fillRect(L, T, pw, y(s[3]) - T);
+    ctx.fillStyle = 'rgba(242,181,68,.05)'; ctx.fillRect(L, y(s[3]), pw, y(s[2]) - y(s[3]));
+    // zona "futuro"
+    ctx.fillStyle = 'rgba(155,107,255,.045)'; ctx.fillRect(xNow, T, fut, ph);
+
+    // grade + eixo y
+    ctx.font = '500 10px "JetBrains Mono", ui-monospace, monospace'; ctx.textBaseline = 'middle'; ctx.textAlign = 'right';
+    ctx.strokeStyle = 'rgba(42,34,64,.8)'; ctx.lineWidth = 1;
+    var ticks = niceTicks(lo, hi, 4);
+    ticks.forEach(function (tv) {
+      var yy = Math.round(y(tv)) + .5; if (yy < T || yy > T + ph) return;
+      ctx.beginPath(); ctx.moveTo(L, yy); ctx.lineTo(L + pw, yy); ctx.stroke();
+      ctx.fillStyle = C.mut; ctx.fillText(fmt(tv, tv % 1 ? (meta.dec > 1 ? 1 : meta.dec) : 0), L - 8, yy);
+    });
+    // eixo x
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillStyle = C.mut;
+    (pw < 520 ? [[60, '-60 s'], [30, '-30 s'], [0, 'agora']] : [[60, '-60 s'], [45, '-45 s'], [30, '-30 s'], [15, '-15 s'], [0, 'agora']]).forEach(function (p) { var xx = xNow - p[0] * step; ctx.fillText(p[1], Math.max(L + 14, xx), T + ph + 8); });
+    ctx.fillStyle = 'rgba(196,168,255,.6)'; ctx.textAlign = 'right'; ctx.fillText(pw < 520 ? 'proj.' : 'projeção', L + pw - 4, T + 4);
+    ctx.strokeStyle = 'rgba(155,107,255,.35)'; ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.moveTo(xNow + .5, T); ctx.lineTo(xNow + .5, T + ph); ctx.stroke();
+
+    // limites
+    [[s[2], C.warn, 'Atenção ' + fmt(s[2], meta.dec > 1 ? 1 : meta.dec)], [s[3], C.bad, 'Crítico ' + fmt(s[3], meta.dec > 1 ? 1 : meta.dec)]].forEach(function (l) {
+      var yy = Math.round(y(l[0])) + .5;
+      ctx.strokeStyle = l[1]; ctx.globalAlpha = .75; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(L, yy); ctx.lineTo(L + pw, yy); ctx.stroke();
+      ctx.globalAlpha = 1; ctx.setLineDash([]);
+      ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillStyle = l[1]; ctx.fillText(l[2] + ' ' + meta.unit, L + 6, yy - 3);
+    });
+
+    // série
+    ctx.save(); ctx.beginPath(); ctx.rect(L, T - 4, pw - fut + 1, ph + 8); ctx.clip();
+    var off = (data.length - 1), sh = phase * step;
+    var X = function (i) { return xNow - (off - i) * step - sh; };
+    var g = ctx.createLinearGradient(0, T, 0, T + ph); g.addColorStop(0, 'rgba(155,107,255,.30)'); g.addColorStop(1, 'rgba(155,107,255,0)');
+    ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.strokeStyle = C.violet2;
+    segments(data, function (seg) {
+      ctx.beginPath(); seg.forEach(function (p, j) { j ? ctx.lineTo(X(p.i), y(p.v)) : ctx.moveTo(X(p.i), y(p.v)); });
+      ctx.stroke();
+      ctx.lineTo(X(seg[seg.length - 1].i), T + ph); ctx.lineTo(X(seg[0].i), T + ph); ctx.closePath(); ctx.fillStyle = g; ctx.fill();
+    });
+    // lacunas (offline)
+    ctx.fillStyle = 'rgba(163,156,184,.07)';
+    data.forEach(function (v, i) { if (v == null) ctx.fillRect(X(i) - step / 2, T, step, ph); });
+    ctx.restore();
+
+    var lv = data[data.length - 1];
+    if (lv != null) {
+      var lx = X(data.length - 1), ly = y(lv), lc = m.lvl[k] === 2 ? C.bad : m.lvl[k] === 1 ? C.warn : C.ok2;
+      // projeção da tendência
+      var tr = m.slope[k];
+      if (m.pred && m.pred.k === k && tr) {
+        var x2 = xNow + fut - 6, secs = (x2 - lx) / step, v2 = lv + tr.slope * secs;
+        ctx.save(); ctx.beginPath(); ctx.rect(L, T, pw, ph); ctx.clip();
+        ctx.strokeStyle = C.warn; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(x2, y(v2)); ctx.stroke(); ctx.setLineDash([]);
+        var cs = (s[3] - lv) / tr.slope, cx = lx + cs * step;
+        if (cx <= x2) { ctx.fillStyle = C.bad; ctx.beginPath(); ctx.arc(cx, y(s[3]), 4, 0, 7); ctx.fill(); }
+        ctx.restore();
+      }
+      ctx.fillStyle = hexA(lc, .25); ctx.beginPath(); ctx.arc(lx, ly, 7, 0, 7); ctx.fill();
+      ctx.fillStyle = lc; ctx.beginPath(); ctx.arc(lx, ly, 3.5, 0, 7); ctx.fill();
+    }
+  }
+  function niceTicks(lo, hi, n) {
+    var span = hi - lo, raw = span / n, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+    var st = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, out = [];
+    for (var v = Math.ceil(lo / st) * st; v <= hi; v += st) out.push(Math.round(v / st) * st);
+    return out;
+  }
+
+  /* ---------- painel de detalhe ---------- */
+  var tabsEl = $('tabs'), tabBtns = {};
+  KEYS.forEach(function (k) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'tab'; b.setAttribute('role', 'tab'); b.id = 'tab-' + k; b.setAttribute('aria-controls', 'chartPanel');
+    b.innerHTML = SENS[k].label + '<b>—</b>';
+    b.addEventListener('click', function () { setSensor(k); });
+    tabsEl.appendChild(b); tabBtns[k] = { el: b, val: b.querySelector('b') };
+  });
+  tabsEl.addEventListener('keydown', function (e) {
+    var i = KEYS.indexOf(S.sensor), n = KEYS.length, j = null;
+    if (e.key === 'ArrowRight') j = (i + 1) % n; else if (e.key === 'ArrowLeft') j = (i - 1 + n) % n; else if (e.key === 'Home') j = 0; else if (e.key === 'End') j = n - 1;
+    if (j != null) { e.preventDefault(); setSensor(KEYS[j]); tabBtns[KEYS[j]].el.focus(); }
+  });
+  function setSensor(k) {
+    S.sensor = k;
+    KEYS.forEach(function (kk) { var t = tabBtns[kk].el; t.setAttribute('aria-selected', kk === k ? 'true' : 'false'); t.tabIndex = kk === k ? 0 : -1; });
+    $('chartPanel').setAttribute('aria-labelledby', 'tab-' + k);
+    updateDetail(); drawMain(0);
+  }
+  function select(i, fromClick) {
+    S.sel = i; S.sensor = S.machines[i].d.primary;
+    cards.forEach(function (c, j) { c.el.setAttribute('aria-pressed', j === i ? 'true' : 'false'); });
+    setSensor(S.sensor);
+    if (fromClick && window.matchMedia('(max-width: 920px)').matches) {
+      $('detail').scrollIntoView({ behavior: reduce.matches ? 'auto' : 'smooth', block: 'start' });
+    }
+  }
+
+  function updateDetail() {
+    var m = S.machines[S.sel], k = S.sensor, st = STATUS[m.status], meta = SENS[k];
+    setText($('dTitle'), m.d.name);
+    var pill = $('dPill'); pill.className = 'd-pill ' + st.pill; setText(pill, st.txt);
+    setText($('dSub'), m.d.kind + ' · ' + m.d.tag + ' · ' + (m.offline ? 'sem sinal há ' + (S.t - m.offSince + 1) + ' s' : 'última leitura há 1 s'));
+    KEYS.forEach(function (kk) {
+      var v = m.offline ? null : last(m.hist[kk]);
+      setText(tabBtns[kk].val, fmtS(kk, v));
+      var cl = m.offline ? '' : m.lvl[kk] === 2 ? 'tc' : m.lvl[kk] === 1 ? 'tw' : '';
+      if (tabBtns[kk].val.className !== cl) tabBtns[kk].val.className = cl;
+    });
+    var vals = m.hist[k].slice(-HIST).filter(function (v) { return v != null; });
+    var cur = m.offline ? null : last(m.hist[k]);
+    var mn = vals.length ? Math.min.apply(null, vals) : null, mx = vals.length ? Math.max.apply(null, vals) : null;
+    var avg = vals.length ? vals.reduce(function (a, b) { return a + b; }, 0) / vals.length : null;
+    setText($('sNow'), fmtS(k, cur)); setText($('sMin'), fmtS(k, mn)); setText($('sMax'), fmtS(k, mx)); setText($('sAvg'), fmtS(k, avg));
+    setText($('sUp'), uptime(m.up));
+    $('chartState').hidden = !m.offline;
+    chart.setAttribute('aria-label', meta.label + ' de ' + m.d.name + ' nos últimos 60 segundos. Atual ' + fmtS(k, cur) + ', mínimo ' + fmtS(k, mn) + ', máximo ' + fmtS(k, mx) +
+      '. Limite de atenção ' + fmtS(k, m.d.s[k][2]) + ', crítico ' + fmtS(k, m.d.s[k][3]) + '.');
+
+    // previsão
+    var p = $('predict'), cls = '', title, text;
+    var critK = KEYS.filter(function (kk) { return m.lvl[kk] === 2; })[0];
+    if (m.offline) { cls = 'is-off'; title = 'Sem dados para prever'; text = 'O sensor está offline. A tendência volta a ser calculada assim que a comunicação for restabelecida.'; }
+    else if (critK) { cls = 'is-bad'; title = SENS[critK].label + ' acima do limite crítico'; text = 'Valor atual ' + fmtS(critK, last(m.hist[critK])) + '. Recomendado reduzir carga ou parar ' + m.d.name.toLowerCase() + ' para inspeção.'; }
+    else if (m.pred) {
+      cls = 'is-warn'; title = 'Tendência: ' + SENS[m.pred.k].low + ' atinge o limite crítico em ' + eta(m.pred.secs);
+      text = 'Subindo ' + fmt(m.pred.slope * 60, SENS[m.pred.k].dec) + ' ' + SENS[m.pred.k].unit + '/min nas últimas 20 leituras. Dá tempo de agir antes da falha.';
+    } else { title = 'Tendência estável'; text = 'Nenhum sensor deve atingir o limite crítico nos próximos 5 minutos.'; }
+    if (p.className !== 'predict ' + cls) p.className = 'predict ' + cls;
+    setText($('pTitle'), title); setText($('pText'), text);
+
+    // controles
+    $('faultBtn').disabled = m.fault || m.offline;
+    setText($('sensorBtn').querySelector('span'), m.offline ? 'Religar sensor' : 'Desligar sensor');
+    $('normBtn').disabled = !m.fault && !m.offline && m.status === 'ok' && !KEYS.some(function (kk) { return m.off[kk]; });
+
+    // dispositivo
+    setText($('dvName'), m.d.tag);
+    setText($('dvFw'), 'fw ' + m.d.fw);
+    setText($('dvRssi'), m.offline ? '—' : m.rssi + ' dBm');
+    var bars = m.offline ? 0 : m.rssi > -60 ? 4 : m.rssi > -67 ? 3 : m.rssi > -74 ? 2 : 1;
+    $('dvBars').querySelectorAll('i').forEach(function (b, j) { b.classList.toggle('on', j < bars); });
+    setText($('dvBat'), m.bat + '%');
+    $('dvBatBar').style.width = m.bat + '%';
+    $('dvBatBar').style.background = m.bat < 20 ? C.bad : m.bat < 40 ? C.warn : C.ok2;
+    setText($('dvPk'), fmt(m.pk, 0));
+    var dp = $('devPill');
+    var dcls = 'd-pill ' + (m.offline ? 'd-pill--bad' : 'd-pill--ok');
+    if (dp.className !== dcls) dp.className = dcls;
+    setText(dp.lastChild, m.offline ? 'Sem sinal' : 'Conectado');
+    var dg = $('diagram'); dg.classList.toggle('is-off', m.offline); dg.classList.toggle('is-paused', paused);
+  }
+
+  function updateSummary() {
+    var c = { ok: 0, warn: 0, bad: 0, off: 0 };
+    S.machines.forEach(function (m) { c[m.status]++; });
+    var html = '<span class="d-pill d-pill--ok">' + c.ok + (c.ok === 1 ? ' normal' : ' normais') + '</span>' +
+      '<span class="d-pill d-pill--warn">' + c.warn + ' atenção</span>' +
+      '<span class="d-pill d-pill--bad">' + c.bad + ' crítico' + (c.bad === 1 ? '' : 's') + '</span>' +
+      '<span class="d-pill">' + c.off + ' offline</span>';
+    var el = $('summary'); if (el.innerHTML !== html) el.innerHTML = html;
+  }
+
+  /* ---------- loop ---------- */
+  function render() {
+    cards.forEach(function (c, i) { updateCard(i); });
+    updateDetail(); updateSummary();
+    if (S.alertsDirty) renderFeed();
+    flushAnnounce();
+  }
+  function tick() {
+    S.t++;
+    S.machines.forEach(function (m) { step(m); evaluate(m); });
+    lastTick = performance.now();
+    render();
+    if (reduce.matches || !raf) drawMain(0);
+  }
+  function frame(now) {
+    raf = requestAnimationFrame(frame);
+    var ph = Math.min(1, (now - lastTick) / (1000 / speed));
+    drawMain(ph);
+  }
+  function running() { return !paused && !document.hidden; }
+  function sync() {
+    if (running()) {
+      if (!timer) { lastTick = performance.now(); timer = setInterval(tick, 1000 / speed); }
+      if (!reduce.matches && !raf) raf = requestAnimationFrame(frame);
+      if (reduce.matches && raf) { cancelAnimationFrame(raf); raf = 0; }
+    } else {
+      if (timer) { clearInterval(timer); timer = null; }
+      if (raf) { cancelAnimationFrame(raf); raf = 0; }
+      drawMain(0);
+    }
+    var live = $('live');
+    live.classList.toggle('is-paused', paused);
+    setText($('liveText'), paused ? 'Pausado' : 'Ao vivo');
+    $('diagram').classList.toggle('is-paused', paused);
+  }
+  document.addEventListener('visibilitychange', sync);
+  if (reduce.addEventListener) reduce.addEventListener('change', sync);
+
+  /* ---------- controles ---------- */
+  var toastT;
+  function toast(t) {
+    var el = $('toast'); el.textContent = t; el.classList.add('is-on');
+    clearTimeout(toastT); toastT = setTimeout(function () { el.classList.remove('is-on'); }, 2600);
+  }
+  $('pauseBtn').addEventListener('click', function () {
+    paused = !paused;
+    this.setAttribute('aria-pressed', paused ? 'true' : 'false');
+    this.querySelector('span').innerHTML = (paused ? 'Retomar' : 'Pausar') + '<span class="long"> transmissão</span>';
+    this.querySelector('svg').innerHTML = paused ? '<path d="M7 5v14l12-7z"/>' : '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>';
+    sync(); updateDetail();
+    toast(paused ? 'Transmissão pausada' : 'Transmissão retomada');
+  });
+  $('resetBtn').addEventListener('click', function () {
+    var wasPaused = paused;
+    if (timer) { clearInterval(timer); timer = null; }
+    init(); buildCards(); renderFeed(); select(0); render();
+    if (wasPaused) $('pauseBtn').click(); else sync();
+    toast('Demonstração restaurada');
+  });
+  $('faultBtn').addEventListener('click', function () {
+    var m = S.machines[S.sel]; if (m.fault || m.offline) return;
+    m.fault = true; m.calm = 0;
+    if (S.sensor !== m.d.primary) setSensor(m.d.primary);
+    push(m, 'info', 'falha simulada iniciada pelo operador (' + SENS[m.d.primary].low + ')', true);
+    render();
+    toast('Falha simulada: acompanhe ' + SENS[m.d.primary].low + ' de ' + m.d.name);
+  });
+  $('sensorBtn').addEventListener('click', function () {
+    var m = S.machines[S.sel];
+    m.offline = !m.offline;
+    if (m.offline) { m.offSince = S.t; push(m, 'warn', 'sensor sem comunicação'); }
+    else { push(m, 'ok', 'comunicação restabelecida', true); }
+    evaluate(m, true); render(); drawMain(0);
+  });
+  $('normBtn').addEventListener('click', function () {
+    var m = S.machines[S.sel];
+    m.fault = false;
+    if (m.offline) { m.offline = false; push(m, 'ok', 'comunicação restabelecida', true); }
+    evaluate(m, true); render();
+    toast(m.d.name + ': voltando aos valores normais');
+  });
+
+  var ro = new ResizeObserver(function () { if (!S) return; cards.forEach(function (c, i) { drawSpark(c.cv, S.machines[i]); }); drawMain(0); });
+
+  /* ---------- start ---------- */
+  init(); buildCards(); renderFeed(); select(0); render(); drawMain(0);
+  ro.observe(chart); ro.observe($('machines'));
+  sync();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { drawMain(0); });
+
+  // depuração / testes: iotDemo.setSpeed(10) acelera a simulação
+  window.iotDemo = {
+    setSpeed: function (n) { speed = Math.max(.25, Math.min(50, +n || 1)); if (timer) { clearInterval(timer); timer = null; } sync(); },
+    get state() { return S; }
+  };
+})();
+</script>
+</body>
+</html>

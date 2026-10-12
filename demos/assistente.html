@@ -1,0 +1,1012 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Atendimento automático por mensagem · Demonstração · Alfa Dev</title>
+<meta name="description" content="Demonstração de um assistente de atendimento por mensagem que responde clientes com base nos documentos da empresa, agenda consultas e transfere para um humano quando precisa.">
+<meta name="robots" content="noindex,follow">
+<meta name="theme-color" content="#0A0812">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0812'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Georgia,serif' font-style='italic' font-size='44' fill='%239B6BFF'%3E%CE%B1%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="demo.css">
+<style>
+.wrap {
+  max-width: 1240px; margin: 0 auto; padding: clamp(14px, 3vw, 28px);
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 390px); gap: 22px; align-items: start;
+}
+
+/* ---------- chat window ---------- */
+.chat {
+  display: flex; flex-direction: column; overflow: hidden; min-width: 0;
+  height: clamp(560px, calc(100vh - 170px), 860px);
+  box-shadow: 0 30px 80px -40px rgba(107,59,232,.55);
+}
+.chat__head {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px 12px 16px;
+  background: var(--ink-3); border-bottom: 1px solid var(--line-d);
+}
+.avatar {
+  flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--grad); color: #fff; font-family: var(--f-serif); font-style: italic; font-size: 1.45rem; line-height: 1;
+  position: relative;
+}
+.avatar::after {
+  content: ""; position: absolute; right: 0; bottom: 1px; width: 11px; height: 11px; border-radius: 50%;
+  background: var(--violet-2); border: 2px solid var(--ink-3);
+}
+.avatar--human { background: linear-gradient(135deg, #F7CF7E, #E39A3B); color: #2A1A05; font-family: var(--f-sans); font-style: normal; font-size: .9rem; font-weight: 600; }
+.avatar--human::after { background: var(--warn); }
+.chat__who { min-width: 0; flex: 1; }
+.chat__who strong { display: block; font-weight: 600; font-size: .98rem; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat__who span { display: block; font-size: .78rem; color: var(--mut-d); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat__who span b { font-weight: 500; color: var(--violet-2); }
+.chat__new { min-height: 36px; padding: 0 12px; font-size: .82rem; flex: none; }
+.chat__new svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.msgs {
+  flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+  padding: 18px clamp(12px, 2.4vw, 22px) 12px; margin: 0; list-style: none;
+  display: flex; flex-direction: column; gap: 8px;
+  background:
+    radial-gradient(rgba(196,168,255,.05) 1px, transparent 1.2px) 0 0 / 20px 20px,
+    radial-gradient(120% 60% at 50% 0%, rgba(107,59,232,.10), transparent 70%),
+    var(--ink);
+  scrollbar-width: thin; scrollbar-color: var(--line-d) transparent;
+}
+.msg { display: flex; flex-direction: column; max-width: min(82%, 520px); animation: pop .28s var(--ease) both; }
+.msg--user { align-self: flex-end; align-items: flex-end; }
+.msg--bot, .msg--human { align-self: flex-start; align-items: flex-start; }
+@keyframes pop { from { opacity: 0; transform: translateY(6px) scale(.98); } to { opacity: 1; transform: none; } }
+.bubble {
+  position: relative; padding: 8px 12px 6px; border-radius: 16px; font-size: .94rem; line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.bubble__text { white-space: pre-line; }
+.bubble__text b { font-weight: 600; }
+.msg--user .bubble { background: linear-gradient(135deg, #8A5CF5, #6B3BE8); color: #fff; border-bottom-right-radius: 5px; }
+.msg--bot .bubble { background: var(--ink-3); border: 1px solid var(--line-d); border-bottom-left-radius: 5px; }
+.msg--human .bubble { background: #1F1828; border: 1px solid rgba(242,181,68,.28); border-bottom-left-radius: 5px; }
+.bubble__name { display: block; font-size: .74rem; font-weight: 600; color: var(--warn); margin-bottom: 2px; }
+.bubble__meta {
+  display: flex; justify-content: flex-end; align-items: center; gap: 4px; margin-top: 2px;
+  font-family: var(--f-mono); font-size: .62rem; color: var(--mut-d); letter-spacing: .02em;
+}
+.msg--user .bubble__meta { color: rgba(255,255,255,.72); }
+.ticks { width: 17px; height: 11px; fill: none; stroke: rgba(255,255,255,.55); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.ticks .t2 { opacity: 0; }
+.is-read .ticks { stroke: #fff; }
+.is-read .ticks .t2 { opacity: 1; }
+.src {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 5px; padding: 4px 10px 4px 8px; border-radius: var(--r-pill);
+  border: 1px solid rgba(155,107,255,.32); background: rgba(155,107,255,.08); color: var(--violet-2);
+  font-family: var(--f-mono); font-size: .66rem; letter-spacing: .03em;
+}
+.src:hover { background: rgba(155,107,255,.16); }
+.src svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sys {
+  align-self: center; max-width: 92%; text-align: center; margin: 6px 0;
+  padding: 5px 12px; border-radius: var(--r-pill); background: var(--ink-3); border: 1px solid var(--line-d);
+  font-family: var(--f-mono); font-size: .66rem; letter-spacing: .04em; color: var(--mut-d);
+}
+.sys--handoff { color: var(--warn); border-color: rgba(242,181,68,.3); background: rgba(242,181,68,.07); }
+.day { align-self: center; font-family: var(--f-mono); font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: var(--mut-d); padding: 2px 0 6px; }
+
+.typing .bubble { display: inline-flex; gap: 4px; align-items: center; padding: 12px 14px; }
+.typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--violet-2); opacity: .4; animation: blink 1.1s infinite ease-in-out; }
+.typing i:nth-child(2) { animation-delay: .15s; }
+.typing i:nth-child(3) { animation-delay: .3s; }
+.typing.is-human i { background: var(--warn); }
+@keyframes blink { 0%, 60%, 100% { opacity: .3; transform: none; } 30% { opacity: 1; transform: translateY(-3px); } }
+
+/* summary card inside the chat */
+.sum { min-width: min(280px, 64vw); }
+.sum h3 { font-size: .86rem; font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.sum dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 5px 14px; font-size: .86rem; }
+.sum dt { color: var(--mut-d); }
+.sum dd { margin: 0; font-weight: 500; }
+
+/* quick replies + composer */
+.chips {
+  display: flex; gap: 8px; padding: 10px 14px 2px; overflow-x: auto; scrollbar-width: none; min-height: 0;
+  background: var(--ink-2);
+}
+.chips::-webkit-scrollbar { display: none; }
+.chips:empty { display: none; }
+.chip {
+  flex: none; min-height: 34px; padding: 0 14px; border-radius: var(--r-pill);
+  border: 1px solid rgba(155,107,255,.42); background: rgba(155,107,255,.08); color: var(--violet-2);
+  font-size: .84rem; white-space: nowrap; transition: background-color .2s, border-color .2s;
+}
+.chip:hover { background: rgba(155,107,255,.18); border-color: var(--violet); }
+.chip--ghost { border-color: var(--line-d); background: transparent; color: var(--mut-d); }
+.composer { display: flex; gap: 8px; align-items: center; padding: 10px 12px 12px; background: var(--ink-2); border-top: 1px solid transparent; }
+.composer .d-input { border-radius: var(--r-pill); padding: 10px 16px; background: var(--ink-3); }
+.send {
+  flex: none; width: 44px; height: 44px; border-radius: 50%; border: 0; display: grid; place-items: center;
+  background: var(--grad); color: #fff; box-shadow: 0 8px 20px -10px rgba(139,92,246,.9);
+}
+.send:hover { filter: brightness(1.1); }
+.send svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- right panel ---------- */
+.side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.panel { padding: 18px; }
+.eyebrow { font-family: var(--f-mono); font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; color: var(--violet-2); }
+.panel h2 { font-size: 1.12rem; margin-top: 6px; }
+.panel h2 em { font-family: var(--f-serif); font-style: italic; font-weight: 400; font-size: 1.2em; color: var(--violet-2); }
+.panel__lead { font-size: .84rem; color: var(--mut-d); margin-top: 4px; }
+
+.docs { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.doc { border: 1px solid var(--line-d); border-radius: 12px; background: var(--ink); transition: border-color .3s, box-shadow .3s; }
+.doc.is-used { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(155,107,255,.16); }
+.doc__btn {
+  width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 0; background: none; text-align: left; border-radius: 12px;
+}
+.doc__ico { flex: none; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--ink-3); color: var(--violet-2); }
+.doc__ico svg, .doc__chev { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.doc__t { flex: 1; min-width: 0; font-size: .9rem; font-weight: 500; }
+.doc__t small { display: block; font-family: var(--f-mono); font-size: .62rem; color: var(--mut-d); font-weight: 400; letter-spacing: .03em; }
+.doc .d-pill { display: none; }
+.doc.is-used .d-pill { display: inline-flex; }
+.doc__chev { flex: none; color: var(--mut-d); transition: transform .25s var(--ease); }
+.doc__btn[aria-expanded="true"] .doc__chev { transform: rotate(180deg); }
+.doc__body { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 6px; }
+.doc__body[hidden] { display: none; }
+.doc__body p {
+  font-size: .82rem; line-height: 1.5; color: var(--mut-d); padding: 6px 10px; border-left: 2px solid var(--line-d); border-radius: 0 8px 8px 0;
+  transition: background-color .3s, border-color .3s, color .3s;
+}
+.doc__body p.is-hit { border-left-color: var(--violet); background: rgba(155,107,255,.10); color: var(--fg-d); }
+
+.search { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line-d); }
+.search__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.search__head h3 { font-size: .86rem; font-weight: 600; min-width: 0; }
+.search__head .d-pill { flex: none; white-space: nowrap; }
+.search__empty { font-size: .82rem; color: var(--mut-d); margin-top: 8px; }
+.search__q { font-size: .82rem; color: var(--mut-d); margin-top: 8px; overflow-wrap: anywhere; }
+.search__q b { color: var(--fg-d); font-weight: 500; }
+.terms { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.terms code { font-family: var(--f-mono); font-size: .68rem; padding: 2px 7px; border-radius: 6px; background: var(--ink-3); color: var(--violet-2); }
+.terms code.fix { color: var(--warn); }
+.hits { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+.hits li { font-size: .78rem; }
+.hits__row { display: flex; justify-content: space-between; gap: 8px; color: var(--fg-d); }
+.hits__row span:last-child { font-family: var(--f-mono); color: var(--mut-d); font-size: .7rem; }
+.bar { height: 4px; border-radius: 4px; background: var(--ink-3); margin-top: 4px; overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 4px; background: var(--grad); }
+.hits li:not(:first-child) .bar i { background: #4A3D6E; }
+
+/* human agent card */
+.agent { padding: 16px 18px; border-color: rgba(242,181,68,.35); background: linear-gradient(180deg, rgba(242,181,68,.07), transparent 70%), var(--ink-2); }
+.agent[hidden] { display: none; }
+.agent__top { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.agent__top strong { display: block; font-size: .96rem; }
+.agent__top span { display: block; font-size: .78rem; color: var(--mut-d); }
+.agent__banner { margin-top: 12px; padding: 9px 12px; border-radius: 10px; background: rgba(242,181,68,.10); color: #F8D58E; font-size: .82rem; }
+.agent dl { margin: 12px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: .8rem; }
+.agent dt { color: var(--mut-d); }
+.agent dd { margin: 0; overflow-wrap: anywhere; }
+.agent .d-btn { margin-top: 14px; width: 100%; }
+
+.note { display: flex; gap: 10px; padding: 12px 14px; font-size: .78rem; color: var(--mut-d); line-height: 1.5; }
+.note svg { flex: none; width: 16px; height: 16px; margin-top: 2px; fill: none; stroke: var(--violet-2); stroke-width: 2; stroke-linecap: round; }
+.note b { color: var(--fg-d); font-weight: 500; }
+
+@media (max-width: 920px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); }
+  .chat { height: min(760px, calc(100svh - 40px)); min-height: 520px; }
+}
+@media (max-width: 480px) {
+  .wrap { padding: 10px; gap: 14px; }
+  .msg { max-width: 88%; }
+  .chat__new span { display: none; }
+  .chat__new { width: 38px; padding: 0; }
+  .panel { padding: 16px; }
+}
+</style>
+</head>
+<body>
+<header class="demo-bar">
+  <a class="demo-brand" href="../index.html" aria-label="Alfa Dev, voltar ao site">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.5 5.5c-1.6 6.2-4.6 13-9.4 13-3.1 0-5.1-2.6-5.1-6 0-3.8 2.5-7 5.6-7 4.2 0 5.6 5.4 7.4 10.2.8 2 1.9 2.8 3 2.8"/></svg>
+    <b>Alfa <span>Dev</span></b>
+  </a>
+  <div class="demo-title"><strong>Atendimento automático por mensagem</strong><span class="demo-badge">Demonstração</span></div>
+  <div class="demo-bar__end">
+    <a class="demo-back" href="../index.html#cases">← <span>Voltar ao site</span></a>
+    <a class="demo-cta" href="../index.html#contato">Quero algo assim <span aria-hidden="true">→</span></a>
+  </div>
+</header>
+<div class="demo-intro">
+  <p>Responde clientes a qualquer hora com base nos documentos da empresa e chama um humano quando precisa.</p>
+  <p class="demo-intro__note">Dados fictícios · roda no seu navegador</p>
+</div>
+
+<main id="app">
+  <div class="wrap">
+    <section class="chat d-card" aria-label="Conversa com a Clínica Vitta">
+      <header class="chat__head">
+        <div class="avatar" id="headAvatar" aria-hidden="true">V</div>
+        <div class="chat__who">
+          <strong id="headName">Clínica Vitta · Odontologia</strong>
+          <span id="headStatus"><b>online</b> · responde na hora</span>
+        </div>
+        <button class="d-btn chat__new" id="newChat" type="button" aria-label="Nova conversa">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+          <span>Nova conversa</span>
+        </button>
+      </header>
+      <ol class="msgs" id="msgs" role="log" aria-live="polite" aria-label="Mensagens"></ol>
+      <div class="chips" id="chips" role="group" aria-label="Respostas rápidas"></div>
+      <form class="composer" id="composer" autocomplete="off">
+        <label class="sr-only" for="msgInput">Escreva sua mensagem</label>
+        <input class="d-input" id="msgInput" name="msg" type="text" maxlength="300" placeholder="Escreva sua mensagem…" enterkeyhint="send">
+        <button class="send" type="submit" aria-label="Enviar mensagem">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13"/><path d="M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+    </section>
+
+    <aside class="side" aria-label="Bastidores do assistente">
+      <section class="agent d-card" id="agent" hidden aria-live="polite">
+        <span class="d-pill d-pill--warn">Atendente humano</span>
+        <div class="agent__top">
+          <div class="avatar avatar--human" aria-hidden="true">AR</div>
+          <div><strong>Ana Ribeiro</strong><span>Recepção · Clínica Vitta</span></div>
+        </div>
+        <p class="agent__banner" id="agentBanner">Conversa transferida para Ana · tempo médio 2 min</p>
+        <dl>
+          <dt>Motivo</dt><dd id="agentReason">—</dd>
+          <dt>Resumo</dt><dd id="agentSummary">—</dd>
+        </dl>
+        <button class="d-btn" id="backToBot" type="button">Devolver ao assistente</button>
+      </section>
+
+      <section class="panel d-card" aria-labelledby="kbTitle">
+        <p class="eyebrow">Base de conhecimento</p>
+        <h2 id="kbTitle">Documentos da <em>clínica</em></h2>
+        <p class="panel__lead">O assistente só responde com o que está aqui. Abra um documento para ver o texto-fonte.</p>
+        <ul class="docs" id="docs"></ul>
+        <div class="search" id="search" aria-live="polite"></div>
+      </section>
+
+      <p class="note d-card">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+        <span><b>Simulação:</b> em produção, as respostas são geradas por um modelo de IA a partir dos seus documentos, com regras de segurança e transferência para humanos.</span>
+      </p>
+    </aside>
+  </div>
+</main>
+<div class="d-toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+  const KEY = 'alfa-demo-chat-vitta';
+  const $ = (s, r = document) => r.querySelector(s);
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ================= knowledge base (fictitious) ================= */
+  const ICONS = {
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    card: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/>',
+    tag: '<path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.2"/>',
+    cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M10 14l4 4M14 14l-4 4"/>',
+    list: '<path d="M9 4h6v3H9z"/><path d="M8 5H6v16h12V5h-2M9 12h6M9 16h4"/>'
+  };
+  const DOCS = [
+    { id: 'horarios', title: 'Horários e endereço', icon: 'clock',
+      lead: ['Claro!', 'Vamos lá:'], follow: 'Quer que eu já veja um horário para você?', next: ['Agendar consulta', 'Convênios'],
+      passages: [
+        { id: 'h1', text: 'Atendemos de segunda a sexta, das 8h às 19h, e aos sábados, das 8h às 12h. Não abrimos aos domingos nem em feriados.', tags: 'horario funcionamento' },
+        { id: 'h2', text: 'Ficamos na Rua das Acácias, 214, sala 3, Centro, ao lado da Farmácia Bem Viver. Há estacionamento conveniado na mesma rua, com a 1ª hora grátis.', tags: 'endereco carro vaga' },
+        { id: 'h3', text: 'Urgências (dor forte, dente quebrado ou inchaço) são encaixadas no mesmo dia, dentro do horário de atendimento. Basta avisar por aqui ou ligar para (11) 3456-7890.', tags: 'urgencia telefone encaixe' }
+      ] },
+    { id: 'convenios', title: 'Convênios aceitos', icon: 'card',
+      lead: ['Sobre convênios:', 'Claro!'], follow: 'Posso ajudar com mais alguma coisa?', next: ['Agendar consulta', 'Preço da limpeza'],
+      passages: [
+        { id: 'c1', text: 'Aceitamos os convênios OdontoMais, SorrirPrev, Dentalis e Plano Bem-Estar Odonto.', tags: 'convenio aceita cobertura' },
+        { id: 'c2', text: 'Para usar o convênio, traga a carteirinha e um documento com foto. Clareamento e procedimentos estéticos não são cobertos pelos planos e são pagos à parte.', tags: 'convenio documento cobertura' },
+        { id: 'c3', text: 'Se o seu plano não estiver na lista, o atendimento particular tem 10% de desconto no pagamento via Pix.', tags: 'convenio desconto' }
+      ] },
+    { id: 'precos', title: 'Tabela de preços', icon: 'tag',
+      lead: ['Pela nossa tabela de preços:', 'Os valores atuais são:'], follow: 'Quer agendar? A avaliação inicial é gratuita.', next: ['Agendar consulta', 'Convênios'],
+      passages: [
+        { id: 'p1', text: 'Avaliação inicial com o dentista: gratuita, com duração de cerca de 30 minutos.', tags: 'preco avaliacao' },
+        { id: 'p2', text: 'Limpeza (profilaxia) com aplicação de flúor: R$ 180. Dura cerca de 40 minutos.', tags: 'preco limpeza' },
+        { id: 'p3', text: 'Restauração em resina: a partir de R$ 220 por dente. Tratamento de canal: a partir de R$ 750, conforme o dente.', tags: 'preco restauracao canal' },
+        { id: 'p4', text: 'Clareamento caseiro com moldeiras: R$ 890. Clareamento em consultório (laser): R$ 1.400.', tags: 'preco clareamento' },
+        { id: 'p5', text: 'Pagamento via Pix, débito ou cartão de crédito em até 6x sem juros para valores acima de R$ 300.', tags: 'pagamento' }
+      ] },
+    { id: 'cancelamento', title: 'Política de cancelamento', icon: 'cal',
+      lead: ['Sobre cancelamentos:', 'Funciona assim:'], follow: 'Se quiser remarcar, é só me dizer.', next: ['Agendar consulta', 'Falar com atendente'],
+      passages: [
+        { id: 'k1', text: 'Você pode cancelar ou remarcar sem custo até 24 horas antes da consulta, por aqui mesmo.', tags: 'cancelar' },
+        { id: 'k2', text: 'Cancelamentos com menos de 24 horas ou faltas sem aviso geram uma taxa de R$ 50 na próxima consulta, exceto com atestado médico.', tags: 'cancelar pagamento falta cima' },
+        { id: 'k3', text: 'Toleramos atrasos de até 15 minutos. Depois disso, a consulta pode precisar ser remarcada.', tags: 'atraso' }
+      ] },
+    { id: 'preparo', title: 'Preparo para procedimentos', icon: 'list',
+      lead: ['Boa pergunta!', 'Anota aí:'], follow: 'Mais alguma dúvida sobre o procedimento?', next: ['Agendar consulta', 'Horários'],
+      passages: [
+        { id: 'r1', text: 'Para avaliação e limpeza não é preciso jejum: escove os dentes normalmente antes de vir.', tags: 'preparo' },
+        { id: 'r2', text: 'Depois do clareamento, evite por 48 horas alimentos com corante, como café, vinho, refrigerante de cola, açaí e molho de tomate.', tags: 'preparo cuidado' },
+        { id: 'r3', text: 'Para extrações, faça uma refeição leve antes, traga exames recentes e avise se usa anticoagulantes.', tags: 'preparo' },
+        { id: 'r4', text: 'Atendemos crianças a partir de 3 anos, sempre acompanhadas por um responsável.', tags: 'crianca' }
+      ] }
+  ];
+
+  /* ================= text pipeline ================= */
+  const STOP = new Set(('a o as os um uma uns umas de da do das dos em no na nos nas por para pra pro com sem e ou que se me te lhe nos vos ' +
+    'eu tu ele ela eles elas voce voces vc vcs ce meu minha seu sua teu tua isso isto esse essa este esta aquele ' +
+    'qual quais como e eh ser sao sou foi tem ter tenho temos ha ai la aqui ja mais muito muita bem so tambem ' +
+    'gostaria queria quero saber poderia pode podem posso favor porfavor pf pfv preciso precisa sobre ao aos ' +
+    'oi ola ok entao tipo algum alguma nao sim mesmo vou vai estou esta ta tah uns qualquer dia gente').split(' '));
+
+  const SYN_GROUPS = {
+    horario: 'horario horarios hora horas abre abrem abrir abertos aberto aberta fecha fecham fechar fechado funciona funcionam funcionamento expediente atendimento',
+    endereco: 'endereco onde localizacao local fica ficam chegar rua',
+    estacionamento: 'estacionamento estacionar estacionamentos carro vaga vagas',
+    preco: 'preco precos valor valores custa custam custo custos quanto quantos cobram cobra cobrado caro barato tabela',
+    convenio: 'convenio convenios plano planos seguro odontomais sorrirprev dentalis carteirinha',
+    limpeza: 'limpeza limpar limpezas profilaxia tartaro',
+    clareamento: 'clareamento clarear clareia branqueamento branquear clareamentos laser',
+    avaliacao: 'avaliacao avaliar checkup revisao',
+    restauracao: 'restauracao restauracoes obturacao carie caries resina',
+    cancelar: 'cancelar cancelamento cancela cancelo desmarcar desmarco remarcar remarco remarcacao faltar falta faltei multa',
+    pagamento: 'pagamento pagar pago pagamentos parcelar parcela parcelas parcelado cartao credito debito pix',
+    urgencia: 'urgencia urgencias emergencia urgente dor doendo doi quebrou quebrado quebrada inchaco inchado',
+    preparo: 'preparo jejum preparar comer antes',
+    extracao: 'extracao extracoes extrair arrancar tirar siso',
+    atraso: 'atraso atrasar atrasado atrasada atrasos tolerancia',
+    crianca: 'crianca criancas filho filha infantil bebe',
+    desconto: 'desconto descontos particular',
+    alimento: 'alimento alimentos comida comidas beber bebida cafe'
+  };
+  const SYN = {};
+  for (const [c, words] of Object.entries(SYN_GROUPS)) words.split(' ').forEach(w => { SYN[w] = c; });
+
+  const INTENT_WORDS = 'atendente atendentes humano humana pessoa alguem recepcao secretaria reclamacao reclamar absurdo pessimo pessima horrivel ' +
+    'insatisfeito insatisfeita descaso procon agendar agenda agendamento marcar marcacao consulta obrigado obrigada valeu agradeco ' +
+    'bom boa tarde noite tchau confirmar confirmo confirmado segunda terca quarta quinta sexta sabado domingo amanha cancelar';
+
+  const norm = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+
+  function stem(w) {
+    if (w.length <= 3 || /\d/.test(w)) return w;
+    const plural = [['coes', 'cao'], ['oes', 'ao'], ['aes', 'ao'], ['ais', 'al'], ['eis', 'el'], ['mente', ''], ['s', '']];
+    for (const [a, b] of plural) if (w.endsWith(a) && w.length - a.length >= 3) { w = w.slice(0, -a.length) + b; break; }
+    const verb = ['amos', 'emos', 'imos', 'ando', 'endo', 'indo', 'ado', 'ada', 'ido', 'ida', 'ar', 'er', 'ir', 'am', 'em'];
+    for (const v of verb) if (w.endsWith(v) && w.length - v.length >= 3) { w = w.slice(0, -v.length); break; }
+    if (w.length > 4 && /[aeo]$/.test(w)) w = w.slice(0, -1);
+    return w;
+  }
+
+  function lev(a, b, max) {
+    if (Math.abs(a.length - b.length) > max) return max + 1;
+    let pp = null, prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+    for (let i = 1; i <= a.length; i++) {
+      const cur = [i]; let rowMin = i;
+      for (let j = 1; j <= b.length; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        let v = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+        if (pp && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) v = Math.min(v, pp[j - 2] + 1);
+        cur[j] = v; if (v < rowMin) rowMin = v;
+      }
+      if (rowMin > max) return max + 1;
+      pp = prev; prev = cur;
+    }
+    return prev[b.length];
+  }
+
+  const VOCAB = new Set();
+  const addVocab = t => norm(t).split(' ').forEach(w => { if (w.length >= 3) VOCAB.add(w); });
+  DOCS.forEach(d => { addVocab(d.title); d.passages.forEach(p => { addVocab(p.text); addVocab(p.tags); }); });
+  Object.keys(SYN).forEach(w => VOCAB.add(w));
+  addVocab(INTENT_WORDS);
+  const VOCAB_LIST = [...VOCAB];
+
+  /* returns { text: corrected normalized string, fixes: [[from,to]] } */
+  function correct(raw) {
+    const fixes = [];
+    const words = norm(raw).split(' ').filter(Boolean).map(w => {
+      if (VOCAB.has(w) || STOP.has(w) || w.length < 4 || /\d/.test(w)) return w;
+      const max = w.length >= 7 ? 2 : 1;
+      let best = null, bestD = max + 1;
+      for (const v of VOCAB_LIST) {
+        if (w.length < 6 && v[0] !== w[0]) continue;
+        const d = lev(w, v, max);
+        if (d < bestD || (d === bestD && best && SYN[v] && !SYN[best])) { bestD = d; best = v; }
+      }
+      if (best && bestD <= max) { fixes.push([w, best]); return best; }
+      return w;
+    });
+    return { text: words.join(' '), fixes };
+  }
+
+  const canon = text => text.split(' ').filter(Boolean).map(w => SYN[w] || w).filter(w => !STOP.has(w) && w.length >= 2);
+  const terms = text => canon(text).map(stem);
+
+  /* ================= BM25 index ================= */
+  const PASSAGES = [];
+  DOCS.forEach(d => d.passages.forEach(p => {
+    p.doc = d;
+    p.terms = terms(norm(d.title + ' ' + p.text + ' ' + p.tags));
+    p.tf = new Map(); p.terms.forEach(t => p.tf.set(t, (p.tf.get(t) || 0) + 1));
+    PASSAGES.push(p);
+  }));
+  const N = PASSAGES.length;
+  const DF = new Map();
+  PASSAGES.forEach(p => new Set(p.terms).forEach(t => DF.set(t, (DF.get(t) || 0) + 1)));
+  const AVGDL = PASSAGES.reduce((s, p) => s + p.terms.length, 0) / N;
+  const idf = t => Math.log(1 + (N - (DF.get(t) || 0) + 0.5) / ((DF.get(t) || 0) + 0.5));
+  const K1 = 1.2, B = 0.75;
+  const UNKNOWN_W = 0.6 * [...DF.keys()].reduce((s, t) => s + idf(t), 0) / DF.size;
+
+  function search(rawQuery) {
+    const { text, fixes } = correct(rawQuery);
+    const q = [...new Set(terms(text))];
+    // words that never appear in the documents weigh less than known ones (still lower confidence)
+    const w = t => DF.has(t) ? idf(t) : UNKNOWN_W;
+    const totalW = q.reduce((s, t) => s + w(t), 0);
+    const ranked = PASSAGES.map(p => {
+      let score = 0, hitW = 0;
+      for (const t of q) {
+        const f = p.tf.get(t) || 0;
+        if (!f) continue;
+        score += idf(t) * (f * (K1 + 1)) / (f + K1 * (1 - B + B * p.terms.length / AVGDL));
+        hitW += w(t);
+      }
+      return { p, score, cov: totalW ? hitW / totalW : 0 };
+    }).sort((a, b) => b.score - a.score || b.cov - a.cov);
+    const top = ranked[0];
+    const conf = top && top.score > 0 ? top.cov : 0;
+    return { text, fixes, q, ranked, top, conf };
+  }
+
+  /* ================= state ================= */
+  const fresh = () => ({ v: 1, seq: 0, msgs: [], chips: [], mode: 'bot', flow: null, miss: 0, handoff: null, last: null, used: null, open: [], humanIdx: 0 });
+  let state = load() || fresh();
+  let session = 0;
+  let chain = Promise.resolve();
+
+  function load() {
+    try { const s = JSON.parse(localStorage.getItem(KEY)); return s && s.v === 1 && Array.isArray(s.msgs) ? s : null; } catch (e) { return null; }
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable */ } }
+
+  /* ================= rendering ================= */
+  const list = $('#msgs'), chipsEl = $('#chips'), input = $('#msgInput');
+  const now = () => new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmt = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const TICKS = '<svg class="ticks" viewBox="0 0 18 11" aria-hidden="true"><path d="M1 6l3 3 6-7"/><path class="t2" d="M7 8.5l1 .5 7-7"/></svg>';
+  const DOC_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h4"/></svg>';
+
+  function msgEl(m) {
+    const li = document.createElement('li');
+    li.dataset.id = m.id;
+    if (m.from === 'sys') {
+      li.className = 'sys' + (m.kind === 'handoff' ? ' sys--handoff' : '');
+      li.textContent = m.text;
+      return li;
+    }
+    li.className = 'msg msg--' + m.from + (m.status === 'read' ? ' is-read' : '');
+    let inner = '';
+    if (m.from === 'human') inner += '<span class="bubble__name">Ana · Recepção</span>';
+    if (m.card) inner += cardHtml(m.card);
+    else inner += '<div class="bubble__text">' + fmt(m.text) + '</div>';
+    const who = m.from === 'user' ? 'Você' : m.from === 'human' ? 'Ana' : 'Assistente';
+    let meta = '<span class="sr-only">' + who + ', </span><time>' + esc(m.t) + '</time>';
+    if (m.from === 'user') meta += TICKS + '<span class="sr-only tick-label">' + (m.status === 'read' ? ', lida' : ', enviada') + '</span>';
+    li.innerHTML = '<div class="bubble' + (m.card ? ' sum' : '') + '">' + inner + '<div class="bubble__meta">' + meta + '</div></div>' +
+      (m.src ? '<button type="button" class="src" data-doc="' + esc(m.src.doc) + '" data-pass="' + esc(m.src.pass || '') + '">' + DOC_ICON + 'Fonte: ' + esc(m.src.title) + '</button>' : '');
+    return li;
+  }
+  function cardHtml(c) {
+    const pill = c.status === 'ok' ? '<span class="d-pill d-pill--ok">Confirmado · ' + esc(c.code) + '</span>'
+      : c.status === 'off' ? '<span class="d-pill d-pill--bad">Cancelado</span>'
+      : '<span class="d-pill d-pill--warn">Aguardando</span>';
+    return '<h3>Resumo do agendamento ' + pill + '</h3><dl>' +
+      '<dt>Procedimento</dt><dd>' + esc(c.proc) + '</dd>' +
+      '<dt>Dia</dt><dd>' + esc(c.day) + '</dd>' +
+      '<dt>Horário</dt><dd>' + esc(c.time) + '</dd>' +
+      '<dt>Paciente</dt><dd>' + esc(c.name) + '</dd>' +
+      '<dt>Local</dt><dd>Rua das Acácias, 214 · sala 3</dd></dl>';
+  }
+  function scrollDown() {
+    list.scrollTo({ top: list.scrollHeight, behavior: reduceMotion ? 'auto' : 'smooth' });
+  }
+  function renderAll() {
+    list.innerHTML = '<li class="day" aria-hidden="true">Hoje</li>';
+    state.msgs.forEach(m => list.appendChild(msgEl(m)));
+    renderChips(); renderHead(); renderAgent(); renderDocs(); renderSearch();
+    list.scrollTop = list.scrollHeight;
+  }
+  function addMsg(m) {
+    m.id = ++state.seq; m.t = m.t || now();
+    state.msgs.push(m); save();
+    hideTyping();
+    list.appendChild(msgEl(m));
+    scrollDown();
+    return m;
+  }
+  function updateMsg(m) {
+    const el = list.querySelector('[data-id="' + m.id + '"]');
+    if (el) el.replaceWith(msgEl(m));
+    save();
+  }
+  function markRead() {
+    state.msgs.forEach(m => {
+      if (m.from === 'user' && m.status !== 'read') {
+        m.status = 'read';
+        const el = list.querySelector('[data-id="' + m.id + '"]');
+        if (el) { el.classList.add('is-read'); const l = el.querySelector('.tick-label'); if (l) l.textContent = ', lida'; }
+      }
+    });
+    save();
+  }
+  let typingEl = null;
+  function showTyping(human) {
+    hideTyping();
+    typingEl = document.createElement('li');
+    typingEl.className = 'msg msg--' + (human ? 'human' : 'bot') + ' typing' + (human ? ' is-human' : '');
+    typingEl.innerHTML = '<div class="bubble"><i></i><i></i><i></i><span class="sr-only">' + (human ? 'Ana' : 'Assistente') + ' está digitando</span></div>';
+    list.appendChild(typingEl);
+    scrollDown();
+    $('#headStatus').innerHTML = '<b>digitando…</b>';
+  }
+  function hideTyping() {
+    if (typingEl) { typingEl.remove(); typingEl = null; }
+    renderHead();
+  }
+  function renderHead() {
+    const human = state.mode === 'human';
+    $('#headAvatar').className = 'avatar' + (human ? ' avatar--human' : '');
+    $('#headAvatar').textContent = human ? 'AR' : 'V';
+    $('#headName').textContent = human ? 'Ana · Clínica Vitta' : 'Clínica Vitta · Odontologia';
+    $('#headStatus').innerHTML = human ? '<b>atendente humana</b> · em atendimento' : '<b>online</b> · responde na hora';
+  }
+
+  const CHIP_SAY = {
+    'Horários': 'Quais são os horários de atendimento?',
+    'Convênios': 'Quais convênios vocês aceitam?',
+    'Agendar consulta': 'Quero agendar uma consulta',
+    'Preço da limpeza': 'Quanto custa a limpeza?',
+    'Falar com atendente': 'Quero falar com um atendente',
+    'Endereço': 'Qual é o endereço?'
+  };
+  const DEFAULT_CHIPS = ['Horários', 'Convênios', 'Agendar consulta', 'Preço da limpeza', 'Falar com atendente'];
+  function setChips(c) { state.chips = c; save(); renderChips(); }
+  function renderChips() {
+    chipsEl.innerHTML = '';
+    state.chips.forEach(label => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip' + (/^(Cancelar|Não)/.test(label) ? ' chip--ghost' : '');
+      b.textContent = label;
+      b.addEventListener('click', () => send(CHIP_SAY[label] || label));
+      chipsEl.appendChild(b);
+    });
+    chipsEl.scrollLeft = 0;
+  }
+
+  /* knowledge panel */
+  const docsEl = $('#docs');
+  DOCS.forEach(d => {
+    const li = document.createElement('li');
+    li.className = 'doc'; li.id = 'doc-' + d.id;
+    li.innerHTML =
+      '<button type="button" class="doc__btn" aria-expanded="false" aria-controls="docb-' + d.id + '">' +
+      '<span class="doc__ico"><svg viewBox="0 0 24 24" aria-hidden="true">' + ICONS[d.icon] + '</svg></span>' +
+      '<span class="doc__t">' + esc(d.title) + '<small>' + d.passages.length + ' trechos</small></span>' +
+      '<span class="d-pill">usado agora</span>' +
+      '<svg class="doc__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' +
+      '<div class="doc__body" id="docb-' + d.id + '" hidden>' + d.passages.map(p => '<p data-pass="' + p.id + '">' + esc(p.text) + '</p>').join('') + '</div>';
+    li.querySelector('.doc__btn').addEventListener('click', () => {
+      const i = state.open.indexOf(d.id);
+      if (i >= 0) state.open.splice(i, 1); else state.open.push(d.id);
+      save(); renderDocs();
+    });
+    docsEl.appendChild(li);
+  });
+  function renderDocs() {
+    DOCS.forEach(d => {
+      const li = $('#doc-' + d.id);
+      const open = state.open.includes(d.id);
+      li.classList.toggle('is-used', !!state.used && state.used.doc === d.id);
+      li.querySelector('.doc__btn').setAttribute('aria-expanded', String(open));
+      li.querySelector('.doc__body').hidden = !open;
+      li.querySelectorAll('.doc__body p').forEach(p => p.classList.toggle('is-hit', !!state.used && state.used.pass.includes(p.dataset.pass)));
+    });
+  }
+  function useSource(docId, passIds) {
+    state.used = { doc: docId, pass: passIds };
+    state.open = [docId]; // keep the panel short: only the document in use stays open
+    save(); renderDocs();
+  }
+
+  function renderSearch() {
+    const el = $('#search'), r = state.last;
+    if (!r) {
+      el.innerHTML = '<div class="search__head"><h3>Como a resposta foi encontrada</h3></div><p class="search__empty">Faça uma pergunta para ver a busca nos documentos: termos extraídos, trechos mais relevantes e a confiança da resposta.</p>';
+      return;
+    }
+    const level = r.conf >= 0.5 ? ['ok', 'confiança alta'] : r.conf >= 0.25 ? ['warn', 'confiança baixa'] : ['bad', 'fora da base'];
+    const max = Math.max(...r.top.map(h => h.score), 0.0001);
+    el.innerHTML =
+      '<div class="search__head"><h3>Busca nos documentos</h3><span class="d-pill d-pill--' + level[0] + '">' + level[1] + ' · ' + Math.round(r.conf * 100) + '%</span></div>' +
+      '<p class="search__q">Pergunta: <b>' + esc(r.q) + '</b></p>' +
+      '<div class="terms" aria-label="Termos de busca">' +
+        r.fixes.map(f => '<code class="fix" title="correção de digitação">' + esc(f[0]) + ' → ' + esc(f[1]) + '</code>').join('') +
+        (r.terms.length ? r.terms.map(t => '<code>' + esc(t) + '</code>').join('') : '<code>sem termos úteis</code>') +
+      '</div>' +
+      '<ol class="hits" aria-label="Trechos mais relevantes (BM25)">' + r.top.map(h =>
+        '<li><div class="hits__row"><span>' + esc(h.title) + '</span><span>' + h.score.toFixed(2) + '</span></div>' +
+        '<div class="bar"><i style="width:' + Math.max(3, Math.round(h.score / max * 100)) + '%"></i></div></li>').join('') + '</ol>';
+  }
+  function recordSearch(raw, r) {
+    state.last = {
+      q: raw.slice(0, 120), terms: r.q, fixes: r.fixes, conf: r.conf,
+      top: r.ranked.slice(0, 3).map(h => ({ title: h.p.doc.title + ' · trecho ' + (h.p.doc.passages.indexOf(h.p) + 1), score: h.score }))
+    };
+    save(); renderSearch();
+  }
+
+  function renderAgent() {
+    const h = state.mode === 'human' && state.handoff;
+    $('#agent').hidden = !h;
+    if (!h) return;
+    $('#agentReason').textContent = h.reason;
+    $('#agentSummary').textContent = '“' + h.summary + '”';
+    $('#agentBanner').textContent = 'Conversa transferida para Ana às ' + h.at + ' · tempo médio 2 min';
+  }
+
+  /* ================= conversation engine ================= */
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const alive = s => s === session;
+  const typeDelay = text => reduceMotion ? 350 : Math.min(2400, 500 + String(text).length * 13);
+
+  async function say(s, text, extra = {}, human = false) {
+    if (!alive(s)) return null;
+    showTyping(human);
+    await sleep(typeDelay(text));
+    if (!alive(s)) return null;
+    return addMsg(Object.assign({ from: human ? 'human' : 'bot', text }, extra));
+  }
+
+  function send(raw) {
+    const text = String(raw).trim().slice(0, 300);
+    if (!text) return;
+    addMsg({ from: 'user', text, status: 'sent' });
+    setChips([]);
+    const s = session;
+    chain = chain.then(() => respond(text, s)).catch(err => { console.error(err); });
+  }
+
+  const RX = {
+    human: /\b(atendente|atendentes|humano|humana|pessoa|alguem|recepcao|secretaria|falar com (a|o) (doutora?|dentista))\b/,
+    complaint: /\b(reclamacao|reclamar|absurdo|pessimo|pessima|horrivel|insatisfeit[oa]|descaso|procon|desrespeito)\b/,
+    schedule: /\b(agendar|agenda|agendamento|marcar|marcacao|marca|horario disponivel|vaga para)\b/,
+    unschedule: /\b(cancelar|desmarcar|remarcar|cancelamento|multa|taxa)\b/,
+    greet: /^(oi+|ola|opa|e ai|eai|bom dia|boa tarde|boa noite|hey|salve)\b/,
+    thanks: /\b(obrigad[oa]|valeu|agradeco|brigad[oa]|vlw)\b/,
+    bye: /\b(tchau|ate mais|ate logo|falou)\b/,
+    cancelFlow: /\b(cancelar|cancela|sair|parar|desistir|desisto|deixa pra la|nao quero mais|esquece)\b/
+  };
+
+  async function respond(raw, s) {
+    if (!alive(s)) return;
+    await sleep(reduceMotion ? 150 : 450);
+    if (!alive(s)) return;
+    markRead();
+
+    if (state.mode === 'human') return humanReply(raw, s);
+
+    const { text } = correct(raw);
+    if (RX.complaint.test(text)) return handoff(s, 'reclamação', raw);
+    if (RX.human.test(text)) return handoff(s, 'pediu atendente', raw);
+    if (state.flow) return flowStep(raw, text, s);
+
+    const rest = canon(text.replace(RX.greet, '')).filter(w => !/^(tudo|bem|bom|boa|dia|tarde|noite)$/.test(w));
+    const isGreet = RX.greet.test(text);
+    if (RX.thanks.test(text) && rest.filter(w => !RX.thanks.test(w)).length <= 1) {
+      await say(s, pick(['Por nada! Se precisar de mais alguma coisa, é só chamar.', 'Imagina! Estou por aqui sempre que precisar.']));
+      return setChips(DEFAULT_CHIPS);
+    }
+    if (RX.bye.test(text) && rest.length <= 1) {
+      await say(s, 'Até logo! A Clínica Vitta agradece o contato. Cuide bem desse sorriso.');
+      return setChips(DEFAULT_CHIPS);
+    }
+    if (isGreet && rest.length === 0) {
+      await say(s, 'Oi! Tudo bem? Posso te ajudar com horários, convênios, preços, preparo para procedimentos ou agendar sua consulta.');
+      return setChips(DEFAULT_CHIPS);
+    }
+    if (RX.schedule.test(text) && !RX.unschedule.test(text)) return startFlow(text, s);
+
+    const r = search(raw);
+    recordSearch(raw, r);
+    if (r.conf >= 0.5) return answer(r, s, isGreet ? 'Oi! ' : '');
+    if (r.conf >= 0.25 || state.miss >= 1) return handoff(s, 'baixa confiança na resposta', raw);
+    state.miss++; save();
+    await say(s, 'Hmm, não encontrei isso nos documentos da clínica, então prefiro não inventar uma resposta. Posso ajudar com **horários, convênios, preços, cancelamentos** ou **preparo para procedimentos**. Se preferir, chamo uma pessoa da equipe.');
+    setChips(['Falar com atendente', 'Horários', 'Preço da limpeza']);
+  }
+
+  async function answer(r, s, prefix = '') {
+    const best = r.top, d = best.p.doc;
+    // add a second passage only if it is from the same document, nearly as relevant and covers a term the first one misses
+    const extra = r.ranked.slice(1, 3).find(h => h.p.doc === d && h.score >= best.score * 0.75 && h.cov >= 0.5 &&
+      r.q.some(t => h.p.tf.has(t) && !best.p.tf.has(t)));
+    const passIds = [best.p.id].concat(extra ? [extra.p.id] : []);
+    const txt = (prefix || pick(d.lead) + ' ') + best.p.text + (extra ? '\n\n' + extra.p.text : '') + '\n\n' + d.follow;
+    state.miss = 0;
+    useSource(d.id, passIds);
+    await say(s, txt, { src: { doc: d.id, title: d.title, pass: passIds.join(',') } });
+    setChips(d.next.concat(DEFAULT_CHIPS.filter(c => !d.next.includes(c))).slice(0, 4));
+  }
+
+  async function handoff(s, reason, question) {
+    state.flow = null;
+    const msg = reason === 'reclamação'
+      ? 'Sinto muito pelo transtorno. Isso merece a atenção de uma pessoa: vou chamar alguém da equipe agora mesmo.'
+      : reason === 'pediu atendente'
+        ? 'Claro! Vou chamar uma pessoa da equipe. Já enviei um resumo da conversa para você não precisar repetir nada.'
+        : 'Não encontrei essa informação com segurança nos documentos da clínica e prefiro não chutar. Vou chamar uma pessoa da equipe.';
+    await say(s, msg);
+    if (!alive(s)) return;
+    state.mode = 'human'; state.miss = 0;
+    state.handoff = { reason, summary: question.length > 90 ? question.slice(0, 88) + '…' : question, at: now() };
+    addMsg({ from: 'sys', kind: 'handoff', text: 'Conversa transferida para Ana · tempo médio 2 min' });
+    renderHead(); renderAgent();
+    if (window.matchMedia('(max-width: 920px)').matches) toast('Conversa transferida para uma atendente');
+    await sleep(reduceMotion ? 600 : 2600);
+    return humanIntro(s);
+  }
+  async function humanIntro(s) {
+    if (!alive(s) || state.mode !== 'human' || !state.handoff) return;
+    const h = state.handoff;
+    const txt = h.reason === 'reclamação'
+      ? 'Oi, aqui é a Ana, da recepção. Li o que aconteceu e peço desculpas. Pode me contar um pouco mais? Quero resolver isso pessoalmente com você.'
+      : 'Oi! Aqui é a Ana, da recepção da Vitta. Vi sua mensagem: “' + h.summary + '”. Já estou verificando para você, só um instante.';
+    await say(s, txt, {}, true);
+  }
+  const HUMAN_REPLIES = [
+    'Certo, anotei aqui. Vou confirmar com a doutora e te respondo ainda hoje, combinado?',
+    'Entendi. Se preferir, posso te ligar para resolvermos mais rápido. Qual o melhor horário?',
+    'Perfeito, já deixei registrado no seu cadastro. Mais alguma coisa em que eu possa ajudar?'
+  ];
+  async function humanReply(raw, s) {
+    const txt = HUMAN_REPLIES[state.humanIdx % HUMAN_REPLIES.length];
+    state.humanIdx++;
+    await sleep(reduceMotion ? 200 : 900);
+    await say(s, txt, {}, true);
+  }
+  function backToBot() {
+    if (state.mode !== 'human') return;
+    session++; chain = Promise.resolve(); hideTyping();
+    state.mode = 'bot'; state.handoff = null;
+    addMsg({ from: 'sys', text: 'Ana devolveu a conversa ao assistente' });
+    renderHead(); renderAgent();
+    const s = session;
+    chain = chain.then(async () => {
+      await say(s, 'Voltei! Se tiver mais alguma dúvida, é só perguntar.');
+      if (alive(s)) setChips(DEFAULT_CHIPS);
+    });
+    input.focus();
+  }
+
+  /* ================= scheduling flow ================= */
+  const PROCS = [
+    { id: 'avaliacao', label: 'Avaliação (gratuita)', name: 'Avaliação inicial (gratuita)' },
+    { id: 'limpeza', label: 'Limpeza · R$ 180', name: 'Limpeza com flúor · R$ 180' },
+    { id: 'clareamento', label: 'Clareamento', name: 'Clareamento (a partir de R$ 890)' },
+    { id: 'restauracao', label: 'Restauração', name: 'Restauração em resina (a partir de R$ 220)' }
+  ];
+  const WEEK = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+  const WEEK_LABEL = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const ALL_SLOTS = ['08:30', '09:30', '10:00', '11:00', '14:00', '15:30', '16:30', '17:30'];
+
+  function nextDays() {
+    const out = [], d = new Date();
+    d.setHours(12, 0, 0, 0);
+    while (out.length < 5) {
+      d.setDate(d.getDate() + 1);
+      const wd = d.getDay();
+      if (wd === 0 || wd === 6) continue;
+      const dd = String(d.getDate()).padStart(2, '0'), mm = String(d.getMonth() + 1).padStart(2, '0');
+      out.push({ key: d.getFullYear() + '-' + mm + '-' + dd, wd, dom: d.getDate(), mon: d.getMonth() + 1, label: WEEK_LABEL[wd] + ', ' + dd + '/' + mm, tomorrow: out.length === 0 && (d - Date.now()) < 36e5 * 36 });
+    }
+    return out;
+  }
+  function slotsFor(key) {
+    let h = 0;
+    for (const c of key) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+    const s = ALL_SLOTS.filter((_, i) => ((h >> i) & 1) === 0 || i === h % 8);
+    return (s.length >= 3 ? s : ALL_SLOTS.filter((_, i) => i % 2 === h % 2)).slice(0, 5);
+  }
+  const procChips = () => PROCS.map(p => p.label).concat('Cancelar agendamento');
+
+  async function startFlow(text, s) {
+    state.flow = { step: 'proc', data: {}, days: nextDays() };
+    const cw = canon(text);
+    const proc = PROCS.find(p => cw.includes(p.id));
+    if (proc) { state.flow.data.proc = proc.id; return askDay(s, 'Ótimo, vamos agendar: **' + proc.name + '**.'); }
+    save();
+    await say(s, 'Vamos agendar! Leva menos de um minuto. Qual procedimento você precisa?\n\nSe não tiver certeza, a avaliação inicial é gratuita.');
+    setChips(procChips());
+  }
+  async function askDay(s, intro) {
+    state.flow.step = 'day'; save();
+    await say(s, (intro ? intro + ' ' : '') + 'Qual dia fica melhor para você? Estes são os próximos dias com vaga:');
+    setChips(state.flow.days.map(d => d.label).concat('Cancelar agendamento'));
+  }
+  async function askTime(s, intro) {
+    state.flow.step = 'time'; save();
+    const day = state.flow.days.find(d => d.key === state.flow.data.day);
+    await say(s, (intro ? intro + ' ' : '') + 'Para **' + day.label + '** tenho estes horários livres:');
+    setChips(slotsFor(day.key).concat('Cancelar agendamento'));
+  }
+
+  function parseProc(text) {
+    const cw = canon(text);
+    return PROCS.find(p => cw.includes(p.id) || norm(p.label).split(' ')[0] === text.split(' ')[0]);
+  }
+  function parseDay(text) {
+    const days = state.flow.days;
+    const byLabel = days.find(d => text.includes(norm(d.label)));
+    if (byLabel) return byLabel;
+    if (/\bamanha\b/.test(text) && days[0].tomorrow) return days[0];
+    const wd = WEEK.findIndex(w => new RegExp('\\b' + w).test(text));
+    if (wd >= 0) return days.find(d => d.wd === wd) || null;
+    const m = text.match(/\b(\d{1,2})(?: (\d{1,2}))?\b/);
+    if (m) return days.find(d => d.dom === +m[1] && (!m[2] || d.mon === +m[2])) || null;
+    return null;
+  }
+  function parseTime(raw, slots) {
+    const m = String(raw).toLowerCase().match(/(\d{1,2})\s*(?:[:h]\s*(\d{2})?)?/);
+    if (!m) return null;
+    const hh = String(+m[1]).padStart(2, '0');
+    if (m[2]) return slots.find(x => x === hh + ':' + m[2]) || null;
+    const same = slots.filter(x => x.startsWith(hh + ':'));
+    return same.length >= 1 ? same[0] : null;
+  }
+  function parseName(raw) {
+    const t = raw.trim().replace(/\s+/g, ' ').replace(/^(meu nome e|meu nome é|sou o|sou a|me chamo|e|é)\s+/i, '');
+    if (!/^[A-Za-zÀ-ÖØ-öø-ÿ' -]{3,60}$/.test(t)) return { err: 'Para o cadastro, preciso só de letras no nome. Pode digitar seu nome e sobrenome?' };
+    const parts = t.split(' ').filter(w => w.replace(/[-']/g, '').length >= 2);
+    if (parts.length < 2) return { err: 'Pode me passar também o sobrenome? Assim a recepção encontra seu cadastro.' };
+    return { name: parts.map((w, i) => i && /^(da|de|do|das|dos|e)$/i.test(w) ? w.toLowerCase() : w[0].toUpperCase() + w.slice(1).toLowerCase()).join(' ') };
+  }
+
+  async function flowStep(raw, text, s) {
+    const f = state.flow;
+    if (RX.cancelFlow.test(text) && !(f.step === 'confirm' && /\bconfirm/.test(text))) {
+      const card = f.cardId && state.msgs.find(m => m.id === f.cardId);
+      if (card) { card.card.status = 'off'; updateMsg(card); }
+      state.flow = null; save();
+      await say(s, 'Tudo bem, cancelei o agendamento. Nada foi marcado. Posso ajudar com mais alguma coisa?');
+      return setChips(DEFAULT_CHIPS);
+    }
+    const retry = async (msg, chips) => {
+      // maybe the person asked a knowledge question in the middle of the flow
+      const r = search(raw);
+      if (r.conf >= 0.6 && f.step !== 'name') {
+        recordSearch(raw, r);
+        await answer(r, s);
+        await say(s, 'Voltando ao agendamento: ' + msg.charAt(0).toLowerCase() + msg.slice(1));
+      } else {
+        await say(s, msg);
+      }
+      setChips(chips.concat('Cancelar agendamento'));
+    };
+
+    if (f.step === 'proc') {
+      const p = parseProc(text);
+      if (!p) return retry('Não identifiquei o procedimento. Escolha uma das opções abaixo, por favor.', PROCS.map(x => x.label));
+      f.data.proc = p.id;
+      return askDay(s, 'Anotado: **' + p.name + '**.');
+    }
+    if (f.step === 'day') {
+      if (/\b(sabado|domingo)\b/.test(text)) return retry('Pelo agendamento online consigo marcar de segunda a sexta. Qual destes dias prefere?', f.days.map(d => d.label));
+      const d = parseDay(text);
+      if (!d) return retry('Não tenho vaga nesse dia. Escolha um destes, por favor:', f.days.map(x => x.label));
+      f.data.day = d.key;
+      return askTime(s, '');
+    }
+    if (f.step === 'time') {
+      const day = f.days.find(d => d.key === f.data.day);
+      const slots = slotsFor(day.key);
+      const t = parseTime(raw, slots);
+      if (!t) return retry('Esse horário não está livre em ' + day.label + '. Os disponíveis são: ' + slots.join(', ') + '.', slots);
+      f.data.time = t; f.step = 'name'; save();
+      await say(s, 'Perfeito, **' + t + '** reservado por alguns minutos. Para finalizar, qual é o seu nome completo?');
+      return setChips(['Cancelar agendamento']);
+    }
+    if (f.step === 'name') {
+      const r = parseName(raw);
+      if (r.err) { await say(s, r.err); return setChips(['Cancelar agendamento']); }
+      f.data.name = r.name; f.step = 'confirm';
+      const day = f.days.find(d => d.key === f.data.day);
+      const proc = PROCS.find(p => p.id === f.data.proc);
+      const m = await say(s, 'Confira os dados:', { card: { proc: proc.name, day: day.label, time: f.data.time, name: r.name, status: 'pending' } });
+      if (!m) return;
+      f.cardId = m.id; save();
+      return setChips(['Confirmar agendamento', 'Trocar dia', 'Cancelar agendamento']);
+    }
+    if (f.step === 'confirm') {
+      if (/\b(trocar|alterar|mudar|outro)\b/.test(text)) {
+        const card = state.msgs.find(m => m.id === f.cardId);
+        if (card) { card.card.status = 'off'; updateMsg(card); }
+        return askDay(s, 'Sem problema.');
+      }
+      if (/\b(confirm\w*|sim|pode|ok|isso|certo|fechado|perfeito)\b/.test(text)) {
+        const code = 'VT-' + (1000 + Math.floor(Math.random() * 9000));
+        const card = state.msgs.find(m => m.id === f.cardId);
+        if (card) { card.card.status = 'ok'; card.card.code = code; updateMsg(card); }
+        const first = f.data.name.split(' ')[0];
+        state.flow = null; save();
+        await say(s, 'Prontinho, ' + first + '! Consulta confirmada (protocolo **' + code + '**). Vou te mandar um lembrete 24 horas antes.\n\nSe precisar remarcar, é sem custo até 24h antes.', { src: { doc: 'cancelamento', title: 'Política de cancelamento', pass: 'k1' } });
+        useSource('cancelamento', ['k1']);
+        return setChips(['Endereço', 'Convênios', 'Horários']);
+      }
+      await say(s, 'É só confirmar ou trocar o dia pelos botões abaixo.');
+      return setChips(['Confirmar agendamento', 'Trocar dia', 'Cancelar agendamento']);
+    }
+  }
+
+  /* ================= boot & controls ================= */
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg; t.classList.add('is-on');
+    clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('is-on'), 2400);
+  }
+  function greet() {
+    const s = session;
+    showTyping(false);
+    chain = chain.then(async () => {
+      await sleep(reduceMotion ? 100 : 500);
+      if (!alive(s)) return;
+      hideTyping();
+      await say(s, 'Olá! Sou a assistente virtual da **Clínica Vitta**. Respondo dúvidas sobre horários, convênios, preços e preparo para procedimentos, e posso agendar sua consulta.\n\nComo posso ajudar?');
+      if (alive(s)) setChips(DEFAULT_CHIPS);
+    });
+  }
+  function newChat() {
+    session++;
+    chain = Promise.resolve();
+    hideTyping();
+    state = fresh(); save();
+    renderAll();
+    greet();
+    toast('Nova conversa iniciada');
+    input.focus();
+  }
+
+  $('#composer').addEventListener('submit', e => {
+    e.preventDefault();
+    const v = input.value;
+    input.value = '';
+    send(v);
+  });
+  $('#newChat').addEventListener('click', newChat);
+  $('#backToBot').addEventListener('click', backToBot);
+  list.addEventListener('click', e => {
+    const b = e.target.closest('.src');
+    if (!b) return;
+    useSource(b.dataset.doc, (b.dataset.pass || '').split(',').filter(Boolean));
+    const el = $('#doc-' + b.dataset.doc);
+    el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+    el.querySelector('.doc__btn').focus({ preventScroll: true });
+  });
+
+  renderAll();
+  if (!state.msgs.length) greet();
+  else if (state.mode === 'human' && !state.msgs.some(m => m.from === 'human')) chain = chain.then(() => humanIntro(session));
+})();
+</script>
+</body>
+</html>
