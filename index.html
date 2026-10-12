@@ -955,6 +955,8 @@ button { font: inherit; color: inherit; }
   padding:18px 22px;border-radius:var(--r-card);background:rgba(255,255,255,.6);border:1px solid var(--line-l)}
 .svc-extra__h{flex:none;font-family:var(--f-mono);font-size:.66rem;letter-spacing:.16em;color:var(--violet)}
 .svc-extra ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.svc-extra li a{color:var(--violet-3);text-decoration:none;font-weight:500}
+.svc-extra li a:hover{text-decoration:underline}
 .svc-extra li{padding:6px 12px;border-radius:var(--r-pill);background:#fff;border:1px solid var(--line-l);font-size:.84rem;color:var(--fg-l);white-space:nowrap}
 .flow-foot{margin-top:clamp(24px,3vw,36px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 24px}
 .flow-cap{font-size:.95rem;color:var(--mut-l);max-width:40em}
@@ -1047,6 +1049,10 @@ button { font: inherit; color: inherit; }
 .cases-card__title{margin:.55rem 0 0;font-family:var(--f-sans);font-weight:600;font-size:clamp(1.12rem,1.45vw,1.3rem);line-height:1.15;letter-spacing:-.02em;color:var(--fg-d)}
 .cases-card__desc{margin:.65rem 0 0;color:var(--mut-d);font-size:.92rem;line-height:1.5}
 .cases-card__txt{display:flex;flex-direction:column;flex:1}
+.cases-links{margin-top:auto;padding-top:18px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px}
+.cases-links .cases-demo{margin-top:0;padding-top:0}
+.cases-more{font-size:.86rem;color:var(--mut-d);text-decoration:none;border-bottom:1px solid transparent;padding-bottom:3px}
+.cases-more:hover{color:var(--violet-2);border-color:var(--violet-2)}
 .cases-demo{margin-top:auto;padding-top:18px;align-self:flex-start;display:inline-flex;align-items:center;gap:8px;
   font-size:.9rem;font-weight:500;color:var(--fg-d);text-decoration:none}
 .cases-demo > span:first-child{padding-bottom:3px;border-bottom:1px solid rgba(196,168,255,.4);transition:border-color .2s,color .2s}
@@ -1675,6 +1681,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
 .faq-ic::after { transform: rotate(90deg); transition: transform .3s var(--ease); }
 .faq-item[open] .faq-ic { background: var(--violet); border-color: var(--violet); color: #fff; }
 .faq-item[open] .faq-ic::after { transform: rotate(0deg); }
+.faq-item p a { color: var(--violet-3); }
 .faq-item p { margin: -6px 0 22px; padding-right: 48px; max-width: 38em; color: var(--mut-l); line-height: 1.6; }
 @media (max-width: 900px) {
   .faq-wrap { grid-template-columns: minmax(0, 1fr); }
@@ -2009,7 +2016,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
     <div class="svc-extra">
       <p class="svc-extra__h" data-i18n="svc.xLabel">TAMBÉM FAZEMOS</p>
       <ul>
-        <li data-i18n="svc.x0">Jogos para ativação de marca</li>
+        <li><a href="jogos/" data-i18n="svc.x0">Jogos para ativação de marca</a></li>
         <li data-i18n="svc.x1">Testes A/B</li>
         <li data-i18n="svc.x2">Landing pages</li>
         <li data-i18n="svc.x3">SEO técnico</li>
@@ -2140,7 +2147,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
             <p class="cases-cat" data-i18n="cases.c7cat">JOGOS PARA ATIVAÇÃO</p>
             <h3 class="cases-card__title" data-i18n="cases.c7title">Jogo com a sua marca para feiras</h3>
             <p class="cases-card__desc" data-i18n="cases.c7desc">Jogos de plataforma, quiz e arcade com a identidade da marca para estandes, feiras e eventos: fila no estande, contatos captados e ranking ao vivo.</p>
-            <a class="cases-demo" href="demos/jogo.html"><span data-i18n="cases.demo">Ver demonstração</span> <span class="btn__arr" aria-hidden="true">→</span></a>
+            <span class="cases-links"><a class="cases-demo" href="demos/jogo.html"><span data-i18n="cases.demo">Ver demonstração</span> <span class="btn__arr" aria-hidden="true">→</span></a><a class="cases-more" href="jogos/" data-i18n="cases.more">Saiba mais</a></span>
           </div>
           </div>
         </article>
@@ -2418,7 +2425,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       </details>
       <details class="faq-item">
         <summary><span data-i18n="faq.q9">Vocês fazem jogos para feiras e eventos?</span><span class="faq-ic" aria-hidden="true"></span></summary>
-        <p data-i18n="faq.a9">Sim. Criamos jogos interativos com a marca do cliente para estandes, feiras e exposições: totens de toque, cadastro rápido dos participantes, ranking ao vivo e exportação dos contatos. É uma das formas mais eficazes de gerar fila, engajamento e leads num evento.</p>
+        <p data-i18n-html="faq.a9">Sim. Criamos jogos interativos com a marca do cliente para estandes, feiras e exposições: totens de toque, cadastro rápido dos participantes, ranking ao vivo e exportação dos contatos. É uma das formas mais eficazes de gerar fila, engajamento e leads num evento. <a href="jogos/">Conheça as ativações com jogos</a>.</p>
       </details>
       <details class="faq-item">
         <summary><span data-i18n="faq.q7">Vocês integram meios de pagamento?</span><span class="faq-ic" aria-hidden="true"></span></summary>
@@ -2533,6 +2540,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
           <li><a href="#servicos" data-i18n="ft.svc3">Sistemas embarcados</a></li>
           <li><a href="#servicos" data-i18n="ft.svc4">Automações</a></li>
           <li><a href="#duvidas" data-i18n="ft.svc5">Integração de pagamentos</a></li>
+          <li><a href="jogos/" data-i18n="ft.svc6">Jogos para ativação</a></li>
         </ul>
       </nav>
 

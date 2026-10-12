@@ -139,6 +139,7 @@ def main():
     # one level deeper: relative paths and the language switcher
     s = s.replace('src="assets/', 'src="../assets/').replace('href="assets/', 'href="../assets/')
     s = s.replace('href="demos/', 'href="../demos/')
+    s = s.replace('href="jogos/', 'href="../jogos/')
     s = s.replace('<a href="./" hreflang="pt-BR" lang="pt-BR" aria-current="page">PT</a>',
                   '<a href="../" hreflang="pt-BR" lang="pt-BR">PT</a>', 1)
     s = s.replace('<a href="en/" hreflang="en" lang="en">EN</a>',
