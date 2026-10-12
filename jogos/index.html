@@ -633,11 +633,40 @@ button { font: inherit; color: inherit; }
 /* =========================================================
    03 · BENEFÍCIOS (flowchart, same language as the approved services section)
    ========================================================= */
+/* "Para a sua marca": the whole section re-skins itself to demonstrate customization */
+@property --ac { syntax: "<color>"; inherits: true; initial-value: #9B6BFF; }
+@property --ac-2 { syntax: "<color>"; inherits: true; initial-value: #C4A8FF; }
+@property --ac-3 { syntax: "<color>"; inherits: true; initial-value: #6B3BE8; }
+@property --ac-soft { syntax: "<color>"; inherits: true; initial-value: #F1EAFF; }
+@property --ac-wire { syntax: "<color>"; inherits: true; initial-value: #D6CBF2; }
+@property --node-a { syntax: "<color>"; inherits: true; initial-value: #151027; }
+@property --node-b { syntax: "<color>"; inherits: true; initial-value: #0E0B18; }
+@property --ben-bg { syntax: "<color>"; inherits: true; initial-value: #F6F4FB; }
+.ben {
+  --ac: #9B6BFF; --ac-2: #C4A8FF; --ac-3: #6B3BE8; --ac-soft: #F1EAFF; --ac-wire: #D6CBF2; --node-a: #151027; --node-b: #0E0B18; --ben-bg: #F6F4FB;
+  --eyebrow: var(--ac);
+  background: var(--ben-bg);
+  transition: --ac .7s var(--ease), --ac-2 .7s var(--ease), --ac-3 .7s var(--ease), --ac-soft .7s var(--ease), --ac-wire .7s var(--ease),
+    --node-a .7s var(--ease), --node-b .7s var(--ease), --ben-bg .7s var(--ease);
+}
+.ben[data-theme="cafe"]    { --ac: #E07B2E; --ac-2: #FFC48A; --ac-3: #9A4A12; --ac-soft: #FFEBDD; --ac-wire: #F2CDB0; --node-a: #24150C; --node-b: #160C07; --ben-bg: #FBF5EF; }
+.ben[data-theme="esporte"] { --ac: #1FAE6B; --ac-2: #8FE6BD; --ac-3: #0E6B43; --ac-soft: #DDF6EA; --ac-wire: #B8E6CF; --node-a: #0C1F17; --node-b: #07130E; --ben-bg: #F1FAF5; }
+.ben[data-theme="tech"]    { --ac: #3B82F6; --ac-2: #9CC3FF; --ac-3: #1D4ED8; --ac-soft: #E0ECFF; --ac-wire: #BFD4F7; --node-a: #0D1630; --node-b: #080E20; --ben-bg: #F2F6FD; }
+.ben[data-theme="beleza"]  { --ac: #E2468F; --ac-2: #F9A8D4; --ac-3: #9D174D; --ac-soft: #FDE2F0; --ac-wire: #F2C3DA; --node-a: #250C1A; --node-b: #170710; --ben-bg: #FCF3F7; }
+.ben .h2 em { color: var(--ac); }
+button.flow-brand { width: 100%; text-align: left; font: inherit; cursor: pointer; transition: border-color .25s, background-color .25s, transform .15s; }
+button.flow-brand:hover { border-style: solid; border-color: var(--ac-2); }
+button.flow-brand:active { transform: scale(.985); }
+.flow-brand__txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; font-size: .78rem; color: #CFC7E6; }
+.flow-brand__hint { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; font: 500 .6rem/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ac-2); }
+.flow-brand__hint svg { width: 11px; height: 11px; transition: transform .5s var(--ease); }
+button.flow-brand:hover .flow-brand__hint svg { transform: rotate(180deg); }
+.flow-brand__name { margin-left: auto; flex: none; font: 500 .6rem/1 var(--f-mono); letter-spacing: .08em; color: #fff; padding: 5px 8px; border-radius: 999px; background: color-mix(in srgb, var(--ac) 35%, transparent); }
 .ben { overflow: clip; }
 .ben-bg { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
 .ben-bg i { position: absolute; border-radius: 50%; }
-.ben-bg i:nth-child(1) { width: 62vw; height: 62vw; max-width: 900px; max-height: 900px; right: -14vw; top: -22%; background: radial-gradient(closest-side, rgba(155,107,255,.14), rgba(155,107,255,.05) 55%, transparent); }
-.ben-bg i:nth-child(2) { width: 120vw; height: 120vw; max-width: 1700px; max-height: 1700px; left: 38%; top: -30%; border: 1px solid rgba(155,107,255,.10); }
+.ben-bg i:nth-child(1) { width: 62vw; height: 62vw; max-width: 900px; max-height: 900px; right: -14vw; top: -22%; background: radial-gradient(closest-side, color-mix(in srgb, var(--ac) 14%, transparent), color-mix(in srgb, var(--ac) 5%, transparent) 55%, transparent); }
+.ben-bg i:nth-child(2) { width: 120vw; height: 120vw; max-width: 1700px; max-height: 1700px; left: 38%; top: -30%; border: 1px solid color-mix(in srgb, var(--ac) 10%, transparent); }
 .ben-head { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 24px 48px; align-items: end; margin-bottom: clamp(52px, 6vw, 72px); }
 .ben-head .h2 { margin: 0 0 1rem; }
 @media (max-width: 960px) { .ben-head { grid-template-columns: minmax(0, 1fr); } }
@@ -648,42 +677,42 @@ button { font: inherit; color: inherit; }
 }
 .flow-col { position: relative; min-width: 0; display: flex; flex-direction: column; }
 .flow-mid { justify-content: center; }
-.flow-label { position: absolute; left: 0; bottom: 100%; margin: 0 0 6px; font-family: var(--f-mono); font-size: .66rem; letter-spacing: .16em; color: var(--violet); }
+.flow-label { position: absolute; left: 0; bottom: 100%; margin: 0 0 6px; font-family: var(--f-mono); font-size: .66rem; letter-spacing: .16em; color: var(--ac); }
 .flow-inputs, .flow-outputs { list-style: none; margin: 0; padding: 0; flex: 1; display: grid; }
 .flow-inputs { grid-template-rows: repeat(4, 1fr); }
 .flow-outputs { grid-template-rows: repeat(6, 1fr); gap: 0; }
 .flow-inputs li {
   align-self: center; display: flex; align-items: center; gap: 10px; min-width: 0; padding: 10px 14px; border-radius: 12px;
   background: #fff; border: 1px solid var(--line-l); font-size: .86rem; font-weight: 500; color: var(--fg-l); line-height: 1.25;
-  box-shadow: 0 8px 20px -14px rgba(60,30,120,.35); animation: flow-ping var(--cycle) var(--d, 0s) ease-out infinite;
+  box-shadow: 0 8px 20px -14px color-mix(in srgb, var(--ac-3) 35%, transparent); animation: flow-ping var(--cycle) var(--d, 0s) ease-out infinite;
 }
-.flow-inputs svg { width: 16px; height: 16px; flex: none; color: var(--violet); }
+.flow-inputs svg { width: 16px; height: 16px; flex: none; color: var(--ac); }
 .flow-outputs li {
   align-self: center; display: flex; align-items: flex-start; gap: 12px; min-width: 0; padding: 11px 14px; margin-block: 5px; border-radius: 14px;
-  background: #fff; border: 1px solid var(--line-l); box-shadow: 0 10px 24px -16px rgba(60,30,120,.4);
+  background: #fff; border: 1px solid var(--line-l); box-shadow: 0 10px 24px -16px color-mix(in srgb, var(--ac-3) 40%, transparent);
   animation: flow-land var(--cycle) var(--d, 0s) ease-out infinite;
 }
-.flow-ic { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: #F1EAFF; color: var(--violet-3); flex: none; }
+.flow-ic { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: var(--ac-soft); color: var(--ac-3); flex: none; }
 .flow-ic svg { width: 17px; height: 17px; }
 .flow-outputs .flow-ic { width: 32px; height: 32px; border-radius: 9px; }
 .flow-outputs b { display: block; font-size: .92rem; font-weight: 600; color: var(--fg-l); letter-spacing: -.01em; line-height: 1.25; }
 .flow-outputs small { display: block; margin-top: 3px; font-size: .8rem; color: var(--mut-l); line-height: 1.4; }
 @keyframes flow-land {
   0%, 100% { border-color: var(--line-l); transform: none; }
-  5% { border-color: var(--violet); transform: translateX(3px); box-shadow: 0 0 0 4px rgba(155,107,255,.14), 0 10px 24px -16px rgba(60,30,120,.4); }
-  25% { border-color: var(--line-l); transform: none; box-shadow: 0 10px 24px -16px rgba(60,30,120,.4); }
+  5% { border-color: var(--ac); transform: translateX(3px); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ac) 14%, transparent), 0 10px 24px -16px color-mix(in srgb, var(--ac-3) 40%, transparent); }
+  25% { border-color: var(--line-l); transform: none; box-shadow: 0 10px 24px -16px color-mix(in srgb, var(--ac-3) 40%, transparent); }
 }
 @keyframes flow-ping {
-  0%, 100% { border-color: var(--line-l); box-shadow: 0 8px 20px -14px rgba(60,30,120,.35); }
-  6% { border-color: var(--violet); box-shadow: 0 0 0 4px rgba(155,107,255,.14), 0 8px 20px -14px rgba(60,30,120,.35); }
-  22% { border-color: var(--line-l); box-shadow: 0 8px 20px -14px rgba(60,30,120,.35); }
+  0%, 100% { border-color: var(--line-l); box-shadow: 0 8px 20px -14px color-mix(in srgb, var(--ac-3) 35%, transparent); }
+  6% { border-color: var(--ac); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ac) 14%, transparent), 0 8px 20px -14px color-mix(in srgb, var(--ac-3) 35%, transparent); }
+  22% { border-color: var(--line-l); box-shadow: 0 8px 20px -14px color-mix(in srgb, var(--ac-3) 35%, transparent); }
 }
 .flow-conn { position: relative; min-width: 0; }
 .flow-conn svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.flow-wire { fill: none; stroke: #D6CBF2; stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.flow-wire { fill: none; stroke: var(--ac-wire); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
 .flow-pulse {
-  fill: none; stroke: var(--violet); stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke;
-  stroke-dasharray: 14 200; stroke-dashoffset: 14; filter: drop-shadow(0 0 4px rgba(155,107,255,.9));
+  fill: none; stroke: var(--ac); stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke;
+  stroke-dasharray: 14 200; stroke-dashoffset: 14; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--ac) 90%, transparent));
   animation: flow-pulse var(--cycle) var(--d, 0s) cubic-bezier(.5,0,.5,1) infinite;
 }
 @keyframes flow-pulse { 0% { stroke-dashoffset: 14; } 30%, 100% { stroke-dashoffset: -100; } }
@@ -691,12 +720,12 @@ button { font: inherit; color: inherit; }
 .flow-node {
   position: relative; min-width: 0; display: flex; flex-direction: column; padding: 18px 18px 16px; border-radius: var(--r-card);
   border: 1px solid transparent; color: var(--fg-d);
-  background: linear-gradient(180deg, #151027, #0E0B18) padding-box,
-    conic-gradient(from var(--sh-ang), rgba(155,107,255,.15) 0 60%, #C4A8FF 78%, rgba(155,107,255,.15) 92%) border-box;
-  box-shadow: 0 24px 50px -22px rgba(60,20,140,.6); animation: sh-spin 4s linear infinite;
+  background: linear-gradient(180deg, var(--node-a), var(--node-b)) padding-box,
+    conic-gradient(from var(--sh-ang), color-mix(in srgb, var(--ac) 15%, transparent) 0 60%, var(--ac-2) 78%, color-mix(in srgb, var(--ac) 15%, transparent) 92%) border-box;
+  box-shadow: 0 24px 50px -22px color-mix(in srgb, var(--ac-3) 60%, transparent); animation: sh-spin 4s linear infinite;
 }
 .flow-node__top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
-.flow-node .flow-ic { background: rgba(155,107,255,.22); color: var(--violet-2); }
+.flow-node .flow-ic { background: color-mix(in srgb, var(--ac) 22%, transparent); color: var(--ac-2); }
 .flow-t { font-size: 1.12rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; margin: 0 0 6px; }
 .flow-d { font-size: .86rem; line-height: 1.45; color: #BDB6D2; margin: 0; }
 .flow-steps { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 4px; }
@@ -704,13 +733,13 @@ button { font: inherit; color: inherit; }
   display: flex; align-items: center; gap: 8px; padding: 7px 9px; border-radius: 8px; border: 1px solid transparent;
   font-family: var(--f-mono); font-size: .7rem; color: #9E96B8; animation: flow-step var(--cycle) var(--d, 0s) linear infinite;
 }
-.flow-steps svg { width: 14px; height: 14px; flex: none; color: var(--violet-2); }
+.flow-steps svg { width: 14px; height: 14px; flex: none; color: var(--ac-2); }
 @keyframes flow-step {
-  0%, 25% { color: #fff; border-color: rgba(196,168,255,.45); background: linear-gradient(90deg, rgba(155,107,255,.38), rgba(155,107,255,.06)); box-shadow: 0 0 16px -4px rgba(155,107,255,.6); }
+  0%, 25% { color: #fff; border-color: color-mix(in srgb, var(--ac-2) 45%, transparent); background: linear-gradient(90deg, color-mix(in srgb, var(--ac) 38%, transparent), color-mix(in srgb, var(--ac) 6%, transparent)); box-shadow: 0 0 16px -4px color-mix(in srgb, var(--ac) 60%, transparent); }
   30%, 100% { color: #9E96B8; border-color: transparent; background: transparent; box-shadow: none; }
 }
-.flow-brand { margin-top: 14px; display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; background: rgba(155,107,255,.08); border: 1px dashed rgba(196,168,255,.3); font-size: .78rem; color: #CFC7E6; line-height: 1.35; }
-.flow-brand i { flex: none; width: 26px; height: 26px; border-radius: 7px; background: var(--grad); box-shadow: 0 0 14px rgba(155,107,255,.55); }
+.flow-brand { margin-top: 14px; display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; background: color-mix(in srgb, var(--ac) 8%, transparent); border: 1px dashed color-mix(in srgb, var(--ac-2) 30%, transparent); font-size: .78rem; color: #CFC7E6; line-height: 1.35; }
+.flow-brand i { flex: none; width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(135deg, var(--ac-2), var(--ac) 55%, var(--ac-3)); box-shadow: 0 0 14px color-mix(in srgb, var(--ac) 55%, transparent); }
 .flow-foot { margin-top: clamp(32px, 4vw, 48px); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 24px; }
 .flow-cap { font-size: .95rem; color: var(--mut-l); max-width: 40em; }
 @media (max-width: 1099px) {
@@ -719,8 +748,8 @@ button { font: inherit; color: inherit; }
   .flow-inputs li { align-self: stretch; padding: 10px 12px; font-size: .84rem; }
   .flow-conn { height: 44px; }
   .flow-conn svg { display: none; }
-  .flow-v { display: block; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #D6CBF2; overflow: hidden; }
-  .flow-v::after { content: ""; position: absolute; left: -2px; top: 0; width: 6px; height: 14px; border-radius: 3px; background: var(--violet); box-shadow: 0 0 8px rgba(155,107,255,.9); animation: flow-drop 1.6s ease-in infinite; }
+  .flow-v { display: block; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--ac-wire); overflow: hidden; }
+  .flow-v::after { content: ""; position: absolute; left: -2px; top: 0; width: 6px; height: 14px; border-radius: 3px; background: var(--ac); box-shadow: 0 0 8px color-mix(in srgb, var(--ac) 90%, transparent); animation: flow-drop 1.6s ease-in infinite; }
   .flow-label { position: static; margin: 0 0 10px; text-align: center; }
   .flow-outputs { grid-template-rows: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .flow-outputs li { align-self: stretch; margin: 0; flex-direction: column; gap: 10px; padding: 14px; }
@@ -735,7 +764,7 @@ button { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .flow *, .flow-node { animation: none !important; }
   .flow-pulse { display: none; }
-  .flow-steps li:nth-child(2) { color: #fff; background: rgba(155,107,255,.3); }
+  .flow-steps li:nth-child(2) { color: #fff; background: color-mix(in srgb, var(--ac) 30%, transparent); }
 }
 
 /* =========================================================
@@ -1515,7 +1544,13 @@ button { font: inherit; color: inherit; }
             <li style="--d:2s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V12M12 20V5M19 20v-5"/></svg>Ranking ao vivo</li>
             <li style="--d:3s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="9" width="17" height="11" rx="1.5"/><path d="M12 9v11M3.5 13h17M12 9c-1.5-3.5-5.5-4-5.5-1.5S10 9 12 9zm0 0c1.5-3.5 5.5-4 5.5-1.5S14 9 12 9z"/></svg>Prêmio</li>
           </ol>
-          <div class="flow-brand"><i aria-hidden="true"></i><span>Cores, personagens e textos com a sua identidade visual</span></div>
+          <button type="button" class="flow-brand" data-brand-cycle aria-describedby="brand-live">
+            <i aria-hidden="true"></i>
+            <span class="flow-brand__txt"><span>Cores, personagens e textos com a sua identidade visual</span>
+              <span class="flow-brand__hint"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.5V5h-2.5"/></svg>Toque para trocar</span></span>
+            <span class="flow-brand__name" data-brand-name>ALFA</span>
+          </button>
+          <span class="sr-only" id="brand-live" aria-live="polite"></span>
         </div>
       </div>
 
@@ -2287,6 +2322,22 @@ button { font: inherit; color: inherit; }
       } else { selectAddr(); done(false); }
     });
   }
+})();
+</script>
+<script>
+/* benefits: cycle brand identities to show the game re-skinned for any brand */
+(function () {
+  var btn = document.querySelector('[data-brand-cycle]'), sec = document.getElementById('beneficios');
+  if (!btn || !sec) return;
+  var themes = [['', 'ALFA', 'Alfa Dev'], ['cafe', 'CAFÉ', 'cafeteria'], ['esporte', 'ESPORTE', 'marca esportiva'], ['tech', 'TECH', 'empresa de tecnologia'], ['beleza', 'BELEZA', 'marca de beleza']];
+  var i = 0, name = btn.querySelector('[data-brand-name]'), live = document.getElementById('brand-live');
+  btn.addEventListener('click', function () {
+    i = (i + 1) % themes.length;
+    var t = themes[i];
+    if (t[0]) sec.setAttribute('data-theme', t[0]); else sec.removeAttribute('data-theme');
+    name.textContent = t[1];
+    live.textContent = 'Seção com a identidade de uma ' + t[2] + '.';
+  });
 })();
 </script>
 </body>
