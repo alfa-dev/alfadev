@@ -674,6 +674,21 @@ button { font: inherit; color: inherit; }
 }
 .hero-chip--gain svg { color: var(--violet-2); flex-shrink: 0; }
 
+/* problem -> light -> solution flow (drawn by JS from the chip positions) */
+.hero-flow { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.hf-in { fill: none; stroke: rgba(163, 156, 184, .26); stroke-width: 1.2; stroke-dasharray: 3 5; }
+.hf-out { fill: none; stroke: rgba(196, 168, 255, .3); stroke-width: 1.2; }
+.hf-raw { fill: rgba(18, 14, 30, .95); stroke: rgba(196, 188, 214, .85); stroke-width: 1.2; stroke-dasharray: 2.5 2; }
+.hf-flash { fill: url(#hf-glow); }
+.hf-dot { fill: #fff; filter: drop-shadow(0 0 4px rgba(180, 140, 255, .95)) drop-shadow(0 0 10px rgba(155, 107, 255, .7)); }
+.hf-tail { fill: #C4A8FF; }
+.hero-chip { transition: border-color .4s, box-shadow .4s, color .4s, background-color .4s; }
+.hero-chip--pain.is-send { border-color: rgba(196, 188, 214, .75); color: rgba(243, 240, 250, .9); }
+.hero-chip--gain.is-hit {
+  border-color: #E6D9FF; background: rgba(76, 48, 150, .78);
+  box-shadow: 0 0 0 4px rgba(155, 107, 255, .18), 0 0 30px rgba(155, 107, 255, .65), inset 0 0 14px rgba(196, 168, 255, .25);
+}
+
 /* positions, tracking the beam at ~68% x */
 .hero-p1 { top: 25%; left: max(46%, 575px); }
 .hero-p2 { top: 33%; left: max(47%, 590px); }
@@ -1702,30 +1717,37 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
   </div>
 
   <div class="hero-float" aria-hidden="true">
-    <div class="hero-chip-pos hero-pain hero-p1" data-speed="-0.06"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain1">Processos manuais</span></div>
-    <div class="hero-chip-pos hero-pain hero-p2" data-speed="-0.09"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain2">Dados espalhados</span></div>
-    <div class="hero-chip-pos hero-pain hero-p3" data-speed="-0.05"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain3">Falta de tempo</span></div>
-    <div class="hero-chip-pos hero-pain hero-p4" data-speed="-0.11"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain4">Oportunidades perdidas</span></div>
+    <svg class="hero-flow" focusable="false">
+      <defs>
+        <radialGradient id="hf-glow"><stop offset="0" stop-color="#fff"/><stop offset=".3" stop-color="#efe4ff" stop-opacity=".9"/><stop offset=".7" stop-color="#b48cff" stop-opacity=".3"/><stop offset="1" stop-color="#9b6bff" stop-opacity="0"/></radialGradient>
+      </defs>
+      <g class="hf-lines"></g>
+      <g class="hf-pkts"></g>
+    </svg>
+    <div class="hero-chip-pos hero-pain hero-p1"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain1">Processos manuais</span></div>
+    <div class="hero-chip-pos hero-pain hero-p2"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain2">Dados espalhados</span></div>
+    <div class="hero-chip-pos hero-pain hero-p3"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain3">Falta de tempo</span></div>
+    <div class="hero-chip-pos hero-pain hero-p4"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain4">Oportunidades perdidas</span></div>
 
-    <div class="hero-chip-pos hero-gain hero-g1" data-speed="-0.08">
+    <div class="hero-chip-pos hero-gain hero-g1">
       <span class="hero-chip hero-chip--gain">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/><circle cx="12" cy="12" r="6.5"/></svg>
         <span data-i18n="hero.gain1">Automação</span>
       </span>
     </div>
-    <div class="hero-chip-pos hero-gain hero-g2" data-speed="-0.12">
+    <div class="hero-chip-pos hero-gain hero-g2">
       <span class="hero-chip hero-chip--gain">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="7.5" ry="3"/><path d="M4.5 5.5v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6"/><path d="M4.5 11.5v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6"/></svg>
         <span data-i18n="hero.gain2">Dados conectados</span>
       </span>
     </div>
-    <div class="hero-chip-pos hero-gain hero-g3" data-speed="-0.07">
+    <div class="hero-chip-pos hero-gain hero-g3">
       <span class="hero-chip hero-chip--gain">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M2.8 19.5c.6-3.3 3.2-5.3 6.2-5.3s5.6 2 6.2 5.3"/><circle cx="17" cy="9" r="2.5"/><path d="M16.4 14.3c2.5.2 4.3 1.9 4.8 4.7"/></svg>
         <span data-i18n="hero.gain3">Equipes focadas</span>
       </span>
     </div>
-    <div class="hero-chip-pos hero-gain hero-g4" data-speed="-0.1">
+    <div class="hero-chip-pos hero-gain hero-g4">
       <span class="hero-chip hero-chip--gain">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
         <span data-i18n="hero.gain4">Crescimento real</span>
@@ -2486,6 +2508,105 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       es.forEach(function (e) { if (e.isIntersecting) on(e.target.id); });
     }, { rootMargin: '-45% 0px -45% 0px' });
     cards.forEach(function (c) { io.observe(c); });
+  })();
+
+  /* ================= hero: problems enter the light and leave as solutions ================= */
+  (function () {
+    var host = doc.querySelector('.hero-float'), svg = host && host.querySelector('.hero-flow');
+    if (!svg) return;
+    var NS = 'http://www.w3.org/2000/svg';
+    var pains = $$('.hero-pain .hero-chip', host), gains = $$('.hero-gain .hero-chip', host);
+    var lines = svg.querySelector('.hf-lines'), layer = svg.querySelector('.hf-pkts');
+    var pairs = [], trips = [], raf = 0, last = 0, spawnAt = 0, next = 0, visible = false;
+    var T_IN = 1500, T_FLASH = 420, T_OUT = 1300, GAP = 1150;
+
+    function el(tag, attrs, parent) {
+      var n = doc.createElementNS(NS, tag);
+      for (var k in attrs) n.setAttribute(k, attrs[k]);
+      (parent || layer).appendChild(n);
+      return n;
+    }
+    function layout() {
+      lines.textContent = ''; pairs = [];
+      if (getComputedStyle(host).display === 'none') return false;
+      var hb = host.getBoundingClientRect();
+      if (!hb.width) return false;
+      var pr = pains.map(function (c) { return c.getBoundingClientRect(); });
+      var gr = gains.map(function (c) { return c.getBoundingClientRect(); });
+      var right = Math.max.apply(null, pr.map(function (r) { return r.right; })) - hb.left;
+      var left = Math.min.apply(null, gr.map(function (r) { return r.left; })) - hb.left;
+      var beam = right + (left - right) * 0.6;   // the light sits a bit right of centre
+      pains.forEach(function (c, i) {
+        var a = pr[i], b = gr[i]; if (!b) return;
+        var x0 = a.right - hb.left + 4, y0 = a.top + a.height / 2 - hb.top;
+        var x1 = b.left - hb.left - 4, y1 = b.top + b.height / 2 - hb.top;
+        var my = y0 + (y1 - y0) * 0.5;
+        var pin = el('path', { class: 'hf-in', d: 'M' + x0 + ' ' + y0 + ' C' + (x0 + (beam - x0) * 0.55) + ' ' + y0 + ' ' + (beam - 50) + ' ' + my + ' ' + beam + ' ' + my }, lines);
+        var pout = el('path', { class: 'hf-out', d: 'M' + beam + ' ' + my + ' C' + (beam + 50) + ' ' + my + ' ' + (x1 - (x1 - beam) * 0.55) + ' ' + y1 + ' ' + x1 + ' ' + y1 }, lines);
+        pairs.push({ pin: pin, pout: pout, lin: pin.getTotalLength(), lout: pout.getTotalLength(), pain: c, gain: gains[i] });
+      });
+      return pairs.length > 0;
+    }
+    function ease(t) { return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+    function spawn(now) {
+      var p = pairs[next % pairs.length]; next++;
+      p.pain.classList.add('is-send'); setTimeout(function () { p.pain.classList.remove('is-send'); }, 700);
+      var g = doc.createElementNS(NS, 'g'); layer.appendChild(g);
+      trips.push({ p: p, t0: now, g: g,
+        raw: el('rect', { class: 'hf-raw', width: 10, height: 10, rx: 2.5, x: -5, y: -5 }, g),
+        flash: el('circle', { class: 'hf-flash', r: 0 }, g),
+        tails: [0, 1, 2].map(function (k) { return el('circle', { class: 'hf-tail', r: 2.6 - k * .6, opacity: 0 }, g); }),
+        dot: el('circle', { class: 'hf-dot', r: 3.6, opacity: 0 }, g) });
+    }
+    function put(n, pt) { n.setAttribute('transform', 'translate(' + pt.x.toFixed(1) + ' ' + pt.y.toFixed(1) + ')'); }
+    function step(tr, now) {
+      var dt = now - tr.t0, p = tr.p;
+      if (dt < T_IN) {                                   // raw problem travels into the light
+        var a = ease(dt / T_IN), pt = p.pin.getPointAtLength(a * p.lin);
+        put(tr.raw, pt); tr.raw.setAttribute('opacity', Math.min(1, dt / 200));
+        return true;
+      }
+      if (dt < T_IN + T_FLASH) {                         // transformation flash
+        var f = (dt - T_IN) / T_FLASH, c = p.pin.getPointAtLength(p.lin);
+        tr.raw.setAttribute('opacity', Math.max(0, 1 - f * 3));
+        put(tr.flash, c); tr.flash.setAttribute('r', (6 + 30 * Math.sin(f * Math.PI)).toFixed(1));
+        tr.flash.setAttribute('opacity', Math.sin(f * Math.PI).toFixed(2));
+        put(tr.dot, c); tr.dot.setAttribute('opacity', f > .5 ? 1 : 0);
+        return true;
+      }
+      var o = (dt - T_IN - T_FLASH) / T_OUT;
+      tr.flash.setAttribute('opacity', 0); tr.raw.setAttribute('opacity', 0);
+      if (o < 1) {                                       // solution travels to its chip
+        var e = ease(o);
+        put(tr.dot, p.pout.getPointAtLength(e * p.lout));
+        tr.tails.forEach(function (t, k) {
+          var lag = Math.max(0, e - (k + 1) * .035);
+          put(t, p.pout.getPointAtLength(lag * p.lout)); t.setAttribute('opacity', (.55 - k * .15).toFixed(2));
+        });
+        if (!tr.hit && o > .96) { tr.hit = true; p.gain.classList.add('is-hit'); setTimeout(function () { p.gain.classList.remove('is-hit'); }, 900); }
+        return true;
+      }
+      return false;
+    }
+    function frame(now) {
+      raf = 0;
+      if (!visible || doc.hidden) { last = 0; return; }
+      if (last && now - last > 200) { trips.forEach(function (t) { t.t0 += now - last; }); spawnAt += now - last; }  // resume where it paused
+      last = now;
+      if (now >= spawnAt) { spawn(now); spawnAt = now + GAP; }
+      trips = trips.filter(function (t) { var alive = step(t, now); if (!alive) t.g.remove(); return alive; });
+      raf = requestAnimationFrame(frame);
+    }
+    function start() { if (!raf && visible && !doc.hidden && !reduced && pairs.length) raf = requestAnimationFrame(frame); }
+    function relayout() { trips.forEach(function (t) { t.g.remove(); }); trips = []; layout(); start(); }
+
+    var ready = function () { layout(); start(); };
+    if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(ready); else ready();
+    win.addEventListener('resize', function () { clearTimeout(relayout.t); relayout.t = setTimeout(relayout, 150); }, { passive: true });
+    doc.addEventListener('visibilitychange', start);
+    if ('IntersectionObserver' in win) {
+      new IntersectionObserver(function (es) { visible = es[es.length - 1].isIntersecting; start(); }).observe(host);
+    } else { visible = true; start(); }
   })();
 
   /* ================= particles ================= */
