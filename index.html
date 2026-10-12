@@ -680,49 +680,41 @@ button { font: inherit; color: inherit; }
 /* problem -> light -> solution: same language as the services flowchart (wires + light pulses) */
 .hero-float { --hcycle: 4.4s; }
 .hero-flow { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
-.hf-under { fill: none; stroke: rgba(10, 8, 18, .55); stroke-width: 4.5; stroke-linecap: round; }
-.hf-wire-in { fill: none; stroke: rgba(200, 194, 218, .55); stroke-width: 1.4; stroke-dasharray: 3 5; }
-.hf-wire-out { fill: none; stroke: rgba(214, 196, 255, .85); stroke-width: 1.6; }
+.hf-under { fill: none; stroke: rgba(10, 8, 18, .32); stroke-width: 3; stroke-linecap: round; }
+.hf-wire-in { fill: none; stroke: rgba(214, 208, 230, .5); stroke-width: 1; stroke-dasharray: 2 4; }
+.hf-wire-out { fill: none; stroke: rgba(226, 214, 255, .7); stroke-width: 1.1; }
 .hf-pulse {
   fill: none; stroke-linecap: round; stroke-dasharray: 18 200; stroke-dashoffset: 18;
   animation: hf-pulse var(--hcycle) var(--d, 0s) cubic-bezier(.5, 0, .5, 1) infinite;
 }
-.hf-pulse--halo { stroke: rgba(10, 8, 18, .5); stroke-width: 8; }
-.hf-pulse--in { stroke: #EEE9F8; stroke-width: 2.6; }
-.hf-pulse--out { stroke: #fff; stroke-width: 3; }
-.hf-pulse--outglow { stroke: rgba(155, 107, 255, .55); stroke-width: 9; }
-.hf-port { fill: #120E1E; stroke-width: 1.5; }
+.hf-pulse--halo { stroke: rgba(10, 8, 18, .28); stroke-width: 5; }
+.hf-pulse--in { stroke: #F3EFFB; stroke-width: 1.8; }
+.hf-pulse--out { stroke: #fff; stroke-width: 2; }
+.hf-pulse--outglow { stroke: rgba(155, 107, 255, .4); stroke-width: 6; }
+.hf-port { fill: #120E1E; stroke-width: 1.2; }
 .hf-port--in { stroke: rgba(200, 194, 218, .8); }
 .hf-port--out { stroke: #C4A8FF; }
 @keyframes hf-pulse { 0% { stroke-dashoffset: 18; } 28%, 100% { stroke-dashoffset: -100; } }
 
-/* the core sits in the light: dark node with a rotating light border, like the build node */
-.hero-core {
-  position: absolute; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 22px;
-  display: grid; place-items: center; z-index: 1;
-  border: 1px solid transparent;
-  background:
-    linear-gradient(160deg, #1a1430, #0d0a18) padding-box,
-    conic-gradient(from var(--flow-ang), rgba(155,107,255,.2) 0 60%, #E6D9FF 78%, rgba(155,107,255,.2) 92%) border-box;
-  box-shadow: 0 0 0 8px rgba(155, 107, 255, .12), 0 0 0 1px rgba(10, 8, 18, .6), 0 18px 40px -10px rgba(10, 8, 18, .8), 0 0 60px rgba(180, 140, 255, .6);
-  animation: flow-spin 4s linear infinite;
-}
-.hero-core::before {
-  content: ""; position: absolute; inset: -12px; border-radius: 30px; border: 1px solid rgba(196, 168, 255, .5);
-  animation: hf-core var(--hcycle) 1.35s ease-out infinite; opacity: 0;
-}
-@keyframes hf-core { 0% { transform: scale(.85); opacity: .9; } 30%, 100% { transform: scale(1.5); opacity: 0; } }
-.hero-core svg { width: 32px; height: 32px; overflow: visible; }
-.hero-core__st {
-  position: absolute; top: calc(100% + 14px); left: 50%; transform: translateX(-50%);
-  display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: var(--r-pill); white-space: nowrap;
-  font: 500 .6rem/1 var(--f-mono); letter-spacing: .1em; color: var(--violet-2);
-  background: rgba(18, 14, 30, .88); border: 1px solid rgba(196, 168, 255, .35);
-}
-.hero-core__st i { width: 6px; height: 6px; border-radius: 50%; background: var(--violet); animation: flow-blink 1.2s ease-in-out infinite; }
-.hero-core path { fill: none; stroke: url(#brand-grad); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-.hero-core[hidden] { display: none; }
-.hero-sparks { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+/* the core: a delicate processing mechanism in the light */
+.hero-core { position: absolute; width: 140px; height: 140px; margin: -70px 0 0 -70px; z-index: 1; }
+.hero-core::before { content: ""; position: absolute; inset: 26px; border-radius: 50%; background: radial-gradient(circle, rgba(10, 8, 18, .6), rgba(10, 8, 18, 0) 72%); }
+.hero-core svg { position: relative; width: 100%; height: 100%; overflow: visible; }
+.hc-tick { stroke: rgba(236, 228, 255, .45); stroke-width: 1; }
+.hc-orbit { fill: none; stroke: rgba(236, 228, 255, .35); stroke-width: .8; stroke-dasharray: 1.5 3.5; }
+.hc-sweep { fill: none; stroke: #fff; stroke-width: 1.4; stroke-linecap: round; stroke-dasharray: 10 90; animation: hc-sweep 3s linear infinite; }
+.hc-ticks { transform-origin: 70px 70px; animation: hc-rot 24s linear infinite; }
+.hc-seg { fill: none; stroke: rgba(196, 168, 255, .28); stroke-width: 2.2; stroke-linecap: round; animation: hc-seg 1.8s calc(var(--i) * .15s) linear infinite; }
+.hc-gear { fill: none; stroke: rgba(226, 214, 255, .7); stroke-width: 4; stroke-dasharray: 2.2 3.4; transform-origin: 70px 70px; animation: hc-rot 9s linear infinite reverse; }
+.hc-gear2 { fill: rgba(18, 14, 30, .85); stroke: rgba(196, 168, 255, .45); stroke-width: .8; }
+.hc-trace { fill: none; stroke: rgba(226, 214, 255, .55); stroke-width: .9; stroke-dasharray: 2 2; animation: hc-trace 1.2s linear infinite; }
+.hc-chip { fill: #120E1E; stroke: rgba(196, 168, 255, .5); stroke-width: 1; }
+.hc-shine { fill: none; stroke: #fff; stroke-width: 1.4; stroke-linecap: round; stroke-dasharray: 18 82; animation: hc-sweep 2.2s linear infinite; }
+.hc-alpha { fill: none; stroke: url(#brand-grad); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+@keyframes hc-rot { to { transform: rotate(360deg); } }
+@keyframes hc-sweep { to { stroke-dashoffset: -100; } }
+@keyframes hc-trace { to { stroke-dashoffset: -8; } }
+@keyframes hc-seg { 0% { stroke: #fff; } 25%, 100% { stroke: rgba(196, 168, 255, .28); } }
 
 /* chips light up when a pulse leaves (problems) or lands (solutions) */
 .hero-chip { position: relative; }
@@ -734,8 +726,8 @@ button { font: inherit; color: inherit; }
 .hero-chip--gain::after { border: 1px solid #E6D9FF; box-shadow: 0 0 0 4px rgba(155, 107, 255, .2), 0 0 28px rgba(155, 107, 255, .7); }
 @keyframes hf-ping { 0% { opacity: 0; } 4% { opacity: 1; } 22%, 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .hf-pulse, .hero-core::before { display: none; }
-  .hero-core, .hero-chip::after { animation: none; }
+  .hf-pulse { display: none; }
+  .hero-core *, .hero-chip::after { animation: none !important; }
 }
 
 /* positions, tracking the beam at ~68% x */
@@ -1226,21 +1218,32 @@ button { font: inherit; color: inherit; }
   .cases-sig i{opacity:0}.cases-spark{stroke-dashoffset:0}
 }
 
-/* 7 · activation game totem */
-.cases-totem{position:absolute;left:50%;top:6%;width:40%;height:82%;transform:translateX(-50%) rotateY(-18deg) rotateX(6deg);transform-style:preserve-3d}
+/* 7 · activation game totem: a little branded platformer */
+.cases-totem{position:absolute;left:50%;top:6%;width:42%;height:82%;transform:translateX(-50%) rotateY(-18deg) rotateX(6deg);transform-style:preserve-3d}
 .cases-totem__screen{position:absolute;inset:0 0 12% 0;border-radius:14px;overflow:hidden;
-  background:linear-gradient(180deg,#3a1f12,#1b0f0a 70%),#1b0f0a;border:3px solid #2b2440;
-  box-shadow:0 0 0 1px rgba(196,168,255,.3),0 30px 40px -12px rgba(0,0,0,.8),0 0 30px rgba(242,181,68,.25)}
-.cases-totem__brand{position:absolute;left:50%;top:9%;width:46%;height:7%;transform:translateX(-50%);border-radius:99px;background:linear-gradient(90deg,#F2B544,#FFD98A)}
-.cases-totem__score{position:absolute;right:8%;top:19%;font:600 .62rem/1 var(--f-mono);color:#FFE7B3}
-.cases-drop{position:absolute;left:var(--x);top:-8%;width:9%;aspect-ratio:1/1.25;border-radius:50%;
-  background:radial-gradient(circle at 35% 30%,#C98B5A,#7A4524);box-shadow:inset -2px 0 0 rgba(0,0,0,.25);
-  animation:cases-fall 3.1s var(--d) linear infinite}
-.cases-drop--bad{background:radial-gradient(circle at 35% 30%,#9aa3b2,#4b5262)}
-@keyframes cases-fall{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(1150%) rotate(220deg)}}
-.cases-cup{position:absolute;bottom:6%;left:40%;width:26%;height:12%;border-radius:4px 4px 12px 12px;
-  background:linear-gradient(180deg,#F2B544,#C98A1E);box-shadow:0 0 14px rgba(242,181,68,.6);animation:cases-cup 2.6s ease-in-out infinite alternate}
-@keyframes cases-cup{0%{left:12%}100%{left:62%}}
+  background:linear-gradient(180deg,#3b2a6b 0%,#6b3be8 45%,#c4a8ff 100%);border:3px solid #2b2440;
+  box-shadow:0 0 0 1px rgba(196,168,255,.3),0 30px 40px -12px rgba(0,0,0,.8),0 0 30px rgba(155,107,255,.35)}
+.cases-pf-sky{position:absolute;inset:0;background:
+  radial-gradient(circle at 78% 18%,#FFE7B3 0 7%,transparent 7.5%),
+  radial-gradient(60% 30% at 20% 85%,rgba(43,25,90,.9),transparent 70%),
+  radial-gradient(70% 35% at 85% 92%,rgba(43,25,90,.8),transparent 70%)}
+.cases-pf-bill{position:absolute;left:12%;top:24%;width:34%;height:12%;border-radius:4px;background:#F2B544;box-shadow:0 0 12px rgba(242,181,68,.6);
+  animation:cases-pf-par 6s linear infinite}
+.cases-totem__score{position:absolute;right:8%;top:6%;font:600 .62rem/1 var(--f-mono);color:#fff;z-index:2}
+.cases-pf-world{position:absolute;inset:0;animation:cases-pf-scroll 6s linear infinite}
+.cases-pf-plat{position:absolute;left:var(--x);top:var(--y);width:var(--w);height:7%;border-radius:4px;
+  background:linear-gradient(180deg,#7BE0B0 0 30%,#2a1f4a 30%);box-shadow:0 4px 0 #1b1530}
+.cases-pf-coin{position:absolute;left:var(--x);top:var(--y);width:6%;aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#FFF1C2,#F2B544 60%,#C98A1E);box-shadow:0 0 8px rgba(242,181,68,.8);
+  animation:cases-pf-spin 1s ease-in-out infinite alternate}
+.cases-pf-hero{position:absolute;left:24%;top:62%;width:11%;aspect-ratio:1/1.15;border-radius:30% 30% 22% 22%;z-index:1;
+  background:linear-gradient(180deg,#fff 0 22%,#9B6BFF 22%);box-shadow:inset 0 -3px 0 rgba(0,0,0,.2),0 0 10px rgba(255,255,255,.4);
+  animation:cases-pf-jump 1.5s cubic-bezier(.3,0,.4,1) infinite}
+.cases-pf-hero::after{content:"";position:absolute;left:52%;top:30%;width:18%;height:18%;border-radius:50%;background:#14111F}
+@keyframes cases-pf-scroll{to{transform:translateX(-78%)}}
+@keyframes cases-pf-par{from{transform:translateX(0)}to{transform:translateX(-60%)}}
+@keyframes cases-pf-jump{0%,100%{transform:translateY(0) scale(1.08,.92)}12%{transform:translateY(-10%) scale(.92,1.1)}45%{transform:translateY(-170%) scale(1)}80%{transform:translateY(-20%)}90%{transform:translateY(0) scale(1.1,.9)}}
+@keyframes cases-pf-spin{to{transform:scaleX(.35)}}
 .cases-totem__base{position:absolute;left:30%;right:30%;bottom:0;height:12%;border-radius:0 0 8px 8px;background:linear-gradient(180deg,#2b2440,#151027)}
 
 /* stats */
@@ -1800,10 +1803,19 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
 
   <div class="hero-float" aria-hidden="true" data-live>
     <svg class="hero-flow" focusable="false"><g class="hf-lines"></g></svg>
-    <canvas class="hero-sparks"></canvas>
     <div class="hero-core">
-      <svg viewBox="0 0 24 24" focusable="false"><path d="M18.5 5.5c-1.6 6.2-4.6 13-9.4 13-3.1 0-5.1-2.6-5.1-6 0-3.8 2.5-7 5.6-7 4.2 0 5.6 5.4 7.4 10.2.8 2 1.9 2.8 3 2.8"/></svg>
-      <span class="hero-core__st"><i></i><span data-i18n="hero.core">PROCESSANDO</span></span>
+      <svg viewBox="0 0 140 140" focusable="false">
+        <g class="hc-ticks"><line class="hc-tick" x1="128.00" y1="70.00" x2="132.00" y2="70.00"/><line class="hc-tick" x1="126.02" y1="85.01" x2="129.89" y2="86.05"/><line class="hc-tick" x1="120.23" y1="99.00" x2="123.69" y2="101.00"/><line class="hc-tick" x1="111.01" y1="111.01" x2="113.84" y2="113.84"/><line class="hc-tick" x1="99.00" y1="120.23" x2="101.00" y2="123.69"/><line class="hc-tick" x1="85.01" y1="126.02" x2="86.05" y2="129.89"/><line class="hc-tick" x1="70.00" y1="128.00" x2="70.00" y2="132.00"/><line class="hc-tick" x1="54.99" y1="126.02" x2="53.95" y2="129.89"/><line class="hc-tick" x1="41.00" y1="120.23" x2="39.00" y2="123.69"/><line class="hc-tick" x1="28.99" y1="111.01" x2="26.16" y2="113.84"/><line class="hc-tick" x1="19.77" y1="99.00" x2="16.31" y2="101.00"/><line class="hc-tick" x1="13.98" y1="85.01" x2="10.11" y2="86.05"/><line class="hc-tick" x1="12.00" y1="70.00" x2="8.00" y2="70.00"/><line class="hc-tick" x1="13.98" y1="54.99" x2="10.11" y2="53.95"/><line class="hc-tick" x1="19.77" y1="41.00" x2="16.31" y2="39.00"/><line class="hc-tick" x1="28.99" y1="28.99" x2="26.16" y2="26.16"/><line class="hc-tick" x1="41.00" y1="19.77" x2="39.00" y2="16.31"/><line class="hc-tick" x1="54.99" y1="13.98" x2="53.95" y2="10.11"/><line class="hc-tick" x1="70.00" y1="12.00" x2="70.00" y2="8.00"/><line class="hc-tick" x1="85.01" y1="13.98" x2="86.05" y2="10.11"/><line class="hc-tick" x1="99.00" y1="19.77" x2="101.00" y2="16.31"/><line class="hc-tick" x1="111.01" y1="28.99" x2="113.84" y2="26.16"/><line class="hc-tick" x1="120.23" y1="41.00" x2="123.69" y2="39.00"/><line class="hc-tick" x1="126.02" y1="54.99" x2="129.89" y2="53.95"/></g>
+        <circle class="hc-orbit" cx="70" cy="70" r="56"/>
+        <circle class="hc-sweep" cx="70" cy="70" r="56" pathLength="100"/>
+        <g class="hc-segs"><path class="hc-seg" style="--i:0" d="M115.94 72.41 A46 46 0 0 1 110.99 90.88"/><path class="hc-seg" style="--i:1" d="M108.58 95.05 A46 46 0 0 1 95.05 108.58"/><path class="hc-seg" style="--i:2" d="M90.88 110.99 A46 46 0 0 1 72.41 115.94"/><path class="hc-seg" style="--i:3" d="M67.59 115.94 A46 46 0 0 1 49.12 110.99"/><path class="hc-seg" style="--i:4" d="M44.95 108.58 A46 46 0 0 1 31.42 95.05"/><path class="hc-seg" style="--i:5" d="M29.01 90.88 A46 46 0 0 1 24.06 72.41"/><path class="hc-seg" style="--i:6" d="M24.06 67.59 A46 46 0 0 1 29.01 49.12"/><path class="hc-seg" style="--i:7" d="M31.42 44.95 A46 46 0 0 1 44.95 31.42"/><path class="hc-seg" style="--i:8" d="M49.12 29.01 A46 46 0 0 1 67.59 24.06"/><path class="hc-seg" style="--i:9" d="M72.41 24.06 A46 46 0 0 1 90.88 29.01"/><path class="hc-seg" style="--i:10" d="M95.05 31.42 A46 46 0 0 1 108.58 44.95"/><path class="hc-seg" style="--i:11" d="M110.99 49.12 A46 46 0 0 1 115.94 67.59"/></g>
+        <circle class="hc-gear" cx="70" cy="70" r="33"/>
+        <circle class="hc-gear2" cx="70" cy="70" r="27"/>
+        <path class="hc-trace" d="M8 70 H40 M100 70 H132 M70 8 V20 M70 120 V132"/>
+        <rect class="hc-chip" x="51" y="51" width="38" height="38" rx="10"/>
+        <rect class="hc-shine" x="51" y="51" width="38" height="38" rx="10" pathLength="100"/>
+        <path class="hc-alpha" transform="translate(58 58)" d="M18.5 5.5c-1.6 6.2-4.6 13-9.4 13-3.1 0-5.1-2.6-5.1-6 0-3.8 2.5-7 5.6-7 4.2 0 5.6 5.4 7.4 10.2.8 2 1.9 2.8 3 2.8"/>
+      </svg>
     </div>
     <div class="hero-chip-pos hero-pain hero-p1"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain1">Processos manuais</span></div>
     <div class="hero-chip-pos hero-pain hero-p2"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain2">Dados espalhados</span></div>
@@ -2009,7 +2021,6 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
         <li data-i18n="svc.x2">Landing pages</li>
         <li data-i18n="svc.x3">SEO técnico</li>
         <li data-i18n="svc.x4">Dashboards e BI</li>
-        <li data-i18n="svc.x5">Integrações com ERP e CRM</li>
         <li data-i18n="svc.x6">Migração de sistemas legados</li>
         <li data-i18n="svc.x7">Chatbots e agentes de IA</li>
         <li data-i18n="svc.x8">Leitura de documentos com IA</li>
@@ -2114,10 +2125,19 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
             <div class="cases-glow"></div>
             <div class="cases-totem">
               <div class="cases-totem__screen">
-                <span class="cases-totem__brand"></span>
+                <span class="cases-pf-sky"></span>
+                <span class="cases-pf-bill"></span>
                 <span class="cases-totem__score">1.250</span>
-                <i class="cases-drop" style="--x:18%;--d:0s"></i><i class="cases-drop" style="--x:46%;--d:.7s"></i><i class="cases-drop cases-drop--bad" style="--x:70%;--d:1.3s"></i><i class="cases-drop" style="--x:32%;--d:1.9s"></i><i class="cases-drop" style="--x:82%;--d:2.5s"></i>
-                <span class="cases-cup"></span>
+                <div class="cases-pf-world">
+                  <i class="cases-pf-plat" style="--x:0%;--y:78%;--w:34%"></i>
+                  <i class="cases-pf-plat" style="--x:44%;--y:64%;--w:24%"></i>
+                  <i class="cases-pf-plat" style="--x:78%;--y:50%;--w:28%"></i>
+                  <i class="cases-pf-plat" style="--x:116%;--y:70%;--w:30%"></i>
+                  <i class="cases-pf-plat" style="--x:156%;--y:58%;--w:26%"></i>
+                  <i class="cases-pf-coin" style="--x:52%;--y:52%"></i><i class="cases-pf-coin" style="--x:60%;--y:52%"></i>
+                  <i class="cases-pf-coin" style="--x:86%;--y:38%"></i><i class="cases-pf-coin" style="--x:126%;--y:58%"></i><i class="cases-pf-coin" style="--x:166%;--y:46%"></i>
+                </div>
+                <span class="cases-pf-hero"></span>
               </div>
               <span class="cases-totem__base"></span>
             </div>
@@ -2126,7 +2146,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
           <div class="cases-card__txt">
             <p class="cases-cat" data-i18n="cases.c7cat">JOGOS PARA ATIVAÇÃO</p>
             <h3 class="cases-card__title" data-i18n="cases.c7title">Jogo com a sua marca para feiras</h3>
-            <p class="cases-card__desc" data-i18n="cases.c7desc">Jogos interativos com a identidade da marca para estandes, feiras e eventos: fila no estande, contatos captados e ranking ao vivo.</p>
+            <p class="cases-card__desc" data-i18n="cases.c7desc">Jogos de plataforma, quiz e arcade com a identidade da marca para estandes, feiras e eventos: fila no estande, contatos captados e ranking ao vivo.</p>
             <a class="cases-demo" href="demos/jogo.html"><span data-i18n="cases.demo">Ver demonstração</span> <span class="btn__arr" aria-hidden="true">→</span></a>
           </div>
           </div>
@@ -2461,6 +2481,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
         <div class="ct-field ct-field--full">
           <label for="f-msg" data-i18n="ct.fMsg">Qual é o desafio?</label>
           <textarea id="f-msg" name="mensagem" rows="4" required data-i18n-ph="ct.fMsgPh" placeholder="Ex.: perdemos horas por semana copiando dados de PDFs para uma planilha."></textarea>
+          <script type="application/json" id="ct-examples" data-i18n-html="ct.examples">["Ex.: perdemos horas por semana copiando dados de PDFs para uma planilha.", "Ex.: nossos pedidos chegam pelo WhatsApp e se perdem no caminho.", "Ex.: queremos um app para a equipe registrar visitas em campo.", "Ex.: precisamos de um jogo com a nossa marca para a próxima feira.", "Ex.: as planilhas não aguentam mais o tamanho da operação.", "Ex.: queremos vender online com Pix e cartão integrados ao estoque.", "Ex.: o atendimento responde as mesmas perguntas o dia inteiro.", "Ex.: queremos saber antes quando uma máquina vai falhar.", "Ex.: nosso sistema antigo trava e ninguém consegue mexer nele."]</script>
         </div>
         <div class="ct-field--full ct-submit">
           <button class="btn btn--primary" type="submit"><span data-i18n="ct.send">Enviar mensagem</span> <span class="btn__arr" aria-hidden="true">→</span></button>
@@ -2643,8 +2664,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
     if (!svg) return;
     var NS = 'http://www.w3.org/2000/svg', lines = svg.querySelector('.hf-lines'), core = host.querySelector('.hero-core');
     var pains = $$('.hero-pain .hero-chip', host), gains = $$('.hero-gain .hero-chip', host);
-    var IN = [0, .35, .7, 1.05], OUT = 1.6, CYCLE = 4.4, TRAVEL = CYCLE * .28;   // seconds; must match --hcycle and the 28% keyframe
-    var geo = null;
+    var IN = [0, .35, .7, 1.05], OUT = 1.6, TRAVEL = 4.4 * .28;   // seconds; must match --hcycle and the 28% keyframe
     function path(d, cls, delay) {
       var n = doc.createElementNS(NS, 'path');
       n.setAttribute('d', d); n.setAttribute('class', cls);
@@ -2662,11 +2682,10 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       var cx = right + (left - right) * .58;
       var cy = (pr[0].top + pr[pr.length - 1].bottom + gr[0].top + gr[gr.length - 1].bottom) / 4 - hb.top;
       core.style.left = cx + 'px'; core.style.top = cy + 'px';
-      geo = { w: hb.width, h: hb.height, cx: cx, cy: cy };
-      var ex = cx - 40, sx = cx + 40;          // wires meet the core's edges
+      var ex = cx - 62, sx = cx + 62;          // wires meet the mechanism's outer ring
       function port(x, y, cls) {
         var c = doc.createElementNS(NS, 'circle');
-        c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 3.2); c.setAttribute('class', 'hf-port ' + cls);
+        c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 2.6); c.setAttribute('class', 'hf-port ' + cls);
         lines.appendChild(c);
       }
       pr.forEach(function (r, i) {
@@ -2687,61 +2706,8 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       });
       port(ex, cy, 'hf-port--in'); port(sx, cy, 'hf-port--out');
     }
-    /* sparks with gravity when each pulse reaches the core; clocked to the CSS pulses */
-    var cv = host.querySelector('.hero-sparks'), ctx = cv && cv.getContext('2d');
-    var sparks = [], t0 = 0, lastCycle = -1, fired = {}, raf = 0, live = false, pausedAt = 0, prev = 0, dpr = 1;
-    function sizeCanvas() {
-      if (!geo || !ctx) return;
-      dpr = Math.min(win.devicePixelRatio || 1, 2);
-      cv.width = Math.round(geo.w * dpr); cv.height = Math.round(geo.h * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-    function burst(x, y) {
-      for (var i = 0; i < 22; i++) {
-        var a = -Math.PI / 2 + (Math.random() - .5) * Math.PI * 1.3, v = 90 + Math.random() * 190;
-        sparks.push({ x: x + (Math.random() - .5) * 10, y: y, vx: Math.cos(a) * v - 30 + Math.random() * 60, vy: Math.sin(a) * v,
-          life: 0, max: .9 + Math.random() * .8, r: .9 + Math.random() * 1.9, hue: Math.random() < .35 ? 0 : 1 });
-      }
-    }
-    function tick(now) {
-      raf = 0;
-      if (!live || !geo) return;
-      var dt = prev ? Math.min((now - prev) / 1000, .05) : 0; prev = now;
-      var t = (now - t0) / 1000, cyc = Math.floor(t / CYCLE), ph = t - cyc * CYCLE;
-      if (cyc !== lastCycle) { lastCycle = cyc; fired = {}; }
-      IN.forEach(function (d, i) {                       // a pulse lands at the core's left port
-        if (!fired[i] && ph >= d + TRAVEL) { fired[i] = 1; burst(geo.cx - 34, geo.cy); }
-      });
-      ctx.clearRect(0, 0, geo.w, geo.h);
-      ctx.globalCompositeOperation = 'lighter';
-      sparks = sparks.filter(function (p) {
-        p.life += dt; if (p.life > p.max) return false;
-        p.vy += 520 * dt; p.vx *= (1 - .6 * dt);          // gravity + a little drag
-        p.x += p.vx * dt; p.y += p.vy * dt;
-        var k = 1 - p.life / p.max;
-        ctx.globalAlpha = k;
-        ctx.fillStyle = p.hue ? 'rgba(196,168,255,1)' : 'rgba(255,255,255,1)';
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r * (0.6 + k * .6), 0, 6.283); ctx.fill();
-        ctx.globalAlpha = k * .16;                          // soft glow
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 2.2, 0, 6.283); ctx.fill();
-        return true;
-      });
-      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
-      raf = requestAnimationFrame(tick);
-    }
-    function setLive(on) {
-      var now = performance.now();
-      if (on && !live) { if (pausedAt) t0 += now - pausedAt; pausedAt = 0; prev = 0; live = true; if (!raf) raf = requestAnimationFrame(tick); }
-      else if (!on && live) { live = false; pausedAt = now; }
-    }
-
-    function init() { layout(); sizeCanvas(); t0 = performance.now(); lastCycle = -1; prev = 0; if (live && !raf) raf = requestAnimationFrame(tick); }
-    if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(init); else init();
-    win.addEventListener('resize', function () { clearTimeout(layout.t); layout.t = setTimeout(function () { layout(); sizeCanvas(); t0 = performance.now(); pausedAt = live ? 0 : t0; }, 150); }, { passive: true });
-    if (ctx && !reduced && 'IntersectionObserver' in win) {
-      // same margin as the generic [data-live] observer so CSS pulses and sparks pause together
-      new IntersectionObserver(function (es) { setLive(es[es.length - 1].isIntersecting); }, { rootMargin: '60px 0px' }).observe(host);
-    }
+    if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(layout); else layout();
+    win.addEventListener('resize', function () { clearTimeout(layout.t); layout.t = setTimeout(layout, 150); }, { passive: true });
   })();
 
   /* ================= particles ================= */
@@ -3024,6 +2990,35 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       window.location.href = 'mailto:' + MAILTO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
     });
   }
+
+  /* challenge field: the placeholder types and erases example problems until the visitor writes */
+  (function () {
+    var ta = document.getElementById('f-msg'), src = document.getElementById('ct-examples');
+    if (!ta || !src) return;
+    var list; try { list = JSON.parse(src.textContent); } catch (e) { return; }
+    if (!list || list.length < 2) return;
+    var i = 0, pos = list[0].length, dir = -1, wait = 2600, t = null, running = false;
+    function tick() {
+      t = null;
+      if (ta.value) { running = false; return; }
+      var s = list[i];
+      if (reduce) { i = (i + 1) % list.length; ta.placeholder = list[i]; t = setTimeout(tick, 4000); return; }
+      if (dir < 0) {                                     // erase back to the "Ex.: " prefix
+        pos = Math.max(pos - 2, 5); ta.placeholder = s.slice(0, pos);
+        if (pos <= 5) { dir = 1; i = (i + 1) % list.length; t = setTimeout(tick, 280); return; }
+        t = setTimeout(tick, 18);
+      } else {                                           // type the next example
+        s = list[i]; pos = Math.min(pos + 1, s.length); ta.placeholder = s.slice(0, pos);
+        if (pos >= s.length) { dir = -1; t = setTimeout(tick, wait); return; }
+        t = setTimeout(tick, 34 + Math.random() * 40);
+      }
+    }
+    function start() { if (!running && !ta.value) { running = true; t = setTimeout(tick, wait); } }
+    ta.addEventListener('input', function () { if (ta.value) { clearTimeout(t); running = false; ta.placeholder = list[i]; } else start(); });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) { if (es[0].isIntersecting) start(); else { clearTimeout(t); running = false; } }).observe(ta);
+    } else start();
+  })();
 
   var timer = null;
   function done(ok) {
