@@ -617,33 +617,6 @@ button { font: inherit; color: inherit; }
   color: var(--mut-d);
 }
 
-/* tech strip */
-.hero-tech {
-  margin-top: clamp(48px, 7vw, 72px);
-}
-.hero .hero-tech-label {
-  margin: 0 0 16px;
-  color: var(--mut-d);
-}
-.hero-tech-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px 28px;
-}
-.hero-tech-list li {
-  color: var(--mut-d);
-  font-weight: 500;
-  font-size: 1.05rem;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  transition: color .2s ease;
-}
-.hero-tech-list li:hover { color: var(--fg-d); }
 
 /* ---------- floating chips (desktop only) ---------- */
 .hero-float {
@@ -784,8 +757,6 @@ button { font: inherit; color: inherit; }
       linear-gradient(90deg, rgba(10,8,18,.88) 0%, rgba(10,8,18,.55) 55%, rgba(10,8,18,.2) 100%),
       linear-gradient(180deg, rgba(10,8,18,.5) 0%, rgba(10,8,18,0) 25%, rgba(10,8,18,.35) 60%, rgba(10,8,18,.85) 88%, var(--ink) 100%);
   }
-  .hero-tech-list { justify-content: flex-start; gap: 10px 22px; }
-  .hero-tech-list li { font-size: .98rem; }
 }
 @media (max-width: 480px) {
   .hero-ctas .btn { flex: 1 1 100%; justify-content: center; }
@@ -1867,19 +1838,6 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
     </div>
   </div>
 
-  <div class="hero-in hero-tech">
-    <p class="eyebrow hero-tech-label" data-i18n="hero.techLabel">POR TRÁS DE CADA SOLUÇÃO</p>
-    <ul class="hero-tech-list">
-      <li data-i18n="hero.t1">Nuvem</li>
-      <li data-i18n="hero.t2">Tempo real</li>
-      <li data-i18n="hero.t3">Filas</li>
-      <li data-i18n="hero.t4">Armazenamento</li>
-      <li data-i18n="hero.t5">APIs e integrações</li>
-      <li data-i18n="hero.t6">Autenticação</li>
-      <li data-i18n="hero.t7">Pagamentos</li>
-      <li data-i18n="hero.t8">Dispositivos conectados</li>
-    </ul>
-  </div>
 </section>
 
 <section class="sec sec--light svc" id="servicos">
