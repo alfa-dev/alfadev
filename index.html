@@ -289,18 +289,6 @@ button { font: inherit; color: inherit; }
 .icon-btn:active { transform: scale(.94); }
 .icon-btn:disabled { opacity: .4; cursor: default; background: transparent; color: inherit; }
 
-/* ---------- reveal ---------- */
-.js .rv {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity .8s var(--ease), transform .8s var(--ease);
-  transition-delay: var(--rv-d, 0ms);
-}
-.js .rv.in {
-  opacity: 1;
-  transform: none;
-}
-
 /* ---------- parallax / tilt helpers ---------- */
 .px-on [data-speed] { will-change: transform; }
 
@@ -346,7 +334,6 @@ button { font: inherit; color: inherit; }
     transition-delay: 0ms !important;
     scroll-behavior: auto !important;
   }
-  .js .rv { opacity: 1; transform: none; }
   [data-speed] { transform: none !important; will-change: auto; }
 }
 
@@ -769,9 +756,6 @@ button { font: inherit; color: inherit; }
 .svc-grid{display:grid;gap:clamp(14px,1.6vw,20px);grid-template-columns:1fr}
 @media (min-width:640px){.svc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (min-width:1100px){.svc-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.svc-grid > .svc-card:nth-child(2){transition-delay:.08s}
-.svc-grid > .svc-card:nth-child(3){transition-delay:.16s}
-.svc-grid > .svc-card:nth-child(4){transition-delay:.24s}
 
 /* card */
 .svc-card{min-width:0;perspective:1100px}
@@ -1247,9 +1231,6 @@ button { font: inherit; color: inherit; }
   font-size: clamp(1.05rem, 1.5vw, 1.2rem); letter-spacing: -.02em; color: var(--fg-l);
 }
 .proc-d { margin: 0; color: var(--mut-l); font-size: .92rem; line-height: 1.5; max-width: 22em; }
-
-/* stagger delay for base .rv */
-.proc-step.rv { transition-delay: var(--d, 0ms); }
 
 /* wave */
 .proc-wave {
@@ -1756,7 +1737,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
     <div class="svc-grid">
 
       <!-- 01 Sistemas web -->
-      <article class="svc-card rv">
+      <article class="svc-card">
         <div class="svc-card__in tilt">
         <div class="svc-card__body">
           <span class="svc-card__num">01</span>
@@ -1794,7 +1775,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       </article>
 
       <!-- 02 Integracao de IA (featured, dark) -->
-      <article class="svc-card svc-card--dark rv">
+      <article class="svc-card svc-card--dark">
         <div class="svc-card__in tilt">
         <div class="svc-card__body">
           <span class="svc-card__num">02</span>
@@ -1822,7 +1803,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       </article>
 
       <!-- 03 Leitura de documentos -->
-      <article class="svc-card rv">
+      <article class="svc-card">
         <div class="svc-card__in tilt">
         <div class="svc-card__body">
           <span class="svc-card__num">03</span>
@@ -1854,7 +1835,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       </article>
 
       <!-- 04 Automacao de tarefas -->
-      <article class="svc-card rv">
+      <article class="svc-card">
         <div class="svc-card__in tilt">
         <div class="svc-card__body">
           <span class="svc-card__num">04</span>
@@ -1888,14 +1869,14 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
 
 <section class="sec sec--dark scale" id="para-quem" aria-labelledby="scale-title">
   <div class="wrap">
-    <header class="scale-head rv">
+    <header class="scale-head">
       <p class="eyebrow" data-i18n="scale.eyebrow">PARA QUEM</p>
       <h2 class="h2" id="scale-title" data-i18n-html="scale.title">Do primeiro sistema<br>à operação <em>mais complexa.</em></h2>
       <p class="scale-lead" data-i18n="scale.lead">O cuidado técnico é o mesmo em qualquer tamanho de projeto. O que muda é o escopo: desenhado para caber no seu momento e crescer junto com o seu negócio.</p>
     </header>
 
     <ol class="scale-grid">
-      <li class="scale-card rv">
+      <li class="scale-card">
         <p class="scale-tag" data-i18n="scale.c1tag">PEQUENOS NEGÓCIOS</p>
         <h3 class="scale-t" data-i18n="scale.c1t">Tirar a ideia do papel</h3>
         <p class="scale-d" data-i18n="scale.c1d">Um sistema enxuto, um site que vende ou uma automação que devolve horas da sua semana. Investimento proporcional, entregas rápidas.</p>
@@ -1906,7 +1887,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
         </ul>
         <a class="scale-go" href="#contato" data-porte="pequeno"><span data-i18n="scale.cta">Falar sobre o meu caso</span> <span class="btn__arr" aria-hidden="true">→</span></a>
       </li>
-      <li class="scale-card rv">
+      <li class="scale-card">
         <p class="scale-tag" data-i18n="scale.c2tag">EMPRESAS EM CRESCIMENTO</p>
         <h3 class="scale-t" data-i18n="scale.c2t">Organizar para escalar</h3>
         <p class="scale-d" data-i18n="scale.c2d">Quando planilhas e processos manuais viram gargalo: integramos ferramentas, centralizamos dados e colocamos IA onde ela traz retorno.</p>
@@ -1917,7 +1898,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
         </ul>
         <a class="scale-go" href="#contato" data-porte="crescimento"><span data-i18n="scale.cta">Falar sobre o meu caso</span> <span class="btn__arr" aria-hidden="true">→</span></a>
       </li>
-      <li class="scale-card rv">
+      <li class="scale-card">
         <p class="scale-tag" data-i18n="scale.c3tag">OPERAÇÕES COMPLEXAS</p>
         <h3 class="scale-t" data-i18n="scale.c3t">Resolver o que é crítico</h3>
         <p class="scale-d" data-i18n="scale.c3d">Arquitetura sob medida, integração com sistemas legados e IA em fluxos de alto volume, com segurança e documentação desde o primeiro dia.</p>
@@ -1930,7 +1911,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       </li>
     </ol>
 
-    <p class="scale-foot rv"><span data-i18n="scale.foot">Não sabe em qual se encaixa? Tudo bem, a gente descobre junto na primeira conversa.</span> <a href="#contato" data-i18n="scale.footCta">Começar agora</a></p>
+    <p class="scale-foot"><span data-i18n="scale.foot">Não sabe em qual se encaixa? Tudo bem, a gente descobre junto na primeira conversa.</span> <a href="#contato" data-i18n="scale.footCta">Começar agora</a></p>
   </div>
 </section>
 
@@ -1944,12 +1925,12 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
 
   <div class="wrap cases-wrap">
     <header class="cases-head">
-      <div class="cases-head__txt rv">
+      <div class="cases-head__txt">
         <p class="eyebrow" data-i18n="cases.eyebrow">CASES</p>
         <h2 class="h2 cases-title" id="cases-title" data-i18n-html="cases.title">Ideias que<br>viraram <em>resultado.</em></h2>
         <p class="cases-sub" data-i18n="cases.sub">Projetos reais. Impacto mensurável.</p>
       </div>
-      <div class="cases-head__act rv">
+      <div class="cases-head__act">
         <button class="icon-btn cases-nav" type="button" data-cases-prev aria-label="Case anterior" data-i18n-aria="cases.prev">
           <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -1964,7 +1945,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       <!-- NOTE: the three cases below are illustrative examples pending real Alfa Dev projects. Replace copy and visuals before launch. -->
       <div class="cases-track" data-cases-track tabindex="0" role="region" aria-label="Cases" data-i18n-aria="cases.track">
 
-        <article class="cases-card rv">
+        <article class="cases-card">
           <div class="cases-card__in tilt">
           <div class="cases-vis cases-vis--dash" aria-hidden="true">
             <div class="cases-glow"></div>
@@ -2008,7 +1989,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
           </div>
         </article>
 
-        <article class="cases-card rv">
+        <article class="cases-card">
           <div class="cases-card__in tilt">
           <div class="cases-vis cases-vis--docs" aria-hidden="true">
             <div class="cases-glow"></div>
@@ -2031,7 +2012,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
           </div>
         </article>
 
-        <article class="cases-card rv">
+        <article class="cases-card">
           <div class="cases-card__in tilt">
           <div class="cases-vis cases-vis--app" aria-hidden="true">
             <div class="cases-glow"></div>
@@ -2061,7 +2042,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       </div>
 
       <!-- PLACEHOLDER: confirm these numbers with Alfa Dev before launch -->
-      <aside class="cases-stats rv" data-cases-stats aria-label="Resultados" data-i18n-aria="cases.statsLabel">
+      <aside class="cases-stats" data-cases-stats aria-label="Resultados" data-i18n-aria="cases.statsLabel">
         <div class="cases-stat">
           <span class="cases-stat__pre" data-i18n="cases.s1pre">ATÉ</span>
           <p class="cases-stat__num"><span data-count="90">90</span>%</p>
@@ -2106,7 +2087,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       </svg>
 
       <ol class="proc-list">
-        <li class="proc-step rv" style="--d:0ms">
+        <li class="proc-step">
           <span class="proc-ic" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="M4 11.5C4 7.4 7.6 4.5 12 4.5s8 2.9 8 7-3.6 7-8 7c-1 0-2-.15-2.9-.45L5 19.5l1.1-3.4C4.8 14.9 4 13.3 4 11.5z"/></svg>
           </span>
@@ -2114,7 +2095,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
           <h3 class="proc-t" data-i18n="proc.s1t">Entendimento</h3>
           <p class="proc-d" data-i18n="proc.s1d">Conversamos sobre o seu problema, objetivos e contexto.</p>
         </li>
-        <li class="proc-step rv" style="--d:120ms">
+        <li class="proc-step">
           <span class="proc-ic" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="M9 17.5h6M10 20.5h4M12 3.5a6 6 0 0 0-3.6 10.8c.5.4.8 1 .8 1.6v.6h5.6v-.6c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3.5z"/></svg>
           </span>
@@ -2122,7 +2103,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
           <h3 class="proc-t" data-i18n="proc.s2t">Proposta</h3>
           <p class="proc-d" data-i18n="proc.s2d">Desenhamos a solução e estimamos escopo e prazo.</p>
         </li>
-        <li class="proc-step rv" style="--d:240ms">
+        <li class="proc-step">
           <span class="proc-ic" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 5l-3 14"/></svg>
           </span>
@@ -2130,7 +2111,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
           <h3 class="proc-t" data-i18n="proc.s3t">Desenvolvimento</h3>
           <p class="proc-d" data-i18n="proc.s3d">Construímos em ciclos curtos, com validações frequentes.</p>
         </li>
-        <li class="proc-step rv" style="--d:360ms">
+        <li class="proc-step">
           <span class="proc-ic" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="M14 4.5c2.5-1 4.6-1.2 5.5-1 .2.9 0 3-1 5.5-1 2.4-3.3 4.8-6.5 6.5l-3.5-3.5C10.2 8.8 12.6 5.5 14 4.5z"/><circle cx="15.2" cy="8.8" r="1.6"/><path d="M8.5 12l-3-.5L4 13l3.8 1M12 15.5l.5 3L11 20l-1-3.8M7.5 16.5c-1.2.3-2.5 1.6-3 4 2.4-.5 3.7-1.8 4-3"/></svg>
           </span>
@@ -2145,13 +2126,13 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
 
 <section class="sec sec--light faq" id="duvidas" aria-labelledby="faq-title">
   <div class="wrap faq-wrap">
-    <div class="faq-head rv">
+    <div class="faq-head">
       <p class="eyebrow" data-i18n="faq.eyebrow">DÚVIDAS FREQUENTES</p>
       <h2 class="h2" id="faq-title" data-i18n-html="faq.title">Antes de<br><em>conversarmos.</em></h2>
       <p class="faq-lead" data-i18n="faq.lead">Não encontrou sua pergunta? Mande pra gente, respondemos pessoalmente.</p>
       <a class="btn btn--primary" href="#contato"><span data-i18n="faq.cta">Fazer uma pergunta</span> <span class="btn__arr" aria-hidden="true">→</span></a>
     </div>
-    <div class="faq-list rv">
+    <div class="faq-list">
       <details class="faq-item">
         <summary><span data-i18n="faq.q1">Vocês atendem empresas pequenas?</span><span class="faq-ic" aria-hidden="true"></span></summary>
         <p data-i18n="faq.a1">Sim. Muitos projetos começam pequenos: uma automação, um painel, um sistema interno. Desenhamos o escopo para caber no seu momento e crescer depois, sem precisar refazer tudo.</p>
@@ -2318,7 +2299,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
 
 <script>window.ALFA_I18N={"en": {"hd.home": "Alfa Dev, home", "hd.navLabel": "Main", "hd.services": "Services", "hd.cases": "Work", "hd.process": "Process", "hd.langLabel": "Language", "hd.cta": "Talk to us", "hero.eyebrow": "CUSTOM SOFTWARE • AI • AUTOMATION", "hero.title": "From chaos<br>to <span class=\"hero-grad\">clarity.</span>", "hero.lede": "We build custom software and AI solutions that streamline operations, give your team hours back and deliver results. From small businesses to the most complex operations.", "hero.ctaPrimary": "Start a project", "hero.ctaSecondary": "See how it works", "hero.pain1": "Manual processes", "hero.pain2": "Scattered data", "hero.pain3": "No time to spare", "hero.pain4": "Missed opportunities", "hero.gain1": "Automation", "hero.gain2": "Connected data", "hero.gain3": "Focused teams", "hero.gain4": "Real growth", "hero.note": "AI applied<br>where it matters.", "hero.techLabel": "TECHNOLOGIES WE USE", "svc.eyebrow": "SERVICES", "svc.title": "AI solutions<br>for <em>real businesses.</em>", "svc.sub": "From prototype to production, we build custom solutions that plug into your business and deliver results.", "svc.aside": "We combine cutting-edge technology, hands-on experience and business sense to turn ideas into products that actually work.", "svc.cta": "Which format fits you?", "svc.c1.title": "Web systems", "svc.c1.text": "Portals, dashboards and internal tools that are fast, secure and easy to maintain.", "svc.c1.aria": "Talk to us about web systems", "svc.c2.title": "AI integration", "svc.c2.text": "Models connected to your data and workflows, with a human in the loop.", "svc.c2.aria": "Talk to us about AI integration", "svc.c2.s1": "Analyze", "svc.c2.s2": "Process", "svc.c2.s3": "Generate insights", "svc.c2.s4": "Execute", "svc.c3.title": "Document processing", "svc.c3.text": "Extract and structure information with OCR and AI models.", "svc.c3.aria": "Talk to us about document processing", "svc.c4.title": "Task automation", "svc.c4.text": "Agents and automations that eliminate repetitive work.", "svc.c4.aria": "Talk to us about task automation", "svc.c4.s1": "Receive data", "svc.c4.s2": "Process with AI", "svc.c4.s3": "Apply rules", "svc.c4.s4": "Take action", "cases.eyebrow": "CASES", "cases.title": "Ideas that<br>became <em>results.</em>", "cases.sub": "Real projects. Measurable impact.", "cases.prev": "Previous case", "cases.next": "Next case", "cases.all": "I want results like these", "cases.track": "Case studies", "cases.c1cat": "PLATFORM", "cases.c1title": "AI-powered management portal", "cases.c1desc": "Centralized data and automation for a more productive team.", "cases.chip1": "AI on", "cases.c2cat": "PROCESSING", "cases.c2title": "Documents in seconds", "cases.c2desc": "Accurate, secure data extraction.", "cases.chip2": "Extracted · 0.8s", "cases.c3cat": "MOBILE APP", "cases.c3title": "Smart field app", "cases.c3desc": "Real-time data collection, analysis and insights.", "cases.chip3": "Live", "cases.statsLabel": "Results", "cases.s1pre": "UP TO", "cases.s1": "less time on operational tasks", "cases.s2": "productivity boost", "cases.s3": "custom-built solutions", "proc.eyebrow": "HOW WE WORK", "proc.title": "From idea<br>to <em>impact.</em>", "proc.lead": "A simple, transparent, collaborative process, from first contact to delivery (and beyond).", "proc.cta": "Start with step 01", "proc.s1t": "Discovery", "proc.s1d": "We talk through your problem, goals and context.", "proc.s2t": "Proposal", "proc.s2d": "We design the solution and estimate scope and timeline.", "proc.s3t": "Development", "proc.s3d": "We build in short cycles with frequent check-ins.", "proc.s4t": "Launch and growth", "proc.s4d": "We ship it and keep improving it alongside you.", "ct.eyebrow": "LET'S TALK", "ct.title": "Got an<br><em>idea</em> in mind?", "ct.sub": "Tell us about your challenge in a few lines. We'll reply with the right questions and a clear path forward.", "ct.copy": "Copy", "ct.copyAria": "Copy email address", "ct.cardAria": "How we work with you", "ct.note": "Good ideas<br>go further.", "ft.logoAria": "Alfa Dev, back to top", "ft.about": "Software agency in Rio de Janeiro. We build custom systems and AI solutions for businesses of every size, from a first system to the most complex operation.", "ft.svc": "Services", "ft.svc1": "Web systems", "ft.svc2": "AI integration", "ft.svc3": "Document processing", "ft.svc4": "Task automation", "ft.co": "Company", "ft.co1": "Cases", "ft.co2": "Process", "ft.co3": "Who it's for", "ft.co4": "Contact", "ft.city": "Rio de Janeiro, Brazil", "ft.remote": "Working remotely with clients everywhere.", "ft.copy": "© 2026 Alfa Dev. All rights reserved.", "ft.contact": "Contact", "hd.who": "Who it's for", "hd.faq": "FAQ", "hero.assure": "The first conversation is free. You leave with a clear path forward, whether you hire us or not.", "scale.eyebrow": "WHO IT'S FOR", "scale.title": "From your first system<br>to the <em>most complex operation.</em>", "scale.lead": "The engineering care is the same at any size. What changes is the scope: shaped to fit where you are today and grow with your business.", "scale.c1tag": "SMALL BUSINESSES", "scale.c1t": "Get the idea off the ground", "scale.c1d": "A lean system, a website that sells or an automation that gives you hours back every week. Proportional investment, fast deliveries.", "scale.c1l1": "Focused scope, nothing extra", "scale.c1l2": "Something working within the first weeks", "scale.c1l3": "Straight talk, no jargon", "scale.c2tag": "GROWING COMPANIES", "scale.c2t": "Get organized to scale", "scale.c2d": "When spreadsheets and manual work become the bottleneck: we connect your tools, centralize data and put AI where it pays off.", "scale.c2l1": "Systems that talk to each other", "scale.c2l2": "Dashboards with reliable data", "scale.c2l3": "AI applied to real workflows", "scale.c3tag": "COMPLEX OPERATIONS", "scale.c3t": "Solve what's mission-critical", "scale.c3d": "Custom architecture, legacy system integration and AI in high-volume flows, with security and documentation from day one.", "scale.c3l1": "Architecture built to scale", "scale.c3l2": "Security and data-privacy compliance", "scale.c3l3": "Works alongside existing systems", "scale.cta": "Talk about my case", "scale.foot": "Not sure which one you are? That's fine, we'll figure it out together in the first conversation.", "scale.footCta": "Start now", "faq.eyebrow": "FAQ", "faq.title": "Before<br><em>we talk.</em>", "faq.lead": "Didn't find your question? Send it over, we answer personally.", "faq.cta": "Ask a question", "faq.q1": "Do you work with small businesses?", "faq.a1": "Yes. Many projects start small: an automation, a dashboard, an internal tool. We shape the scope to fit where you are now and grow later, without rebuilding everything.", "faq.q2": "How much does a project cost?", "faq.a2": "It depends on the scope. After the first conversation you get a written proposal with scope, timeline and investment, before any commitment.", "faq.q3": "How long does it take?", "faq.a3": "We work in short cycles, so you see something working early, not just at the end. The full timeline comes in the proposal, based on the scope.", "faq.q4": "Do I need to understand technology?", "faq.a4": "No. You bring the business problem; we turn it into a solution and explain every decision in plain language.", "faq.q5": "What about the security of my data?", "faq.a5": "Every solution is designed following Brazil's LGPD data-protection law, with access control and human review at the critical points where AI acts.", "faq.q6": "What happens after launch?", "faq.a6": "We stay with you: monitoring, adjustments and continuous improvement, so the system grows with your business.", "ct.fName": "Name", "ct.fEmail": "Email", "ct.fCompany": "Company", "ct.optional": "(optional)", "ct.fSize": "Business stage", "ct.oUnsure": "Not sure yet", "ct.oSmall": "Small business", "ct.oGrowth": "Growing company", "ct.oComplex": "Complex operation", "ct.fMsg": "What's the challenge?", "ct.fMsgPh": "E.g. we lose hours every week copying data from PDFs into a spreadsheet.", "ct.send": "Send message", "ct.hint": "We'll open your email app with the message ready to send.", "ct.direct": "Prefer to write directly?", "ct.nextTitle": "What happens next", "ct.n1t": "You tell us the challenge", "ct.n1d": "A few lines, in your own words. No formal brief.", "ct.n2t": "We talk through the context", "ct.n2d": "We learn your priorities, constraints and what already exists.", "ct.n3t": "You get a clear proposal", "ct.n3d": "Scope, timeline and investment in writing. The decision is yours, on your time.", "ft.co5": "FAQ"}};</script>
 <script>
-/* Alfa Dev · core behaviour: i18n, reveal, parallax, tilt, particles */
+/* Alfa Dev · core behaviour: i18n, parallax, tilt, particles */
 (function () {
   'use strict';
   var doc = document, root = doc.documentElement, win = window;
@@ -2384,25 +2365,6 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
   });
   win.alfaLang = function () { return current; };
   win.alfaSetLang = setLang;
-
-  /* ================= reveal ================= */
-  var rvs = $$('.rv');
-  // stagger: index among .rv siblings sharing the same parent
-  rvs.forEach(function (el) {
-    var p = el.parentNode, i = 0, s = p ? p.firstElementChild : null;
-    while (s && s !== el) { if (s.classList.contains('rv')) i++; s = s.nextElementSibling; }
-    if (i && !el.style.getPropertyValue('--rv-d')) el.style.setProperty('--rv-d', Math.min(i * 70, 560) + 'ms');
-  });
-  if (!('IntersectionObserver' in win) || reduced) {
-    rvs.forEach(function (el) { el.classList.add('in'); });
-  } else {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
-      });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-    rvs.forEach(function (el) { io.observe(el); });
-  }
 
   /* ================= parallax ================= */
   var px = [];
@@ -2582,12 +2544,6 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
     try { Field(h); } catch (e) { /* canvas unsupported */ }
   });
 
-  // react live to reduced-motion toggles by simply revealing everything
-  if (mqReduce.addEventListener) {
-    mqReduce.addEventListener('change', function (e) {
-      if (e.matches) rvs.forEach(function (el) { el.classList.add('in'); });
-    });
-  }
 })();
 
 </script>
