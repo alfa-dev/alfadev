@@ -746,7 +746,7 @@ button { font: inherit; color: inherit; }
 
 /* problem -> light -> solution flow (drawn by JS from the chip positions) */
 .hero-flow { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
-.hf-in { fill: none; stroke: rgba(163, 156, 184, .26); stroke-width: 1.2; stroke-dasharray: 3 5; }
+.hf-in { fill: none; stroke: rgba(163, 156, 184, .2); stroke-width: 1; stroke-dasharray: 2 6; }
 .hf-out { fill: none; stroke: rgba(196, 168, 255, .3); stroke-width: 1.2; }
 .hf-raw { fill: rgba(18, 14, 30, .95); stroke: rgba(196, 188, 214, .85); stroke-width: 1.2; stroke-dasharray: 2.5 2; }
 .hf-flash { fill: url(#hf-glow); }
@@ -994,21 +994,21 @@ button { font: inherit; color: inherit; }
 /* tablet & mobile: vertical pipeline */
 @media (max-width:1099px){
   .flow{grid-template-columns:minmax(0,1fr)}
-  .flow-inputs{display:flex;flex-wrap:wrap;gap:8px}
-  .flow-inputs li{padding:8px 12px}
+  .flow-inputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;gap:8px}
+  .flow-inputs li{align-self:stretch;padding:10px 12px;font-size:.84rem}
+  .flow-conn{height:40px}
   .flow-conn{height:44px}
   .flow-conn svg{display:none}
   .flow-v{display:block;position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:#D6CBF2;overflow:hidden}
   .flow-v::after{content:"";position:absolute;left:-2px;width:6px;height:14px;border-radius:3px;background:var(--violet);
     box-shadow:0 0 8px rgba(155,107,255,.9);animation:flow-drop 1.6s ease-in infinite}
   @keyframes flow-drop{0%{top:-14px}100%{top:100%}}
-  .flow-label{position:static;margin-bottom:10px}
+  .flow-label{position:static;margin:0 0 10px;text-align:center}
   .flow-agent{position:relative;left:auto;right:auto;top:auto;margin:40px 0 0}
   .flow-outputs{display:grid;grid-template-rows:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .flow-outputs li{align-self:stretch}
-}
-@media (max-width:480px){
-  .flow-outputs{grid-template-columns:minmax(0,1fr)}
+  .flow-outputs li{align-self:stretch;flex-direction:column;align-items:flex-start;gap:10px;padding:14px}
+  .flow-foot{flex-direction:column;align-items:stretch;text-align:center}
+  .flow-foot .btn{width:100%}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -1378,12 +1378,20 @@ button { font: inherit; color: inherit; }
 }
 @media (max-width: 520px) {
   .proc-list { grid-template-columns: minmax(0, 1fr); row-gap: 0; }
-  .proc-step, .proc-step:nth-child(odd) { padding: 24px 0; }
-  .proc-step + .proc-step::before {
-    display: block; top: 0; left: 0; right: 0; bottom: auto; width: auto; height: 1px;
-    background: var(--line-l);
+  .proc-step, .proc-step:nth-child(odd) {
+    display: grid; grid-template-columns: 56px minmax(0, 1fr); column-gap: 18px; align-items: start;
+    padding: 0 0 30px;
   }
-  .proc-step:first-child { padding-top: 0; }
+  .proc-step:last-child { padding-bottom: 0; }
+  .proc-ic { grid-row: 1 / span 3; margin: 0; position: relative; z-index: 1; }
+  .proc-num { margin: 6px 0 2px; color: var(--violet); }
+  .proc-t { margin-bottom: 6px; }
+  .proc-step::before, .proc-step + .proc-step::before {
+    content: ""; display: block; position: absolute; left: 27.5px; top: 56px; bottom: 0; width: 1.5px; height: auto; right: auto;
+    background: linear-gradient(var(--violet-2), rgba(196, 168, 255, .25));
+  }
+  .proc-step:last-child::before { display: none; }
+  .proc-step:nth-child(3)::before { display: block; }
 }
 @media (prefers-reduced-motion: reduce) {
   .proc--anim .proc-wave__path, .proc--anim .proc-wave__dots circle { transition: none; stroke-dashoffset: 0; opacity: 1; transform: none; }
@@ -2649,7 +2657,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
     var pains = $$('.hero-pain .hero-chip', host), gains = $$('.hero-gain .hero-chip', host);
     var lines = svg.querySelector('.hf-lines'), layer = svg.querySelector('.hf-pkts');
     var pairs = [], trips = [], raf = 0, last = 0, spawnAt = 0, next = 0, visible = false;
-    var T_IN = 1500, T_FLASH = 420, T_OUT = 1300, GAP = 1150;
+    var T_IN = 2200, T_FLASH = 480, T_OUT = 1250, GAP = 1150;
 
     function el(tag, attrs, parent) {
       var n = doc.createElementNS(NS, tag);
@@ -2672,18 +2680,44 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
         var x0 = a.right - hb.left + 4, y0 = a.top + a.height / 2 - hb.top;
         var x1 = b.left - hb.left - 4, y1 = b.top + b.height / 2 - hb.top;
         var my = y0 + (y1 - y0) * 0.5;
-        var pin = el('path', { class: 'hf-in', d: 'M' + x0 + ' ' + y0 + ' C' + (x0 + (beam - x0) * 0.55) + ' ' + y0 + ' ' + (beam - 50) + ' ' + my + ' ' + beam + ' ' + my }, lines);
-        var pout = el('path', { class: 'hf-out', d: 'M' + beam + ' ' + my + ' C' + (beam + 50) + ' ' + my + ' ' + (x1 - (x1 - beam) * 0.55) + ' ' + y1 + ' ' + x1 + ' ' + y1 }, lines);
-        pairs.push({ pin: pin, pout: pout, lin: pin.getTotalLength(), lout: pout.getTotalLength(), pain: c, gain: gains[i] });
+        var a0 = { x: x0, y: y0 }, m = { x: beam, y: my };
+        el('path', { class: 'hf-in', d: wander(a0, m, 1) }, lines);           // faint guide, itself a bit lost
+        var pout = el('path', { class: 'hf-out', d: 'M' + beam + ' ' + my + ' L' + x1 + ' ' + y1 }, lines);
+        pairs.push({ a0: a0, m: m, pout: pout, lout: pout.getTotalLength(), pain: c, gain: gains[i] });
       });
       return pairs.length > 0;
+    }
+    // a messy route: random detours, a little backtracking, one loop; calmer as it nears the light
+    function wander(a, b, seed) {
+      var rnd = seed ? (function (n) { return function () { n = (n * 9301 + 49297) % 233280; return n / 233280; }; })(seed * 7919 + Math.round(a.y)) : Math.random;
+      var pts = [a], K = 7, dx = b.x - a.x;
+      for (var k = 1; k < K; k++) {
+        var t = k / K, calm = 1 - t * 0.75;
+        var x = a.x + dx * t + (rnd() - .5) * dx * .22 * calm;
+        if (k === 3) x -= dx * .12 * calm;                                // backtrack
+        var y = a.y + (b.y - a.y) * t + (rnd() - .5) * 70 * calm;
+        pts.push({ x: x, y: y });
+        if (k === 2) {                                                     // a small loop: going in circles
+          var r = 9 + rnd() * 7;
+          pts.push({ x: x + r, y: y - r }, { x: x + 2 * r * .2, y: y - 2 * r }, { x: x - r, y: y - r }, { x: x + r * .4, y: y + 2 });
+        }
+      }
+      pts.push(b);
+      var d = 'M' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
+      for (var i = 0; i < pts.length - 1; i++) {                          // Catmull-Rom -> cubic
+        var p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+        d += ' C' + (p1.x + (p2.x - p0.x) / 6).toFixed(1) + ' ' + (p1.y + (p2.y - p0.y) / 6).toFixed(1) + ' ' +
+             (p2.x - (p3.x - p1.x) / 6).toFixed(1) + ' ' + (p2.y - (p3.y - p1.y) / 6).toFixed(1) + ' ' + p2.x.toFixed(1) + ' ' + p2.y.toFixed(1);
+      }
+      return d;
     }
     function ease(t) { return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
     function spawn(now) {
       var p = pairs[next % pairs.length]; next++;
       p.pain.classList.add('is-send'); setTimeout(function () { p.pain.classList.remove('is-send'); }, 700);
       var g = doc.createElementNS(NS, 'g'); layer.appendChild(g);
-      trips.push({ p: p, t0: now, g: g,
+      var route = el('path', { d: wander(p.a0, p.m, 0), fill: 'none', stroke: 'none' }, g);   // fresh mess every trip
+      trips.push({ p: p, t0: now, g: g, route: route, lroute: route.getTotalLength(), spin: (Math.random() - .5) * 900,
         raw: el('rect', { class: 'hf-raw', width: 10, height: 10, rx: 2.5, x: -5, y: -5 }, g),
         flash: el('circle', { class: 'hf-flash', r: 0 }, g),
         tails: [0, 1, 2].map(function (k) { return el('circle', { class: 'hf-tail', r: 2.6 - k * .6, opacity: 0 }, g); }),
@@ -2692,13 +2726,16 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
     function put(n, pt) { n.setAttribute('transform', 'translate(' + pt.x.toFixed(1) + ' ' + pt.y.toFixed(1) + ')'); }
     function step(tr, now) {
       var dt = now - tr.t0, p = tr.p;
-      if (dt < T_IN) {                                   // raw problem travels into the light
-        var a = ease(dt / T_IN), pt = p.pin.getPointAtLength(a * p.lin);
-        put(tr.raw, pt); tr.raw.setAttribute('opacity', Math.min(1, dt / 200));
+      if (dt < T_IN) {                                   // raw problem stumbles toward the light
+        var u = dt / T_IN, a = Math.min(1, Math.max(0, u + Math.sin(u * 19) * .025 * (1 - u))), pt = tr.route.getPointAtLength(a * tr.lroute);
+        var jit = 1.6 * (1 - u);
+        tr.raw.setAttribute('transform', 'translate(' + (pt.x + (Math.random() - .5) * jit).toFixed(1) + ' ' + (pt.y + (Math.random() - .5) * jit).toFixed(1) +
+          ') rotate(' + (tr.spin * u + Math.sin(u * 23) * 25 * (1 - u)).toFixed(1) + ')');
+        tr.raw.setAttribute('opacity', Math.min(1, dt / 200));
         return true;
       }
-      if (dt < T_IN + T_FLASH) {                         // transformation flash
-        var f = (dt - T_IN) / T_FLASH, c = p.pin.getPointAtLength(p.lin);
+      if (dt < T_IN + T_FLASH) {                         // processed by the light
+        var f = (dt - T_IN) / T_FLASH, c = p.m;
         tr.raw.setAttribute('opacity', Math.max(0, 1 - f * 3));
         put(tr.flash, c); tr.flash.setAttribute('r', (6 + 30 * Math.sin(f * Math.PI)).toFixed(1));
         tr.flash.setAttribute('opacity', Math.sin(f * Math.PI).toFixed(2));
@@ -2708,7 +2745,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       var o = (dt - T_IN - T_FLASH) / T_OUT;
       tr.flash.setAttribute('opacity', 0); tr.raw.setAttribute('opacity', 0);
       if (o < 1) {                                       // solution travels to its chip
-        var e = ease(o);
+        var e = 1 - Math.pow(1 - o, 3);                  // straight and calm: ease-out
         put(tr.dot, p.pout.getPointAtLength(e * p.lout));
         tr.tails.forEach(function (t, k) {
           var lag = Math.max(0, e - (k + 1) * .035);
