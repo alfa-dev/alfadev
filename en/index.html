@@ -785,7 +785,7 @@ button { font: inherit; color: inherit; }
 .hero-float { --hcycle: 4.4s; }
 .hero-flow { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .hf-under { fill: none; stroke: rgba(10, 8, 18, .32); stroke-width: 3; stroke-linecap: round; }
-.hf-wire-in { fill: none; stroke: rgba(214, 208, 230, .5); stroke-width: 1; stroke-dasharray: 2 4; }
+.hf-wire-in { fill: none; stroke: rgba(214, 208, 230, .45); stroke-width: 1; }
 .hf-wire-out { fill: none; stroke: rgba(226, 214, 255, .7); stroke-width: 1.1; }
 .hf-pulse {
   fill: none; stroke-linecap: round; stroke-dasharray: 18 200; stroke-dashoffset: 18;
@@ -802,7 +802,7 @@ button { font: inherit; color: inherit; }
 
 /* the core: a delicate processing mechanism in the light */
 .hero-core { position: absolute; width: 140px; height: 140px; margin: -70px 0 0 -70px; z-index: 1; }
-.hero-core::before { content: ""; position: absolute; inset: 26px; border-radius: 50%; background: radial-gradient(circle, rgba(10, 8, 18, .6), rgba(10, 8, 18, 0) 72%); }
+.hero-core::before { content: ""; position: absolute; inset: 4px; border-radius: 50%; background: radial-gradient(circle, rgba(107, 59, 232, .55), rgba(107, 59, 232, .18) 45%, rgba(107, 59, 232, 0) 72%); mix-blend-mode: multiply; }
 .hero-core svg { position: relative; width: 100%; height: 100%; overflow: visible; }
 .hc-tick { stroke: rgba(236, 228, 255, .45); stroke-width: 1; }
 .hc-orbit { fill: none; stroke: rgba(236, 228, 255, .35); stroke-width: .8; stroke-dasharray: 1.5 3.5; }
@@ -810,14 +810,11 @@ button { font: inherit; color: inherit; }
 .hc-ticks { transform-origin: 70px 70px; animation: hc-rot 24s linear infinite; }
 .hc-seg { fill: none; stroke: rgba(196, 168, 255, .28); stroke-width: 2.2; stroke-linecap: round; animation: hc-seg 1.8s calc(var(--i) * .15s) linear infinite; }
 .hc-gear { fill: none; stroke: rgba(226, 214, 255, .7); stroke-width: 4; stroke-dasharray: 2.2 3.4; transform-origin: 70px 70px; animation: hc-rot 9s linear infinite reverse; }
-.hc-gear2 { fill: rgba(18, 14, 30, .85); stroke: rgba(196, 168, 255, .45); stroke-width: .8; }
-.hc-trace { fill: none; stroke: rgba(226, 214, 255, .55); stroke-width: .9; stroke-dasharray: 2 2; animation: hc-trace 1.2s linear infinite; }
-.hc-chip { fill: #120E1E; stroke: rgba(196, 168, 255, .5); stroke-width: 1; }
-.hc-shine { fill: none; stroke: #fff; stroke-width: 1.4; stroke-linecap: round; stroke-dasharray: 18 82; animation: hc-sweep 2.2s linear infinite; }
-.hc-alpha { fill: none; stroke: url(#brand-grad); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.hc-gear2 { fill: none; stroke: rgba(236, 228, 255, .55); stroke-width: .8; }
+.hc-trace { fill: none; stroke: rgba(236, 228, 255, .6); stroke-width: .9; }
+.hc-alpha { fill: none; stroke: #fff; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 1px 4px rgba(60, 25, 150, .85)) drop-shadow(0 0 10px rgba(155, 107, 255, .7)); }
 @keyframes hc-rot { to { transform: rotate(360deg); } }
 @keyframes hc-sweep { to { stroke-dashoffset: -100; } }
-@keyframes hc-trace { to { stroke-dashoffset: -8; } }
 @keyframes hc-seg { 0% { stroke: #fff; } 25%, 100% { stroke: rgba(196, 168, 255, .28); } }
 
 /* chips light up when a pulse leaves (problems) or lands (solutions) */
@@ -1916,9 +1913,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
         <circle class="hc-gear" cx="70" cy="70" r="33"/>
         <circle class="hc-gear2" cx="70" cy="70" r="27"/>
         <path class="hc-trace" d="M8 70 H40 M100 70 H132 M70 8 V20 M70 120 V132"/>
-        <rect class="hc-chip" x="51" y="51" width="38" height="38" rx="10"/>
-        <rect class="hc-shine" x="51" y="51" width="38" height="38" rx="10" pathLength="100"/>
-        <path class="hc-alpha" transform="translate(58 58)" d="M18.5 5.5c-1.6 6.2-4.6 13-9.4 13-3.1 0-5.1-2.6-5.1-6 0-3.8 2.5-7 5.6-7 4.2 0 5.6 5.4 7.4 10.2.8 2 1.9 2.8 3 2.8"/>
+        <path class="hc-alpha" transform="translate(50.8 50.8) scale(1.6)" d="M18.5 5.5c-1.6 6.2-4.6 13-9.4 13-3.1 0-5.1-2.6-5.1-6 0-3.8 2.5-7 5.6-7 4.2 0 5.6 5.4 7.4 10.2.8 2 1.9 2.8 3 2.8"/>
       </svg>
     </div>
     <div class="hero-chip-pos hero-pain hero-p1"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain1">Manual processes</span></div>
