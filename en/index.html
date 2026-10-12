@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Alfa Dev · Custom software development: web, mobile, embedded and automation</title>
-<meta name="description" content="Custom software: web systems, mobile apps, embedded solutions, automations and payment integrations (Pix, cards, bank slips) for small businesses and complex operations. Working remotely with clients in Brazil and worldwide.">
+<title>Alfa Dev · Custom software, mobile apps and AI applied to your business</title>
+<meta name="description" content="Custom software: web systems, mobile apps, embedded solutions, automations, applied artificial intelligence (AI), brand activation games for trade shows and events, and payment integrations (Pix, cards, bank slips) for small businesses and complex operations. Working remotely with clients in Brazil and worldwide.">
 <link rel="canonical" href="https://alfadev.com.br/en/">
 <link rel="alternate" hreflang="pt-BR" href="https://alfadev.com.br/">
 <link rel="alternate" hreflang="en" href="https://alfadev.com.br/en/">
@@ -17,11 +17,11 @@
 <meta property="og:site_name" content="Alfa Dev">
 <meta property="og:url" content="https://alfadev.com.br/en/">
 <meta property="og:title" content="Alfa Dev · Custom software, built to last">
-<meta property="og:description" content="From small businesses to complex operations: custom web systems, mobile apps, embedded solutions, automations and payment integrations.">
+<meta property="og:description" content="From small businesses to complex operations: custom web systems, mobile apps, embedded solutions, automations, applied AI, event games and payment integrations.">
 <meta property="og:image" content="https://alfadev.com.br/assets/hero-2.webp">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Alfa Dev · Custom software, built to last">
-<meta name="twitter:description" content="From small businesses to complex operations: custom web systems, mobile apps, embedded solutions, automations and payment integrations.">
+<meta name="twitter:description" content="From small businesses to complex operations: custom web systems, mobile apps, embedded solutions, automations, applied AI, event games and payment integrations.">
 <meta name="twitter:image" content="https://alfadev.com.br/assets/hero-2.webp">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0812'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' font-family='Georgia,serif' font-style='italic' font-size='44' fill='%239B6BFF'%3E%CE%B1%3C/text%3E%3C/svg%3E">
 <script>document.documentElement.classList.add('js')</script>
@@ -66,7 +66,16 @@
     "Data storage",
     "APIs and integrations",
     "Authentication",
-    "Applied artificial intelligence"
+    "Applied artificial intelligence",
+    "AI agents",
+    "Large language models (LLM)",
+    "A/B testing",
+    "Technical SEO",
+    "Business intelligence",
+    "Brand activation games",
+    "Advergames",
+    "Interactive event kiosks",
+    "Trade show lead capture"
   ],
   "sameAs": [
     "https://github.com/alfa-dev",
@@ -88,6 +97,34 @@
         "itemOffered": {
           "@type": "Service",
           "name": "Artificial intelligence integration"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "AI chatbots and agents for customer service"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "AI document reading and data extraction"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "A/B testing, landing pages and technical SEO"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Interactive brand activation games for trade shows, exhibitions and events"
         }
       },
       {
@@ -744,19 +781,53 @@ button { font: inherit; color: inherit; }
 }
 .hero-chip--gain svg { color: var(--violet-2); flex-shrink: 0; }
 
-/* problem -> light -> solution flow (drawn by JS from the chip positions) */
+/* problem -> light -> solution: same language as the services flowchart (wires + light pulses) */
+.hero-float { --hcycle: 4.4s; }
 .hero-flow { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
-.hf-in { fill: none; stroke: rgba(163, 156, 184, .2); stroke-width: 1; stroke-dasharray: 2 6; }
-.hf-out { fill: none; stroke: rgba(196, 168, 255, .3); stroke-width: 1.2; }
-.hf-raw { fill: rgba(18, 14, 30, .95); stroke: rgba(196, 188, 214, .85); stroke-width: 1.2; stroke-dasharray: 2.5 2; }
-.hf-flash { fill: url(#hf-glow); }
-.hf-dot { fill: #fff; filter: drop-shadow(0 0 4px rgba(180, 140, 255, .95)) drop-shadow(0 0 10px rgba(155, 107, 255, .7)); }
-.hf-tail { fill: #C4A8FF; }
-.hero-chip { transition: border-color .4s, box-shadow .4s, color .4s, background-color .4s; }
-.hero-chip--pain.is-send { border-color: rgba(196, 188, 214, .75); color: rgba(243, 240, 250, .9); }
-.hero-chip--gain.is-hit {
-  border-color: #E6D9FF; background: rgba(76, 48, 150, .78);
-  box-shadow: 0 0 0 4px rgba(155, 107, 255, .18), 0 0 30px rgba(155, 107, 255, .65), inset 0 0 14px rgba(196, 168, 255, .25);
+.hf-under { fill: none; stroke: rgba(10, 8, 18, .32); stroke-width: 3; stroke-linecap: round; }
+.hf-wire-in { fill: none; stroke: rgba(214, 208, 230, .45); stroke-width: 1; }
+.hf-wire-out { fill: none; stroke: rgba(226, 214, 255, .7); stroke-width: 1.1; }
+.hf-pulse {
+  fill: none; stroke-linecap: round; stroke-dasharray: 18 200; stroke-dashoffset: 18;
+  animation: hf-pulse var(--hcycle) var(--d, 0s) cubic-bezier(.5, 0, .5, 1) infinite;
+}
+.hf-pulse--halo { stroke: rgba(10, 8, 18, .28); stroke-width: 5; }
+.hf-pulse--in { stroke: #F3EFFB; stroke-width: 1.8; }
+.hf-pulse--out { stroke: #fff; stroke-width: 2; }
+.hf-pulse--outglow { stroke: rgba(155, 107, 255, .4); stroke-width: 6; }
+.hf-port { fill: #120E1E; stroke-width: 1.2; }
+.hf-port--in { stroke: rgba(200, 194, 218, .8); }
+.hf-port--out { stroke: #C4A8FF; }
+@keyframes hf-pulse { 0% { stroke-dashoffset: 18; } 28%, 100% { stroke-dashoffset: -100; } }
+
+/* the core: a delicate processing mechanism in the light */
+.hero-core { position: absolute; width: 140px; height: 140px; margin: -70px 0 0 -70px; z-index: 1; }
+.hero-core::before { content: ""; position: absolute; inset: 4px; border-radius: 50%; background: radial-gradient(circle, rgba(107, 59, 232, .55), rgba(107, 59, 232, .18) 45%, rgba(107, 59, 232, 0) 72%); mix-blend-mode: multiply; }
+.hero-core svg { position: relative; width: 100%; height: 100%; overflow: visible; }
+.hc-tick { stroke: rgba(236, 228, 255, .45); stroke-width: 1; }
+.hc-orbit { fill: none; stroke: rgba(236, 228, 255, .35); stroke-width: .8; stroke-dasharray: 1.5 3.5; }
+.hc-sweep { fill: none; stroke: #fff; stroke-width: 1.4; stroke-linecap: round; stroke-dasharray: 10 90; animation: hc-sweep 3s linear infinite; }
+.hc-ticks { transform-origin: 70px 70px; animation: hc-rot 24s linear infinite; }
+.hc-seg { fill: none; stroke: rgba(196, 168, 255, .28); stroke-width: 2.2; stroke-linecap: round; animation: hc-seg 1.8s calc(var(--i) * .15s) linear infinite; }
+.hc-gear { fill: none; stroke: rgba(226, 214, 255, .7); stroke-width: 4; stroke-dasharray: 2.2 3.4; transform-origin: 70px 70px; animation: hc-rot 9s linear infinite reverse; }
+.hc-gear2 { fill: none; stroke: rgba(236, 228, 255, .55); stroke-width: .8; }
+.hc-trace { fill: none; stroke: rgba(236, 228, 255, .6); stroke-width: .9; }
+@keyframes hc-rot { to { transform: rotate(360deg); } }
+@keyframes hc-sweep { to { stroke-dashoffset: -100; } }
+@keyframes hc-seg { 0% { stroke: #fff; } 25%, 100% { stroke: rgba(196, 168, 255, .28); } }
+
+/* chips light up when a pulse leaves (problems) or lands (solutions) */
+.hero-chip { position: relative; }
+.hero-chip::after {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; opacity: 0;
+  animation: hf-ping var(--hcycle) var(--pd, 0s) ease-out infinite;
+}
+.hero-chip--pain::after { border: 1px solid rgba(226, 220, 240, .8); box-shadow: 0 0 0 3px rgba(226, 220, 240, .1); }
+.hero-chip--gain::after { border: 1px solid #E6D9FF; box-shadow: 0 0 0 4px rgba(155, 107, 255, .2), 0 0 28px rgba(155, 107, 255, .7); }
+@keyframes hf-ping { 0% { opacity: 0; } 4% { opacity: 1; } 22%, 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .hf-pulse { display: none; }
+  .hero-core *, .hero-chip::after { animation: none !important; }
 }
 
 /* positions, tracking the beam at ~68% x */
@@ -984,7 +1055,14 @@ button { font: inherit; color: inherit; }
 .flow-agent p{margin:5px 0 0;font-size:.8rem;line-height:1.45;color:var(--mut-l)}
 @media (min-width:1100px){.flow{padding-bottom:150px}}
 
-.flow-foot{margin-top:clamp(28px,3.4vw,44px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 24px}
+.svc-extra{margin-top:clamp(36px,4vw,56px);display:flex;align-items:center;gap:14px 24px;flex-wrap:wrap;
+  padding:18px 22px;border-radius:var(--r-card);background:rgba(255,255,255,.6);border:1px solid var(--line-l)}
+.svc-extra__h{flex:none;font-family:var(--f-mono);font-size:.66rem;letter-spacing:.16em;color:var(--violet)}
+.svc-extra ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.svc-extra li a{color:var(--violet-3);text-decoration:none;font-weight:500}
+.svc-extra li a:hover{text-decoration:underline}
+.svc-extra li{padding:6px 12px;border-radius:var(--r-pill);background:#fff;border:1px solid var(--line-l);font-size:.84rem;color:var(--fg-l);white-space:nowrap}
+.flow-foot{margin-top:clamp(24px,3vw,36px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 24px}
 .flow-cap{font-size:.95rem;color:var(--mut-l);max-width:40em}
 .flow{margin-top:28px}
 
@@ -1008,6 +1086,9 @@ button { font: inherit; color: inherit; }
   .flow-outputs{display:grid;grid-template-rows:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .flow-outputs li{align-self:stretch;flex-direction:column;align-items:flex-start;gap:10px;padding:14px}
   .flow-foot{flex-direction:column;align-items:stretch;text-align:center}
+  .svc-extra{padding:16px;gap:12px}
+  .svc-extra ul{gap:6px}
+  .svc-extra li{padding:5px 10px;font-size:.76rem}
   .flow-foot .btn{width:100%}
 }
 
@@ -1072,6 +1153,10 @@ button { font: inherit; color: inherit; }
 .cases-card__title{margin:.55rem 0 0;font-family:var(--f-sans);font-weight:600;font-size:clamp(1.12rem,1.45vw,1.3rem);line-height:1.15;letter-spacing:-.02em;color:var(--fg-d)}
 .cases-card__desc{margin:.65rem 0 0;color:var(--mut-d);font-size:.92rem;line-height:1.5}
 .cases-card__txt{display:flex;flex-direction:column;flex:1}
+.cases-links{margin-top:auto;padding-top:18px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px}
+.cases-links .cases-demo{margin-top:0;padding-top:0}
+.cases-more{font-size:.86rem;color:var(--mut-d);text-decoration:none;border-bottom:1px solid transparent;padding-bottom:3px}
+.cases-more:hover{color:var(--violet-2);border-color:var(--violet-2)}
 .cases-demo{margin-top:auto;padding-top:18px;align-self:flex-start;display:inline-flex;align-items:center;gap:8px;
   font-size:.9rem;font-weight:500;color:var(--fg-d);text-decoration:none}
 .cases-demo > span:first-child{padding-bottom:3px;border-bottom:1px solid rgba(196,168,255,.4);transition:border-color .2s,color .2s}
@@ -1238,6 +1323,34 @@ button { font: inherit; color: inherit; }
   .cases-vis *{animation:none!important}
   .cases-sig i{opacity:0}.cases-spark{stroke-dashoffset:0}
 }
+
+/* 7 · activation game totem: a little branded platformer */
+.cases-totem{position:absolute;left:50%;top:6%;width:42%;height:82%;transform:translateX(-50%) rotateY(-18deg) rotateX(6deg);transform-style:preserve-3d}
+.cases-totem__screen{position:absolute;inset:0 0 12% 0;border-radius:14px;overflow:hidden;
+  background:linear-gradient(180deg,#3b2a6b 0%,#6b3be8 45%,#c4a8ff 100%);border:3px solid #2b2440;
+  box-shadow:0 0 0 1px rgba(196,168,255,.3),0 30px 40px -12px rgba(0,0,0,.8),0 0 30px rgba(155,107,255,.35)}
+.cases-pf-sky{position:absolute;inset:0;background:
+  radial-gradient(circle at 78% 18%,#FFE7B3 0 7%,transparent 7.5%),
+  radial-gradient(60% 30% at 20% 85%,rgba(43,25,90,.9),transparent 70%),
+  radial-gradient(70% 35% at 85% 92%,rgba(43,25,90,.8),transparent 70%)}
+.cases-pf-bill{position:absolute;left:12%;top:24%;width:34%;height:12%;border-radius:4px;background:#F2B544;box-shadow:0 0 12px rgba(242,181,68,.6);
+  animation:cases-pf-par 6s linear infinite}
+.cases-totem__score{position:absolute;right:8%;top:6%;font:600 .62rem/1 var(--f-mono);color:#fff;z-index:2}
+.cases-pf-world{position:absolute;inset:0;animation:cases-pf-scroll 6s linear infinite}
+.cases-pf-plat{position:absolute;left:var(--x);top:var(--y);width:var(--w);height:7%;border-radius:4px;
+  background:linear-gradient(180deg,#7BE0B0 0 30%,#2a1f4a 30%);box-shadow:0 4px 0 #1b1530}
+.cases-pf-coin{position:absolute;left:var(--x);top:var(--y);width:6%;aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#FFF1C2,#F2B544 60%,#C98A1E);box-shadow:0 0 8px rgba(242,181,68,.8);
+  animation:cases-pf-spin 1s ease-in-out infinite alternate}
+.cases-pf-hero{position:absolute;left:24%;top:62%;width:11%;aspect-ratio:1/1.15;border-radius:30% 30% 22% 22%;z-index:1;
+  background:linear-gradient(180deg,#fff 0 22%,#9B6BFF 22%);box-shadow:inset 0 -3px 0 rgba(0,0,0,.2),0 0 10px rgba(255,255,255,.4);
+  animation:cases-pf-jump 1.5s cubic-bezier(.3,0,.4,1) infinite}
+.cases-pf-hero::after{content:"";position:absolute;left:52%;top:30%;width:18%;height:18%;border-radius:50%;background:#14111F}
+@keyframes cases-pf-scroll{to{transform:translateX(-78%)}}
+@keyframes cases-pf-par{from{transform:translateX(0)}to{transform:translateX(-60%)}}
+@keyframes cases-pf-jump{0%,100%{transform:translateY(0) scale(1.08,.92)}12%{transform:translateY(-10%) scale(.92,1.1)}45%{transform:translateY(-170%) scale(1)}80%{transform:translateY(-20%)}90%{transform:translateY(0) scale(1.1,.9)}}
+@keyframes cases-pf-spin{to{transform:scaleX(.35)}}
+.cases-totem__base{position:absolute;left:30%;right:30%;bottom:0;height:12%;border-radius:0 0 8px 8px;background:linear-gradient(180deg,#2b2440,#151027)}
 
 /* stats */
 .cases-stats{position:relative;display:flex;flex-direction:column;justify-content:space-evenly;padding:clamp(20px,2.4vw,32px) clamp(20px,2.2vw,30px);
@@ -1672,6 +1785,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
 .faq-ic::after { transform: rotate(90deg); transition: transform .3s var(--ease); }
 .faq-item[open] .faq-ic { background: var(--violet); border-color: var(--violet); color: #fff; }
 .faq-item[open] .faq-ic::after { transform: rotate(0deg); }
+.faq-item p a { color: var(--violet-3); }
 .faq-item p { margin: -6px 0 22px; padding-right: 48px; max-width: 38em; color: var(--mut-l); line-height: 1.6; }
 @media (max-width: 900px) {
   .faq-wrap { grid-template-columns: minmax(0, 1fr); }
@@ -1794,14 +1908,19 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
     <div class="hero-dust" data-particles="70"></div>
   </div>
 
-  <div class="hero-float" aria-hidden="true">
-    <svg class="hero-flow" focusable="false">
-      <defs>
-        <radialGradient id="hf-glow"><stop offset="0" stop-color="#fff"/><stop offset=".3" stop-color="#efe4ff" stop-opacity=".9"/><stop offset=".7" stop-color="#b48cff" stop-opacity=".3"/><stop offset="1" stop-color="#9b6bff" stop-opacity="0"/></radialGradient>
-      </defs>
-      <g class="hf-lines"></g>
-      <g class="hf-pkts"></g>
-    </svg>
+  <div class="hero-float" aria-hidden="true" data-live>
+    <svg class="hero-flow" focusable="false"><g class="hf-lines"></g></svg>
+    <div class="hero-core">
+      <svg viewBox="0 0 140 140" focusable="false">
+        <g class="hc-ticks"><line class="hc-tick" x1="128.00" y1="70.00" x2="132.00" y2="70.00"/><line class="hc-tick" x1="126.02" y1="85.01" x2="129.89" y2="86.05"/><line class="hc-tick" x1="120.23" y1="99.00" x2="123.69" y2="101.00"/><line class="hc-tick" x1="111.01" y1="111.01" x2="113.84" y2="113.84"/><line class="hc-tick" x1="99.00" y1="120.23" x2="101.00" y2="123.69"/><line class="hc-tick" x1="85.01" y1="126.02" x2="86.05" y2="129.89"/><line class="hc-tick" x1="70.00" y1="128.00" x2="70.00" y2="132.00"/><line class="hc-tick" x1="54.99" y1="126.02" x2="53.95" y2="129.89"/><line class="hc-tick" x1="41.00" y1="120.23" x2="39.00" y2="123.69"/><line class="hc-tick" x1="28.99" y1="111.01" x2="26.16" y2="113.84"/><line class="hc-tick" x1="19.77" y1="99.00" x2="16.31" y2="101.00"/><line class="hc-tick" x1="13.98" y1="85.01" x2="10.11" y2="86.05"/><line class="hc-tick" x1="12.00" y1="70.00" x2="8.00" y2="70.00"/><line class="hc-tick" x1="13.98" y1="54.99" x2="10.11" y2="53.95"/><line class="hc-tick" x1="19.77" y1="41.00" x2="16.31" y2="39.00"/><line class="hc-tick" x1="28.99" y1="28.99" x2="26.16" y2="26.16"/><line class="hc-tick" x1="41.00" y1="19.77" x2="39.00" y2="16.31"/><line class="hc-tick" x1="54.99" y1="13.98" x2="53.95" y2="10.11"/><line class="hc-tick" x1="70.00" y1="12.00" x2="70.00" y2="8.00"/><line class="hc-tick" x1="85.01" y1="13.98" x2="86.05" y2="10.11"/><line class="hc-tick" x1="99.00" y1="19.77" x2="101.00" y2="16.31"/><line class="hc-tick" x1="111.01" y1="28.99" x2="113.84" y2="26.16"/><line class="hc-tick" x1="120.23" y1="41.00" x2="123.69" y2="39.00"/><line class="hc-tick" x1="126.02" y1="54.99" x2="129.89" y2="53.95"/></g>
+        <circle class="hc-orbit" cx="70" cy="70" r="56"/>
+        <circle class="hc-sweep" cx="70" cy="70" r="56" pathLength="100"/>
+        <g class="hc-segs"><path class="hc-seg" style="--i:0" d="M115.94 72.41 A46 46 0 0 1 110.99 90.88"/><path class="hc-seg" style="--i:1" d="M108.58 95.05 A46 46 0 0 1 95.05 108.58"/><path class="hc-seg" style="--i:2" d="M90.88 110.99 A46 46 0 0 1 72.41 115.94"/><path class="hc-seg" style="--i:3" d="M67.59 115.94 A46 46 0 0 1 49.12 110.99"/><path class="hc-seg" style="--i:4" d="M44.95 108.58 A46 46 0 0 1 31.42 95.05"/><path class="hc-seg" style="--i:5" d="M29.01 90.88 A46 46 0 0 1 24.06 72.41"/><path class="hc-seg" style="--i:6" d="M24.06 67.59 A46 46 0 0 1 29.01 49.12"/><path class="hc-seg" style="--i:7" d="M31.42 44.95 A46 46 0 0 1 44.95 31.42"/><path class="hc-seg" style="--i:8" d="M49.12 29.01 A46 46 0 0 1 67.59 24.06"/><path class="hc-seg" style="--i:9" d="M72.41 24.06 A46 46 0 0 1 90.88 29.01"/><path class="hc-seg" style="--i:10" d="M95.05 31.42 A46 46 0 0 1 108.58 44.95"/><path class="hc-seg" style="--i:11" d="M110.99 49.12 A46 46 0 0 1 115.94 67.59"/></g>
+        <circle class="hc-gear" cx="70" cy="70" r="33"/>
+        <circle class="hc-gear2" cx="70" cy="70" r="27"/>
+        <path class="hc-trace" d="M8 70 H40 M100 70 H132 M70 8 V20 M70 120 V132"/>
+      </svg>
+    </div>
     <div class="hero-chip-pos hero-pain hero-p1"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain1">Manual processes</span></div>
     <div class="hero-chip-pos hero-pain hero-p2"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain2">Scattered data</span></div>
     <div class="hero-chip-pos hero-pain hero-p3"><span class="hero-chip hero-chip--pain" data-i18n="hero.pain3">No time to spare</span></div>
@@ -1998,6 +2117,20 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
         </ul>
       </div>
     </div>
+    <div class="svc-extra">
+      <p class="svc-extra__h" data-i18n="svc.xLabel">WE ALSO DO</p>
+      <ul>
+        <li><a href="../jogos/" data-i18n="svc.x0">Brand activation games</a></li>
+        <li data-i18n="svc.x1">A/B testing</li>
+        <li data-i18n="svc.x2">Landing pages</li>
+        <li data-i18n="svc.x3">Technical SEO</li>
+        <li data-i18n="svc.x4">Dashboards &amp; BI</li>
+        <li data-i18n="svc.x6">Legacy system migration</li>
+        <li data-i18n="svc.x7">AI chatbots &amp; agents</li>
+        <li data-i18n="svc.x8">AI document reading</li>
+        <li data-i18n="svc.x9">Admin panels</li>
+      </ul>
+    </div>
     <div class="flow-foot">
       <p class="flow-cap" data-i18n="svc.cap">From rough sketch to live solution, with you following every step.</p>
       <a class="btn btn--primary" href="#contato"><span data-i18n="svc.go">Start my project</span> <span class="btn__arr" aria-hidden="true">→</span></a>
@@ -2089,6 +2222,39 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
 
     <div class="cases-body">
       <div class="cases-track" data-cases-track data-live tabindex="0" role="region" aria-label="Solution examples" data-i18n-aria="cases.track">
+
+        <article class="cases-card">
+          <div class="cases-card__in">
+          <div class="cases-vis cases-vis--game" aria-hidden="true">
+            <div class="cases-glow"></div>
+            <div class="cases-totem">
+              <div class="cases-totem__screen">
+                <span class="cases-pf-sky"></span>
+                <span class="cases-pf-bill"></span>
+                <span class="cases-totem__score">1.250</span>
+                <div class="cases-pf-world">
+                  <i class="cases-pf-plat" style="--x:0%;--y:78%;--w:34%"></i>
+                  <i class="cases-pf-plat" style="--x:44%;--y:64%;--w:24%"></i>
+                  <i class="cases-pf-plat" style="--x:78%;--y:50%;--w:28%"></i>
+                  <i class="cases-pf-plat" style="--x:116%;--y:70%;--w:30%"></i>
+                  <i class="cases-pf-plat" style="--x:156%;--y:58%;--w:26%"></i>
+                  <i class="cases-pf-coin" style="--x:52%;--y:52%"></i><i class="cases-pf-coin" style="--x:60%;--y:52%"></i>
+                  <i class="cases-pf-coin" style="--x:86%;--y:38%"></i><i class="cases-pf-coin" style="--x:126%;--y:58%"></i><i class="cases-pf-coin" style="--x:166%;--y:46%"></i>
+                </div>
+                <span class="cases-pf-hero"></span>
+              </div>
+              <span class="cases-totem__base"></span>
+            </div>
+            <div class="cases-chip cases-chip--ok"><i></i><span data-i18n="cases.chip7">Live leaderboard</span></div>
+          </div>
+          <div class="cases-card__txt">
+            <p class="cases-cat" data-i18n="cases.c7cat">BRAND ACTIVATION GAMES</p>
+            <h3 class="cases-card__title" data-i18n="cases.c7title">Branded game for trade shows</h3>
+            <p class="cases-card__desc" data-i18n="cases.c7desc">Platformer, quiz and arcade games in the brand's identity for booths, trade shows and events: lines at the booth, captured leads and a live leaderboard.</p>
+            <span class="cases-links"><a class="cases-demo" href="../demos/jogo.html"><span data-i18n="cases.demo">Try the demo</span> <span class="btn__arr" aria-hidden="true">→</span></a><a class="cases-more" href="../jogos/" data-i18n="cases.more">Learn more</a></span>
+          </div>
+          </div>
+        </article>
 
         <article class="cases-card">
           <div class="cases-card__in">
@@ -2358,6 +2524,14 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
         <p data-i18n="faq.a5">Every solution is designed following Brazil's LGPD data-protection law, with access control and human review at the critical points where AI acts.</p>
       </details>
       <details class="faq-item">
+        <summary><span data-i18n="faq.q8">Do you work with artificial intelligence?</span><span class="faq-ic" aria-hidden="true"></span></summary>
+        <p data-i18n="faq.a8">Yes. We apply AI where it pays off: customer service agents and chatbots, automatic document reading, data classification and decision support. It comes in as part of the solution, integrated with your systems and with human review at the critical points.</p>
+      </details>
+      <details class="faq-item">
+        <summary><span data-i18n="faq.q9">Do you build games for trade shows and events?</span><span class="faq-ic" aria-hidden="true"></span></summary>
+        <p data-i18n-html="faq.a9">Yes. We build interactive branded games for booths, trade shows and exhibitions: touch kiosks, quick sign-up for players, a live leaderboard and lead export. It's one of the most effective ways to draw a crowd, engagement and leads at an event. <a href="../jogos/">See our game activations</a> (in Portuguese).</p>
+      </details>
+      <details class="faq-item">
         <summary><span data-i18n="faq.q7">Do you integrate payment methods?</span><span class="faq-ic" aria-hidden="true"></span></summary>
         <p data-i18n="faq.a7">Yes. We integrate Pix, cards, bank slips and recurring subscriptions into your systems, websites and apps, with automatic confirmation and reconciliation.</p>
       </details>
@@ -2409,6 +2583,22 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Every solution is designed following Brazil's LGPD data-protection law, with access control and human review at the critical points where AI acts."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you work with artificial intelligence?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. We apply AI where it pays off: customer service agents and chatbots, automatic document reading, data classification and decision support. It comes in as part of the solution, integrated with your systems and with human review at the critical points."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you build games for trade shows and events?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. We build interactive branded games for booths, trade shows and exhibitions: touch kiosks, quick sign-up for players, a live leaderboard and lead export. It's one of the most effective ways to draw a crowd, engagement and leads at an event. <a href=\"jogos/\">See our game activations</a> (in Portuguese)."
       }
     },
     {
@@ -2472,6 +2662,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
         <div class="ct-field ct-field--full">
           <label for="f-msg" data-i18n="ct.fMsg">What's the challenge?</label>
           <textarea id="f-msg" name="mensagem" rows="4" required data-i18n-ph="ct.fMsgPh" placeholder="E.g. we lose hours every week copying data from PDFs into a spreadsheet."></textarea>
+          <script type="application/json" id="ct-examples" data-i18n-html="ct.examples">["E.g. we lose hours every week copying data from PDFs into a spreadsheet.", "E.g. our orders come in over WhatsApp and get lost along the way.", "E.g. we want an app for the team to log field visits.", "E.g. we need a branded game for our next trade show.", "E.g. our spreadsheets can't keep up with the size of the operation.", "E.g. we want to sell online with Pix and cards tied to our inventory.", "E.g. customer service answers the same questions all day long.", "E.g. we want to know in advance when a machine is about to fail.", "E.g. our legacy system keeps crashing and nobody dares to touch it."]</script>
         </div>
         <div class="ct-field--full ct-submit">
           <button class="btn btn--primary" type="submit"><span data-i18n="ct.send">Send message</span> <span class="btn__arr" aria-hidden="true">→</span></button>
@@ -2530,6 +2721,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
           <li><a href="#servicos" data-i18n="ft.svc3">Embedded systems</a></li>
           <li><a href="#servicos" data-i18n="ft.svc4">Automations</a></li>
           <li><a href="#duvidas" data-i18n="ft.svc5">Payment integrations</a></li>
+          <li><a href="../jogos/" data-i18n="ft.svc6">Brand activation games</a></li>
         </ul>
       </nav>
 
@@ -2648,132 +2840,56 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
     cards.forEach(function (c) { io.observe(c); });
   })();
 
-  /* ================= hero: problems enter the light and leave as solutions ================= */
+  /* ================= hero: problems -> core in the light -> solutions ================= */
   (function () {
     var host = doc.querySelector('.hero-float'), svg = host && host.querySelector('.hero-flow');
     if (!svg) return;
-    var NS = 'http://www.w3.org/2000/svg';
+    var NS = 'http://www.w3.org/2000/svg', lines = svg.querySelector('.hf-lines'), core = host.querySelector('.hero-core');
     var pains = $$('.hero-pain .hero-chip', host), gains = $$('.hero-gain .hero-chip', host);
-    var lines = svg.querySelector('.hf-lines'), layer = svg.querySelector('.hf-pkts');
-    var pairs = [], trips = [], raf = 0, last = 0, spawnAt = 0, next = 0, visible = false;
-    var T_IN = 2200, T_FLASH = 480, T_OUT = 1250, GAP = 1150;
-
-    function el(tag, attrs, parent) {
-      var n = doc.createElementNS(NS, tag);
-      for (var k in attrs) n.setAttribute(k, attrs[k]);
-      (parent || layer).appendChild(n);
-      return n;
+    var IN = [0, .35, .7, 1.05], OUT = 1.6, TRAVEL = 4.4 * .28;   // seconds; must match --hcycle and the 28% keyframe
+    function path(d, cls, delay) {
+      var n = doc.createElementNS(NS, 'path');
+      n.setAttribute('d', d); n.setAttribute('class', cls);
+      if (delay != null) { n.setAttribute('pathLength', '100'); n.style.setProperty('--d', delay + 's'); }
+      lines.appendChild(n);
     }
     function layout() {
-      lines.textContent = ''; pairs = [];
-      if (getComputedStyle(host).display === 'none') return false;
-      var hb = host.getBoundingClientRect();
-      if (!hb.width) return false;
+      lines.textContent = '';
+      if (getComputedStyle(host).display === 'none') return;
+      var hb = host.getBoundingClientRect(); if (!hb.width) return;
       var pr = pains.map(function (c) { return c.getBoundingClientRect(); });
       var gr = gains.map(function (c) { return c.getBoundingClientRect(); });
       var right = Math.max.apply(null, pr.map(function (r) { return r.right; })) - hb.left;
       var left = Math.min.apply(null, gr.map(function (r) { return r.left; })) - hb.left;
-      var beam = right + (left - right) * 0.6;   // the light sits a bit right of centre
-      pains.forEach(function (c, i) {
-        var a = pr[i], b = gr[i]; if (!b) return;
-        var x0 = a.right - hb.left + 4, y0 = a.top + a.height / 2 - hb.top;
-        var x1 = b.left - hb.left - 4, y1 = b.top + b.height / 2 - hb.top;
-        var my = y0 + (y1 - y0) * 0.5;
-        var a0 = { x: x0, y: y0 }, m = { x: beam, y: my };
-        el('path', { class: 'hf-in', d: wander(a0, m, 1) }, lines);           // faint guide, itself a bit lost
-        var pout = el('path', { class: 'hf-out', d: 'M' + beam + ' ' + my + ' L' + x1 + ' ' + y1 }, lines);
-        pairs.push({ a0: a0, m: m, pout: pout, lout: pout.getTotalLength(), pain: c, gain: gains[i] });
+      var cx = right + (left - right) * .58;
+      var cy = (pr[0].top + pr[pr.length - 1].bottom + gr[0].top + gr[gr.length - 1].bottom) / 4 - hb.top;
+      core.style.left = cx + 'px'; core.style.top = cy + 'px';
+      var ex = cx - 62, sx = cx + 62;          // wires meet the mechanism's outer ring
+      function port(x, y, cls) {
+        var c = doc.createElementNS(NS, 'circle');
+        c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 2.6); c.setAttribute('class', 'hf-port ' + cls);
+        lines.appendChild(c);
+      }
+      pr.forEach(function (r, i) {
+        var x0 = r.right - hb.left + 4, y0 = r.top + r.height / 2 - hb.top;
+        var d = 'M' + x0 + ' ' + y0 + ' C' + (x0 + (ex - x0) * .55) + ' ' + y0 + ' ' + (ex - (ex - x0) * .45) + ' ' + cy + ' ' + ex + ' ' + cy;
+        path(d, 'hf-under'); path(d, 'hf-wire-in');
+        path(d, 'hf-pulse hf-pulse--halo', IN[i % 4]); path(d, 'hf-pulse hf-pulse--in', IN[i % 4]);
+        port(x0, y0, 'hf-port--in');
+        pains[i].style.setProperty('--pd', IN[i % 4] + 's');
       });
-      return pairs.length > 0;
+      gr.forEach(function (r, i) {
+        var x1 = r.left - hb.left - 4, y1 = r.top + r.height / 2 - hb.top, dl = +(OUT + i * .15).toFixed(2);
+        var d = 'M' + sx + ' ' + cy + ' C' + (sx + (x1 - sx) * .45) + ' ' + cy + ' ' + (x1 - (x1 - sx) * .55) + ' ' + y1 + ' ' + x1 + ' ' + y1;
+        path(d, 'hf-under'); path(d, 'hf-wire-out');
+        path(d, 'hf-pulse hf-pulse--outglow', dl); path(d, 'hf-pulse hf-pulse--out', dl);
+        port(x1, y1, 'hf-port--out');
+        gains[i].style.setProperty('--pd', (dl + TRAVEL * .9).toFixed(2) + 's');
+      });
+      port(ex, cy, 'hf-port--in'); port(sx, cy, 'hf-port--out');
     }
-    // a messy route: random detours, a little backtracking, one loop; calmer as it nears the light
-    function wander(a, b, seed) {
-      var rnd = seed ? (function (n) { return function () { n = (n * 9301 + 49297) % 233280; return n / 233280; }; })(seed * 7919 + Math.round(a.y)) : Math.random;
-      var pts = [a], K = 7, dx = b.x - a.x;
-      for (var k = 1; k < K; k++) {
-        var t = k / K, calm = 1 - t * 0.75;
-        var x = a.x + dx * t + (rnd() - .5) * dx * .22 * calm;
-        if (k === 3) x -= dx * .12 * calm;                                // backtrack
-        var y = a.y + (b.y - a.y) * t + (rnd() - .5) * 70 * calm;
-        pts.push({ x: x, y: y });
-        if (k === 2) {                                                     // a small loop: going in circles
-          var r = 9 + rnd() * 7;
-          pts.push({ x: x + r, y: y - r }, { x: x + 2 * r * .2, y: y - 2 * r }, { x: x - r, y: y - r }, { x: x + r * .4, y: y + 2 });
-        }
-      }
-      pts.push(b);
-      var d = 'M' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
-      for (var i = 0; i < pts.length - 1; i++) {                          // Catmull-Rom -> cubic
-        var p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
-        d += ' C' + (p1.x + (p2.x - p0.x) / 6).toFixed(1) + ' ' + (p1.y + (p2.y - p0.y) / 6).toFixed(1) + ' ' +
-             (p2.x - (p3.x - p1.x) / 6).toFixed(1) + ' ' + (p2.y - (p3.y - p1.y) / 6).toFixed(1) + ' ' + p2.x.toFixed(1) + ' ' + p2.y.toFixed(1);
-      }
-      return d;
-    }
-    function ease(t) { return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
-    function spawn(now) {
-      var p = pairs[next % pairs.length]; next++;
-      p.pain.classList.add('is-send'); setTimeout(function () { p.pain.classList.remove('is-send'); }, 700);
-      var g = doc.createElementNS(NS, 'g'); layer.appendChild(g);
-      var route = el('path', { d: wander(p.a0, p.m, 0), fill: 'none', stroke: 'none' }, g);   // fresh mess every trip
-      trips.push({ p: p, t0: now, g: g, route: route, lroute: route.getTotalLength(), spin: (Math.random() - .5) * 900,
-        raw: el('rect', { class: 'hf-raw', width: 10, height: 10, rx: 2.5, x: -5, y: -5 }, g),
-        flash: el('circle', { class: 'hf-flash', r: 0 }, g),
-        tails: [0, 1, 2].map(function (k) { return el('circle', { class: 'hf-tail', r: 2.6 - k * .6, opacity: 0 }, g); }),
-        dot: el('circle', { class: 'hf-dot', r: 3.6, opacity: 0 }, g) });
-    }
-    function put(n, pt) { n.setAttribute('transform', 'translate(' + pt.x.toFixed(1) + ' ' + pt.y.toFixed(1) + ')'); }
-    function step(tr, now) {
-      var dt = now - tr.t0, p = tr.p;
-      if (dt < T_IN) {                                   // raw problem stumbles toward the light
-        var u = dt / T_IN, a = Math.min(1, Math.max(0, u + Math.sin(u * 19) * .025 * (1 - u))), pt = tr.route.getPointAtLength(a * tr.lroute);
-        var jit = 1.6 * (1 - u);
-        tr.raw.setAttribute('transform', 'translate(' + (pt.x + (Math.random() - .5) * jit).toFixed(1) + ' ' + (pt.y + (Math.random() - .5) * jit).toFixed(1) +
-          ') rotate(' + (tr.spin * u + Math.sin(u * 23) * 25 * (1 - u)).toFixed(1) + ')');
-        tr.raw.setAttribute('opacity', Math.min(1, dt / 200));
-        return true;
-      }
-      if (dt < T_IN + T_FLASH) {                         // processed by the light
-        var f = (dt - T_IN) / T_FLASH, c = p.m;
-        tr.raw.setAttribute('opacity', Math.max(0, 1 - f * 3));
-        put(tr.flash, c); tr.flash.setAttribute('r', (6 + 30 * Math.sin(f * Math.PI)).toFixed(1));
-        tr.flash.setAttribute('opacity', Math.sin(f * Math.PI).toFixed(2));
-        put(tr.dot, c); tr.dot.setAttribute('opacity', f > .5 ? 1 : 0);
-        return true;
-      }
-      var o = (dt - T_IN - T_FLASH) / T_OUT;
-      tr.flash.setAttribute('opacity', 0); tr.raw.setAttribute('opacity', 0);
-      if (o < 1) {                                       // solution travels to its chip
-        var e = 1 - Math.pow(1 - o, 3);                  // straight and calm: ease-out
-        put(tr.dot, p.pout.getPointAtLength(e * p.lout));
-        tr.tails.forEach(function (t, k) {
-          var lag = Math.max(0, e - (k + 1) * .035);
-          put(t, p.pout.getPointAtLength(lag * p.lout)); t.setAttribute('opacity', (.55 - k * .15).toFixed(2));
-        });
-        if (!tr.hit && o > .96) { tr.hit = true; p.gain.classList.add('is-hit'); setTimeout(function () { p.gain.classList.remove('is-hit'); }, 900); }
-        return true;
-      }
-      return false;
-    }
-    function frame(now) {
-      raf = 0;
-      if (!visible || doc.hidden) { last = 0; return; }
-      if (last && now - last > 200) { trips.forEach(function (t) { t.t0 += now - last; }); spawnAt += now - last; }  // resume where it paused
-      last = now;
-      if (now >= spawnAt) { spawn(now); spawnAt = now + GAP; }
-      trips = trips.filter(function (t) { var alive = step(t, now); if (!alive) t.g.remove(); return alive; });
-      raf = requestAnimationFrame(frame);
-    }
-    function start() { if (!raf && visible && !doc.hidden && !reduced && pairs.length) raf = requestAnimationFrame(frame); }
-    function relayout() { trips.forEach(function (t) { t.g.remove(); }); trips = []; layout(); start(); }
-
-    var ready = function () { layout(); start(); };
-    if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(ready); else ready();
-    win.addEventListener('resize', function () { clearTimeout(relayout.t); relayout.t = setTimeout(relayout, 150); }, { passive: true });
-    doc.addEventListener('visibilitychange', start);
-    if ('IntersectionObserver' in win) {
-      new IntersectionObserver(function (es) { visible = es[es.length - 1].isIntersecting; start(); }).observe(host);
-    } else { visible = true; start(); }
+    if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(layout); else layout();
+    win.addEventListener('resize', function () { clearTimeout(layout.t); layout.t = setTimeout(layout, 150); }, { passive: true });
   })();
 
   /* ================= particles ================= */
@@ -3056,6 +3172,35 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       window.location.href = 'mailto:' + MAILTO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
     });
   }
+
+  /* challenge field: the placeholder types and erases example problems until the visitor writes */
+  (function () {
+    var ta = document.getElementById('f-msg'), src = document.getElementById('ct-examples');
+    if (!ta || !src) return;
+    var list; try { list = JSON.parse(src.textContent); } catch (e) { return; }
+    if (!list || list.length < 2) return;
+    var i = 0, pos = list[0].length, dir = -1, wait = 2600, t = null, running = false;
+    function tick() {
+      t = null;
+      if (ta.value) { running = false; return; }
+      var s = list[i];
+      if (reduce) { i = (i + 1) % list.length; ta.placeholder = list[i]; t = setTimeout(tick, 4000); return; }
+      if (dir < 0) {                                     // erase back to the "Ex.: " prefix
+        pos = Math.max(pos - 2, 5); ta.placeholder = s.slice(0, pos);
+        if (pos <= 5) { dir = 1; i = (i + 1) % list.length; t = setTimeout(tick, 280); return; }
+        t = setTimeout(tick, 18);
+      } else {                                           // type the next example
+        s = list[i]; pos = Math.min(pos + 1, s.length); ta.placeholder = s.slice(0, pos);
+        if (pos >= s.length) { dir = -1; t = setTimeout(tick, wait); return; }
+        t = setTimeout(tick, 34 + Math.random() * 40);
+      }
+    }
+    function start() { if (!running && !ta.value) { running = true; t = setTimeout(tick, wait); } }
+    ta.addEventListener('input', function () { if (ta.value) { clearTimeout(t); running = false; ta.placeholder = list[i]; } else start(); });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) { if (es[0].isIntersecting) start(); else { clearTimeout(t); running = false; } }).observe(ta);
+    } else start();
+  })();
 
   var timer = null;
   function done(ok) {
