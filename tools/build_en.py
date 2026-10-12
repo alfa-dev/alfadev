@@ -25,16 +25,17 @@ SITE = "https://alfadev.com.br/"
 
 HEAD = {
     "title": "Alfa Dev · Custom software development: web, mobile, embedded and automation",
-    "description": "Custom software: web systems, mobile apps, embedded solutions, automations and payment integrations (Pix, cards, bank slips) for small businesses and complex operations. Based in Rio de Janeiro, Brazil, working with clients everywhere.",
+    "description": "Custom software: web systems, mobile apps, embedded solutions, automations and payment integrations (Pix, cards, bank slips) for small businesses and complex operations. Working remotely with clients in Brazil and worldwide.",
     "og_title": "Alfa Dev · Custom software, built to last",
     "og_description": "From small businesses to complex operations: custom web systems, mobile apps, embedded solutions, automations and payment integrations.",
 }
 
 # Portuguese strings inside the JSON-LD blocks -> English
 LD = {
-    "Agência de software no Rio de Janeiro especializada em sistemas web, aplicativos, sistemas embarcados, automação de processos e integração de pagamentos, com infraestrutura em nuvem e IA aplicada quando faz sentido, para pequenos negócios e operações complexas.":
-        "Software agency in Rio de Janeiro specialized in web systems, mobile apps, embedded systems, process automation and payment integrations, with cloud infrastructure and AI applied where it makes sense, for small businesses and complex operations.",
+    "Agência de software especializada em sistemas web, aplicativos, sistemas embarcados, automação de processos e integração de pagamentos, com infraestrutura em nuvem e IA aplicada quando faz sentido. Atendimento remoto para pequenos negócios e operações complexas no Brasil e no exterior.":
+        "Software agency specialized in web systems, mobile apps, embedded systems, process automation and payment integrations, with cloud infrastructure and AI applied where it makes sense. Working remotely with small businesses and complex operations in Brazil and worldwide.",
     "Brasil": "Brazil",
+    "Mundo": "Worldwide",
     "Serviços": "Services",
     "Desenvolvimento de sistemas web sob medida": "Custom web system development",
     "Integração de inteligência artificial": "Artificial intelligence integration",
