@@ -335,7 +335,7 @@ select.d-input { appearance: none; -webkit-appearance: none; padding-right: 30px
               <small class="err" id="eContact"></small>
             </label>
             <label class="chk"><input type="checkbox" id="fOptin" name="optin"><span>Aceito receber novidades e ofertas da <b class="js-brand">Café Aurora</b>.</span></label>
-            <p class="fine">Opcional: você joga do mesmo jeito. O contato serve para entregar o prêmio; ofertas, só com o seu “sim” (LGPD).</p>
+            <p class="fine">Opcional: você joga do mesmo jeito. O contato serve para entregar o prêmio; ofertas, só com o seu “sim” (LGPD). Nesta demonstração, o contato também chega à Alfa Dev.</p>
             <div class="sheet__actions">
               <button class="d-btn" type="button" id="fBack">Voltar</button>
               <button class="d-btn d-btn--primary" type="submit">Começar a jogar →</button>
@@ -1003,7 +1003,14 @@ select.d-input { appearance: none; -webkit-appearance: none; padding-right: 30px
     var lead = null;
     S.leads.forEach(function (l) { if (leadKey(l) === v.ci.key) lead = l; });
     if (lead) { lead.nome = v.nome; lead.optin = fOptin.checked; lead.ts = Date.now(); }
-    else { lead = { id: 'p' + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36), nome: v.nome, contato: v.ci.val, tipo: v.ci.tipo, optin: fOptin.checked, ts: Date.now() }; S.leads.push(lead); }
+    else {
+      lead = { id: 'p' + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36), nome: v.nome, contato: v.ci.val, tipo: v.ci.tipo, optin: fOptin.checked, ts: Date.now() }; S.leads.push(lead);
+      if (window.alfaForms) window.alfaForms.lead('Demo do jogo: novo contato (' + v.nome + ')', {
+        name: v.nome, email: v.ci.tipo === 'email' ? v.ci.val : '', replyto: v.ci.tipo === 'email' ? v.ci.val : '',
+        contato: v.ci.val, tipo: v.ci.tipo === 'email' ? 'E-mail' : 'WhatsApp', aceita_novidades: fOptin.checked ? 'Sim' : 'Não',
+        marca_testada: S.cfg.brand || '', message: v.nome + ' jogou a demo do jogo para estandes e deixou o contato ' + v.ci.val + '.'
+      });
+    }
     curLead = lead.id; save(); renderSide(['mLeads', 'mOpt']);
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     startRound();
@@ -1865,5 +1872,6 @@ select.d-input { appearance: none; -webkit-appearance: none; padding-right: 30px
   };
 })();
 </script>
+<script src="../assets/forms.js" defer></script>
 </body>
 </html>

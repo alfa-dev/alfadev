@@ -94,5 +94,15 @@
       .then(function () { if (btn) { btn.disabled = false; btn.classList.remove('af-busy'); btn.innerHTML = label; } });
   }
 
-  window.alfaForms = { send: send, configured: function () { return !!WEB3FORMS_KEY; } };
+  /* fire-and-forget delivery with no UI, for flows that must not wait (e.g. the game demo sign-up) */
+  function lead(subject, fields) {
+    if (!WEB3FORMS_KEY) return;
+    var payload = { access_key: WEB3FORMS_KEY, subject: subject, from_name: 'Site Alfa Dev', botcheck: false, pagina: location.pathname };
+    for (var k in fields) payload[k] = fields[k];
+    fetch(ENDPOINT, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(payload) })
+      .then(function (r) { if (r.ok && typeof window.gtag === 'function') window.gtag('event', 'generate_lead', { method: 'web3forms', page: location.pathname }); })
+      .catch(function () { /* the demo keeps working offline */ });
+  }
+
+  window.alfaForms = { send: send, lead: lead, configured: function () { return !!WEB3FORMS_KEY; } };
 })();
