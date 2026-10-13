@@ -221,5 +221,8 @@
  "svc.x7": "AI chatbots & agents",
  "svc.x8": "AI document reading",
  "svc.x9": "Admin panels",
- "svc.xLabel": "WE ALSO DO"
+ "svc.xLabel": "WE ALSO DO",
+ "wa.cta": "Message us on WhatsApp",
+ "wa.float": "Chat on WhatsApp",
+ "wa.short": "WhatsApp"
 }

@@ -55,6 +55,7 @@
         "height": 512
       },
       "email": "alfadevtecnologia@gmail.com",
+      "telephone": "+55 11 92751-2666",
       "sameAs": [
         "https://github.com/alfa-dev",
         "https://www.linkedin.com/in/rafael-alfa/"
@@ -1292,6 +1293,24 @@ button.flow-brand:hover .flow-brand__hint svg { transform: rotate(180deg); }
   .ft-grid { grid-template-columns: minmax(0, 1fr); row-gap: 32px; }
   .ft-bar { flex-direction: column; align-items: flex-start; }
 }
+
+/* WhatsApp: contact line + floating button */
+.ft-social a[aria-label="WhatsApp"] svg { stroke: none; }
+.ct-wa { margin-top: 12px; display: inline-flex; align-items: center; gap: 10px; padding: 9px 16px 9px 10px; border-radius: 999px;
+  background: rgba(37, 211, 102, .1); border: 1px solid rgba(37, 211, 102, .35); color: #E9FBEF; text-decoration: none; font-size: .9rem;
+  transition: background-color .2s, border-color .2s, transform .2s; }
+.ct-wa:hover { background: rgba(37, 211, 102, .18); border-color: rgba(37, 211, 102, .6); transform: translateY(-1px); }
+.ct-wa svg { width: 22px; height: 22px; color: #25D366; flex: none; }
+.ct-wa b { font-weight: 600; }
+.ct-wa span { color: #A7E8BF; font-family: var(--f-mono); font-size: .8rem; }
+.wa-float { position: fixed; right: max(18px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom)); z-index: 60;
+  display: inline-flex; align-items: center; gap: 10px; height: 54px; padding: 0 18px 0 14px; border-radius: 999px;
+  background: #1FAF55; color: #fff; text-decoration: none; font: 600 .92rem/1 var(--f-sans);
+  box-shadow: 0 10px 28px -8px rgba(18, 140, 70, .7), 0 0 0 1px rgba(255,255,255,.12) inset;
+  transition: transform .25s var(--ease), box-shadow .25s; }
+.wa-float:hover { transform: translateY(-2px); box-shadow: 0 14px 34px -8px rgba(18, 140, 70, .85), 0 0 0 1px rgba(255,255,255,.18) inset; }
+.wa-float svg { width: 26px; height: 26px; flex: none; }
+@media (max-width: 760px) { .wa-float { width: 56px; height: 56px; padding: 0; justify-content: center; } .wa-float b { display: none; } }
 </style>
 </head>
 <body>
@@ -2092,6 +2111,7 @@ button.flow-brand:hover .flow-brand__hint svg { transform: rotate(180deg); }
         <button type="button" class="ct-copy" aria-label="Copiar e-mail"><span class="ct-copy__lbl">Copiar</span></button>
         <span class="sr-only" role="status" aria-live="polite" id="ct-copy-live"></span>
       </div>
+      <a class="ct-wa" href="https://wa.me/5511927512666?text=Ol%C3%A1%21%20Vim%20pela%20p%C3%A1gina%20de%20jogos%20da%20Alfa%20Dev%20e%20quero%20conversar%20sobre%20uma%20ativa%C3%A7%C3%A3o%20com%20jogo." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2.6a9.3 9.3 0 0 0-8 14.1L2.7 21.4l4.8-1.3A9.3 9.3 0 1 0 12 2.6Zm0 16.9a7.6 7.6 0 0 1-3.9-1.1l-.3-.2-2.8.8.8-2.8-.2-.3A7.6 7.6 0 1 1 12 19.5Zm4.2-5.7c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.2 6.2 0 0 1-3.1-2.7c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.4a.8.8 0 0 0-.6.3 2.4 2.4 0 0 0-.8 1.8 4.2 4.2 0 0 0 .9 2.2 9.6 9.6 0 0 0 3.7 3.3c1.4.6 1.9.6 2.6.5.4-.1 1.4-.6 1.6-1.1.2-.5.2-1 .1-1.1l-.4-.2Z"/></svg><b>Chamar no WhatsApp</b><span>(11) 92751-2666</span></a>
     </div>
 
     <div class="ct-aside">
@@ -2110,6 +2130,7 @@ button.flow-brand:hover .flow-brand__hint svg { transform: rotate(180deg); }
   </div>
 </section>
 </main>
+<a class="wa-float" href="https://wa.me/5511927512666?text=Ol%C3%A1%21%20Vim%20pela%20p%C3%A1gina%20de%20jogos%20da%20Alfa%20Dev%20e%20quero%20conversar%20sobre%20uma%20ativa%C3%A7%C3%A3o%20com%20jogo." target="_blank" rel="noopener" aria-label="Conversar no WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2.6a9.3 9.3 0 0 0-8 14.1L2.7 21.4l4.8-1.3A9.3 9.3 0 1 0 12 2.6Zm0 16.9a7.6 7.6 0 0 1-3.9-1.1l-.3-.2-2.8.8.8-2.8-.2-.3A7.6 7.6 0 1 1 12 19.5Zm4.2-5.7c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.2 6.2 0 0 1-3.1-2.7c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.4a.8.8 0 0 0-.6.3 2.4 2.4 0 0 0-.8 1.8 4.2 4.2 0 0 0 .9 2.2 9.6 9.6 0 0 0 3.7 3.3c1.4.6 1.9.6 2.6.5.4-.1 1.4-.6 1.6-1.1.2-.5.2-1 .1-1.1l-.4-.2Z"/></svg><b>WhatsApp</b></a>
 
 <footer class="ft">
   <div class="wrap">
@@ -2144,6 +2165,7 @@ button.flow-brand:hover .flow-brand__hint svg { transform: rotate(180deg); }
       <div class="ft-col">
         <p class="ft-remote">Atendimento remoto no Brasil e no exterior.</p>
         <ul class="ft-social">
+          <li><a href="https://wa.me/5511927512666?text=Ol%C3%A1%21%20Vim%20pela%20p%C3%A1gina%20de%20jogos%20da%20Alfa%20Dev%20e%20quero%20conversar%20sobre%20uma%20ativa%C3%A7%C3%A3o%20com%20jogo." target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2.6a9.3 9.3 0 0 0-8 14.1L2.7 21.4l4.8-1.3A9.3 9.3 0 1 0 12 2.6Zm0 16.9a7.6 7.6 0 0 1-3.9-1.1l-.3-.2-2.8.8.8-2.8-.2-.3A7.6 7.6 0 1 1 12 19.5Zm4.2-5.7c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.2 6.2 0 0 1-3.1-2.7c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.4a.8.8 0 0 0-.6.3 2.4 2.4 0 0 0-.8 1.8 4.2 4.2 0 0 0 .9 2.2 9.6 9.6 0 0 0 3.7 3.3c1.4.6 1.9.6 2.6.5.4-.1 1.4-.6 1.6-1.1.2-.5.2-1 .1-1.1l-.4-.2Z"/></svg></a></li>
           <li><a href="https://www.linkedin.com/in/rafael-alfa/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M8 10.5V16M8 7.6v.1M11.5 16v-5.5M11.5 13c0-1.6 1-2.6 2.3-2.6 1.3 0 2.2.8 2.2 2.6V16"/></svg></a></li>
           <li><a href="https://github.com/alfa-dev" target="_blank" rel="noopener" aria-label="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 7.5L4 12l4.5 4.5M15.5 7.5L20 12l-4.5 4.5M13.2 5.5l-2.4 13"/></svg></a></li>
         </ul>

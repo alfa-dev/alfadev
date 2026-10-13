@@ -140,6 +140,7 @@ def main():
     s = s.replace('src="assets/', 'src="../assets/').replace('href="assets/', 'href="../assets/')
     s = s.replace('href="demos/', 'href="../demos/')
     s = s.replace('href="jogos/', 'href="../jogos/')
+    s = s.replace('Ol%C3%A1%21%20Vim%20pelo%20site%20da%20Alfa%20Dev%20e%20quero%20conversar%20sobre%20um%20projeto.', 'Hi%21%20I%20found%20Alfa%20Dev%27s%20website%20and%20I%27d%20like%20to%20talk%20about%20a%20project.')  # WhatsApp pre-filled message
     s = s.replace('<a href="./" hreflang="pt-BR" lang="pt-BR" aria-current="page">PT</a>',
                   '<a href="../" hreflang="pt-BR" lang="pt-BR">PT</a>', 1)
     s = s.replace('<a href="en/" hreflang="en" lang="en">EN</a>',
