@@ -397,7 +397,7 @@ button { font: inherit; color: inherit; }
 
       <div>
         <div class="form-card">
-          <form class="ct-form" id="ref-form" autocomplete="on" novalidate>
+          <form class="ct-form" id="ref-form" autocomplete="on" novalidate data-alfa-form>
             <p class="mono ct-group-label">Você</p>
             <div class="ct-field">
               <label for="f-nome">Seu nome</label>
@@ -433,7 +433,7 @@ button { font: inherit; color: inherit; }
             </div>
             <div class="ct-field--full ct-submit">
               <button class="btn btn--primary" type="submit">Enviar indicação <span class="btn__arr" aria-hidden="true">→</span></button>
-              <p class="ct-hint">Nada é enviado sem você confirmar no seu e-mail.</p>
+              <p class="ct-hint">Sua indicação vai direto para a nossa equipe.</p>
             </div>
           </form>
         </div>
@@ -487,8 +487,11 @@ button { font: inherit; color: inherit; }
         'O que precisa:',
         v('mensagem') || '-'
       ].join('\n');
-      if (typeof window.gtag === 'function') window.gtag('event', 'generate_lead', { method: 'referral_form' });
-      window.location.href = 'mailto:' + MAILTO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      var data = { subject: subject, body: body, name: v('nome'), email: /@/.test(v('contato')) ? v('contato') : '', to: MAILTO,
+        fields: { quem_indica: v('nome'), contato_de_quem_indica: v('contato'), indicado: v('indicado'), empresa_indicada: v('empresa') || '-',
+          contato_do_indicado: v('indContato') || '-', sabe_da_indicacao: f.sabe.checked ? 'Sim' : 'Não' } };
+      if (window.alfaForms) window.alfaForms.send(form, data);
+      else window.location.href = 'mailto:' + MAILTO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
     });
   }
 
@@ -526,5 +529,6 @@ button { font: inherit; color: inherit; }
   });
 })();
 </script>
+<script src="../assets/forms.js" defer></script>
 </body>
 </html>

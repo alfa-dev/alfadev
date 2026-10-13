@@ -2413,7 +2413,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
       <h2 class="ct-title" id="ct-title" data-i18n-html="ct.title">Tem uma<br><em>ideia</em> em mente?</h2>
       <p class="ct-sub" data-i18n="ct.sub">Conte o seu desafio em poucas linhas. A gente responde com as perguntas certas e um caminho claro.</p>
 
-      <form class="ct-form" id="ct-form" autocomplete="on" novalidate>
+      <form class="ct-form" id="ct-form" autocomplete="on" novalidate data-alfa-form>
         <div class="ct-field">
           <label for="f-nome" data-i18n="ct.fName">Nome</label>
           <input id="f-nome" name="nome" type="text" required autocomplete="name">
@@ -2442,7 +2442,7 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
         </div>
         <div class="ct-field--full ct-submit">
           <button class="btn btn--primary" type="submit"><span data-i18n="ct.send">Enviar mensagem</span> <span class="btn__arr" aria-hidden="true">→</span></button>
-          <p class="ct-hint" data-i18n="ct.hint">Abrimos seu app de e-mail com a mensagem pronta para enviar.</p>
+          <p class="ct-hint" data-i18n="ct.hint">Sua mensagem vai direto para a nossa equipe.</p>
         </div>
       </form>
 
@@ -2944,8 +2944,10 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
         '',
         f.mensagem.value.trim()
       ].join('\n');
-      if (typeof window.gtag === 'function') window.gtag('event', 'generate_lead', { method: 'contact_form', porte: porte ? porte.value : '' });
-      window.location.href = 'mailto:' + MAILTO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      var data = { subject: subject, body: body, name: f.nome.value.trim(), email: f.email.value.trim(), to: MAILTO,
+        fields: { empresa: f.empresa.value.trim() || '-', momento: opt ? opt.textContent.trim() : '-' } };
+      if (window.alfaForms) window.alfaForms.send(form, data);
+      else window.location.href = 'mailto:' + MAILTO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
     });
   }
 
@@ -3011,4 +3013,5 @@ a.ct-mail__addr:hover { color: var(--violet-2); }
 
 </script>
 
+<script src="assets/forms.js" defer></script>
 </body></html>

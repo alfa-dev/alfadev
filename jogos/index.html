@@ -2058,7 +2058,7 @@ button.flow-brand:hover .flow-brand__hint svg { transform: rotate(180deg); }
       <h2 class="ct-title" id="ct-title">Qual é o seu<br><em>próximo evento?</em></h2>
       <p class="ct-sub">Conte sobre a feira, o estande e o que a marca quer alcançar. Respondemos com as perguntas certas e uma ideia de formato.</p>
 
-      <form class="ct-form" id="ct-form" autocomplete="on" novalidate>
+      <form class="ct-form" id="ct-form" autocomplete="on" novalidate data-alfa-form>
         <div class="ct-field">
           <label for="f-nome">Nome</label>
           <input id="f-nome" name="nome" type="text" required autocomplete="name">
@@ -2081,7 +2081,7 @@ button.flow-brand:hover .flow-brand__hint svg { transform: rotate(180deg); }
         </div>
         <div class="ct-field--full ct-submit">
           <button class="btn btn--primary" type="submit">Enviar mensagem <span class="btn__arr" aria-hidden="true">→</span></button>
-          <p class="ct-hint">Abrimos seu app de e-mail com a mensagem pronta para enviar.</p>
+          <p class="ct-hint">Sua mensagem vai direto para a nossa equipe.</p>
         </div>
       </form>
 
@@ -2310,8 +2310,10 @@ button.flow-brand:hover .flow-brand__hint svg { transform: rotate(180deg); }
         '',
         f.mensagem.value.trim()
       ].join('\n');
-      if (typeof window.gtag === 'function') window.gtag('event', 'generate_lead', { method: 'contact_form', page: 'jogos' });
-      window.location.href = 'mailto:' + MAILTO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      var data = { subject: subject, body: body, name: f.nome.value.trim(), email: f.email.value.trim(), to: MAILTO,
+        fields: { empresa: f.empresa.value.trim() || '-', evento: f.evento.value.trim() || '-' } };
+      if (window.alfaForms) window.alfaForms.send(form, data);
+      else window.location.href = 'mailto:' + MAILTO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
     });
   }
 
@@ -2357,5 +2359,6 @@ button.flow-brand:hover .flow-brand__hint svg { transform: rotate(180deg); }
   });
 })();
 </script>
+<script src="../assets/forms.js" defer></script>
 </body>
 </html>
