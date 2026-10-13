@@ -4,7 +4,7 @@
    fall back to opening the visitor's e-mail app with the message pre-filled. */
 (function () {
   'use strict';
-  var WEB3FORMS_KEY = '';
+  var WEB3FORMS_KEY = 'b510e65c-5d56-4ef0-b698-020bdd48a8e4';
   var ENDPOINT = 'https://api.web3forms.com/submit';
 
   var en = (document.documentElement.lang || '').toLowerCase().indexOf('en') === 0;
